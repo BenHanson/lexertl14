@@ -1,5 +1,5 @@
 // leaf_node.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -39,11 +39,11 @@ public:
         }
     }
 
-    virtual ~basic_leaf_node()
+    virtual ~basic_leaf_node() override
     {
     }
 
-    virtual void append_followpos(const node_vector &followpos_)
+    virtual void append_followpos(const node_vector &followpos_) override
     {
         for (node *node_ : followpos_)
         {
@@ -51,23 +51,23 @@ public:
         }
     }
 
-    virtual node_type what_type() const
+    virtual node_type what_type() const override
     {
         return node::LEAF;
     }
 
     virtual bool traverse(const_node_stack &/*node_stack_*/,
-        bool_stack &/*perform_op_stack_*/) const
+        bool_stack &/*perform_op_stack_*/) const override
     {
         return false;
     }
 
-    virtual id_type token() const
+    virtual id_type token() const override
     {
         return _token;
     }
 
-    virtual void greedy(const bool greedy_)
+    virtual void greedy(const bool greedy_) override
     {
         if (!_set_greedy)
         {
@@ -76,17 +76,17 @@ public:
         }
     }
 
-    virtual bool greedy() const
+    virtual bool greedy() const override
     {
         return _greedy;
     }
 
-    virtual const node_vector &followpos() const
+    virtual const node_vector &followpos() const override
     {
         return _followpos;
     }
 
-    virtual node_vector &followpos()
+    virtual node_vector &followpos() override
     {
         return _followpos;
     }
@@ -99,7 +99,7 @@ private:
 
     virtual void copy_node(node_ptr_vector &node_ptr_vector_,
         node_stack &new_node_stack_, bool_stack &/*perform_op_stack_*/,
-        bool &/*down_*/) const
+        bool &/*down_*/) const override
     {
         node_ptr_vector_.emplace_back(std::make_unique<basic_leaf_node>
             (_token, _greedy));

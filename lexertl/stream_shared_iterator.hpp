@@ -1,5 +1,5 @@
 // stream_shared_iterator.hpp
-// Copyright (c) 2010-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2010-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -241,8 +241,8 @@ private:
         std::size_t lowest() const
         {
             std::size_t lowest_ = npos();
-            typename iter_list::const_iterator iter_ = _clients.begin();
-            typename iter_list::const_iterator end_ = _clients.end();
+            auto iter_ = _clients.cbegin();
+            auto end_ = _clients.cend();
 
             for (; iter_ != end_; ++iter_)
             {
@@ -265,8 +265,8 @@ private:
         std::size_t highest() const
         {
             std::size_t highest_ = 0;
-            typename iter_list::const_iterator iter_ = _clients.begin();
-            typename iter_list::const_iterator end_ = _clients.end();
+            auto iter_ = _clients.cbegin();
+            auto end_ = _clients.cend();
 
             for (; iter_ != end_; ++iter_)
             {
@@ -283,8 +283,8 @@ private:
 
         void subtract(const std::size_t lowest_)
         {
-            typename iter_list::iterator iter_ = _clients.begin();
-            typename iter_list::iterator end_ = _clients.end();
+            auto iter_ = _clients.begin();
+            auto end_ = _clients.end();
 
             for (; iter_ != end_; ++iter_)
             {

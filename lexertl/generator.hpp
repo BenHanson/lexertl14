@@ -1,5 +1,5 @@
 // generator.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -90,29 +90,19 @@ public:
     {
         parser parser_(rules_.locale(), node_ptr_vector_, charset_map_,
             rules_.eoi());
-        const typename rules::token_vector_vector_vector &regexes_ =
-            rules_.regexes();
-        typename rules::token_vector_vector::const_iterator regex_iter_ =
-            regexes_[dfa_].begin();
-        typename rules::token_vector_vector::const_iterator regex_iter_end_ =
-            regexes_[dfa_].end();
-        const typename rules::id_vector_vector &ids_ = rules_.ids();
-        const typename rules::id_vector_vector &user_ids_ =
-            rules_.user_ids();
-        typename rules::id_vector::const_iterator id_iter_ =
-            ids_[dfa_].begin();
-        typename rules::id_vector::const_iterator user_id_iter_ =
-            user_ids_[dfa_].begin();
-        const typename rules::id_vector_vector &next_dfas_ =
-            rules_.next_dfas();
-        const typename rules::id_vector_vector &pushes_ = rules_.pushes();
-        const typename rules::bool_vector_vector &pops_ = rules_.pops();
-        typename rules::id_vector::const_iterator next_dfa_iter_ =
-            next_dfas_[dfa_].begin();
-        typename rules::id_vector::const_iterator push_dfa_iter_ =
-            pushes_[dfa_].begin();
-        typename rules::bool_vector::const_iterator pop_dfa_iter_ =
-            pops_[dfa_].begin();
+        const auto &regexes_ = rules_.regexes();
+        auto regex_iter_ = regexes_[dfa_].cbegin();
+        auto regex_iter_end_ = regexes_[dfa_].cend();
+        const auto &ids_ = rules_.ids();
+        const auto &user_ids_ = rules_.user_ids();
+        auto id_iter_ = ids_[dfa_].cbegin();
+        auto user_id_iter_ = user_ids_[dfa_].cbegin();
+        const auto &next_dfas_ = rules_.next_dfas();
+        const auto &pushes_ = rules_.pushes();
+        const auto &pops_ = rules_.pops();
+        auto next_dfa_iter_ = next_dfas_[dfa_].cbegin();
+        auto push_dfa_iter_ = pushes_[dfa_].cbegin();
+        auto pop_dfa_iter_ = pops_[dfa_].cbegin();
         const bool seen_bol_ = (rules_.features()[dfa_] & bol_bit) != 0;
         node *root_ = nullptr;
 
@@ -181,8 +171,7 @@ protected:
         charset_list charset_list_;
         // vector mapping token indexes to partitioned token index sets
         index_set_vector set_mapping_;
-        typename internals::id_type_vector &dfa_ =
-            internals_._dfa[dfa_index_];
+        auto &dfa_ = internals_._dfa[dfa_index_];
         std::size_t dfa_alphabet_ = 0;
         const node_vector *followpos_ = &root_->firstpos();
         node_set_vector seen_sets_;
@@ -422,7 +411,7 @@ protected:
 
                 while (!r_->empty() && iter_ != end_)
                 {
-                    typename charset_list::iterator l_iter_ = iter_;
+                    auto l_iter_ = iter_;
 
                     (*l_iter_)->intersect(*r_.get(), *overlap_.get());
 
@@ -473,8 +462,8 @@ protected:
         internals &internals_, const id_type dfa_index_,
         index_set_vector &set_mapping_)
     {
-        typename charset_list::const_iterator iter_ = charset_list_.begin();
-        typename charset_list::const_iterator end_ = charset_list_.end();
+        auto iter_ = charset_list_.cbegin();
+        auto end_ = charset_list_.cend();
 
         for (id_type index_ = 0; iter_ != end_; ++iter_, ++index_)
         {
@@ -512,7 +501,7 @@ protected:
                 ptr_[char_] = index_ + transitions_index;
             }
 
-            // Note iter_->second must be unsigned
+            // Note range_.second must be unsigned
             ptr_[range_.second] = index_ + transitions_index;
         }
     }
@@ -544,12 +533,9 @@ protected:
         }
 
         bool found_ = false;
-        typename size_t_vector::const_iterator hash_iter_ =
-            hash_vector_.begin();
-        typename size_t_vector::const_iterator hash_end_ =
-            hash_vector_.end();
-        typename node_set_vector::const_iterator set_iter_ =
-            seen_sets_.begin();
+        auto hash_iter_ = hash_vector_.cbegin();
+        auto hash_end_ = hash_vector_.cend();
+        auto set_iter_ = seen_sets_.cbegin();
 
         for (; hash_iter_ != hash_end_; ++hash_iter_, ++set_iter_)
         {
@@ -653,7 +639,7 @@ protected:
 
                 while (!r_->empty() && iter_ != end_)
                 {
-                    typename equivset_list::iterator l_iter_ = iter_;
+                    auto l_iter_ = iter_;
 
                     (*l_iter_)->intersect(*r_.get(), *overlap_.get());
 

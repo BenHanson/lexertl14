@@ -1,5 +1,5 @@
 // dot.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 // Copyright (c) 2013 Autodesk, Inc. All rights reserved.
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -214,10 +214,8 @@ protected:
                 }
 
                 string chars_;
-                typename string_token::range_vector::const_iterator
-                    ranges_iter_ = token_._ranges.begin();
-                typename string_token::range_vector::const_iterator
-                    ranges_end_ = token_._ranges.end();
+                auto ranges_iter_ = token_._ranges.cbegin();
+                auto ranges_end_ = token_._ranges.cend();
 
                 for (; ranges_iter_ != ranges_end_; ++ranges_iter_)
                 {

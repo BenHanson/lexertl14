@@ -1,5 +1,5 @@
 // iteration_node.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -43,17 +43,17 @@ public:
         }
     }
 
-    virtual ~basic_iteration_node()
+    virtual ~basic_iteration_node() override
     {
     }
 
-    virtual node_type what_type() const
+    virtual node_type what_type() const override
     {
         return node::ITERATION;
     }
 
     virtual bool traverse(const_node_stack &node_stack_,
-        bool_stack &perform_op_stack_) const
+        bool_stack &perform_op_stack_) const override
     {
         perform_op_stack_.push(true);
         node_stack_.push(_next);
@@ -67,7 +67,7 @@ private:
 
     virtual void copy_node(node_ptr_vector &node_ptr_vector_,
         node_stack &new_node_stack_, bool_stack &perform_op_stack_,
-        bool &down_) const
+        bool &down_) const override
     {
         if (perform_op_stack_.top())
         {

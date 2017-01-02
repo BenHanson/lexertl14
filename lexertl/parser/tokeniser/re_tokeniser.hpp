@@ -1,5 +1,5 @@
 // tokeniser.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -181,8 +181,7 @@ public:
                         else
                         {
                             token_._type = CHARSET;
-                            token_._str.insert(typename string_token::range
-                                (ch_, ch_));
+                            token_._str.insert(range(ch_, ch_));
                         }
 
                         break;
@@ -194,8 +193,7 @@ public:
                         else
                         {
                             token_._type = CHARSET;
-                            token_._str.insert(typename string_token::range
-                                (ch_, ch_));
+                            token_._str.insert(range(ch_, ch_));
                         }
 
                         break;
@@ -205,8 +203,7 @@ public:
 
                         if (state_._flags & dot_not_newline)
                         {
-                            token_._str.insert(typename string_token::range
-                                ('\n', '\n'));
+                            token_._str.insert(range('\n', '\n'));
                         }
 
                         token_._str.negate();
@@ -237,6 +234,8 @@ public:
     }
 
 private:
+    using range = typename string_token::range;
+
     static bool comment(bool &eos_, rules_char_type &ch_, state &state_)
     {
         bool skipped_ = false;
@@ -441,7 +440,7 @@ private:
     static void add_char(const char_type ch_, const state &state_,
         string_token &token_)
     {
-        typename string_token::range range_(ch_, ch_);
+        range range_(ch_, ch_);
 
         token_.insert(range_);
 

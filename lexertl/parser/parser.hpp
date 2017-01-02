@@ -1,5 +1,5 @@
 // parser.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -89,12 +89,12 @@ public:
         const id_type push_dfa_, const bool pop_dfa_,
         const std::size_t flags_, id_type &nl_id_, const bool seen_bol_)
     {
-        typename token_vector::const_iterator iter_ = regex_.begin();
-        typename token_vector::const_iterator end_ = regex_.end();
+        auto iter_ = regex_.cbegin();
+        auto end_ = regex_.cend();
         node *root_ = nullptr;
         token *lhs_token_ = nullptr;
         // There cannot be less than 2 tokens
-        std::unique_ptr<token> rhs_token_ = std::make_unique<token>(*iter_++);
+        auto rhs_token_ = std::make_unique<token>(*iter_++);
         char action_ = 0;
 
         _token_stack.emplace(std::move(rhs_token_));
@@ -164,7 +164,7 @@ public:
 
         if ((flags_ & match_zero_len) == 0)
         {
-            const typename node::node_vector &firstpos_ = root_->firstpos();
+            const auto &firstpos_ = root_->firstpos();
 
             for (const node *node_ : firstpos_)
             {
@@ -207,22 +207,6 @@ private:
     id_type _eoi;
     token_stack _token_stack;
     tree_node_stack _tree_node_stack;
-
-    struct find_functor
-    {
-        // Pointer to stop warning about cannot create assignment operator.
-        const string_token *_token;
-
-        find_functor(const string_token &token_) :
-            _token(&token_)
-        {
-        }
-
-        bool operator ()(const std::unique_ptr<string_token> &rhs_)
-        {
-            return *_token == *rhs_.get();
-        }
-    };
 
     void reduce(id_type &nl_id_)
     {
@@ -581,7 +565,10 @@ private:
     {
         typename string_token_vector::const_iterator iter_ =
             std::find_if(data_[0].begin(), data_[0].end(),
-                find_functor(token_));
+                [&token_](const std::unique_ptr<string_token> &rhs_)
+        {
+            return token_ == *rhs_.get();
+        });
 
         if (iter_ == data_[0].end())
         {
@@ -615,13 +602,17 @@ private:
     void insert_range(const string_token &token_, const string_token &token2_,
         const string_token &token3_, string_token_vector data_[3])
     {
-        typename string_token_vector::const_iterator iter_ = data_[0].begin();
-        typename string_token_vector::const_iterator end_ = data_[0].end();
+        auto iter_ = data_[0].cbegin();
+        auto end_ = data_[0].cend();
         bool finished_ = false;
 
         do
         {
-            iter_ = std::find_if(iter_, end_, find_functor(token_));
+            iter_ = std::find_if(iter_, end_,
+                [&token_](const std::unique_ptr<string_token> &rhs_)
+            {
+                return token_ == *rhs_.get();
+            });
 
             if (iter_ == end_)
             {
@@ -650,10 +641,9 @@ private:
     // 16 bit unicode
     void push_ranges(string_token_vector data_[2], const std::false_type &)
     {
-        typename string_token_vector::const_iterator viter_ = data_[0].begin();
-        typename string_token_vector::const_iterator vend_ = data_[0].end();
-        typename string_token_vector::const_iterator viter2_ =
-            data_[1].begin();
+        auto viter_ = data_[0].cbegin();
+        auto vend_ = data_[0].cend();
+        auto viter2_ = data_[1].cbegin();
 
         push_range(viter_++->get());
         push_range(viter2_++->get());
@@ -671,12 +661,10 @@ private:
     // 24 bit unicode
     void push_ranges(string_token_vector data_[3], const std::true_type &)
     {
-        typename string_token_vector::const_iterator viter_ = data_[0].begin();
-        typename string_token_vector::const_iterator vend_ = data_[0].end();
-        typename string_token_vector::const_iterator viter2_ =
-            data_[1].begin();
-        typename string_token_vector::const_iterator viter3_ =
-            data_[2].begin();
+        auto viter_ = data_[0].cbegin();
+        auto vend_ = data_[0].cend();
+        auto viter2_ = data_[1].cbegin();
+        auto viter3_ = data_[2].cbegin();
 
         push_range(viter_++->get());
         push_range(viter2_++->get());
@@ -759,7 +747,7 @@ private:
         // perform ?
         node *lhs_ = _tree_node_stack.top();
         // Don't know if lhs_ is a leaf_node, so get firstpos.
-        typename node::node_vector &firstpos_ = lhs_->firstpos();
+        auto &firstpos_ = lhs_->firstpos();
 
         for (node *node_ : firstpos_)
         {
@@ -898,7 +886,7 @@ private:
 
     void fixup_bol(node * &root_)const
     {
-        const typename node::node_vector &first_ = root_->firstpos();
+        const auto &first_ = root_->firstpos();
         bool found_ = false;
 
         for (const node *node_ : first_)

@@ -1,5 +1,5 @@
 // match_results.hpp
-// Copyright (c) 2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2015-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -131,18 +131,18 @@ struct recursive_match_results : public match_results<iter, id_type, flags>
     {
     }
 
-    virtual ~recursive_match_results()
+    virtual ~recursive_match_results() override
     {
     }
 
-    virtual void clear()
+    virtual void clear() override
     {
         match_results<iter, id_type, flags>::clear();
 
         while (!stack.empty()) stack.pop();
     }
 
-    virtual void reset(const iter &start_, const iter &end_)
+    virtual void reset(const iter &start_, const iter &end_) override
     {
         match_results<iter, id_type, flags>::reset(start_, end_);
 

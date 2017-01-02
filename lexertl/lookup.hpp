@@ -1,5 +1,5 @@
 // lookup.hpp
-// Copyright (c) 2009-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2009-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -373,11 +373,11 @@ void next(const basic_state_machine<typename std::iterator_traits
     const std::integral_constant<bool, compressed> &compressed_,
     const std::integral_constant<bool, recursive> &recursive_)
 {
-    const basic_internals<id_type> &internals_ = sm_.data();
-    typename results::iter_type end_token_ = results_.second;
+    const auto &internals_ = sm_.data();
+    auto end_token_ = results_.second;
 
 skip:
-    typename results::iter_type curr_ = results_.second;
+    auto curr_ = results_.second;
 
     results_.first = curr_;
 
@@ -399,7 +399,7 @@ again:
         if (!lu_state_.is_eol(*curr_,
             std::integral_constant<bool, (flags & eol_bit) != 0>()))
         {
-            const typename results::char_type prev_char_ = *curr_;
+            const auto prev_char_ = *curr_;
             const id_type state_ = lu_state_.next_char(prev_char_,
                 compressed_);
 

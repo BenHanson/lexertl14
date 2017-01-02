@@ -1,5 +1,5 @@
 // end_node.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -39,53 +39,53 @@ public:
         node::_lastpos.push_back(this);
     }
 
-    virtual ~basic_end_node()
+    virtual ~basic_end_node() override
     {
     }
 
-    virtual node_type what_type() const
+    virtual node_type what_type() const override
     {
         return node::END;
     }
 
     virtual bool traverse(const_node_stack &/*node_stack_*/,
-        bool_stack &/*perform_op_stack_*/) const
+        bool_stack &/*perform_op_stack_*/) const override
     {
         return false;
     }
 
-    virtual const node_vector &followpos() const
+    virtual const node_vector &followpos() const override
     {
         // _followpos is always empty..!
         return _followpos;
     }
 
-    virtual bool end_state() const
+    virtual bool end_state() const override
     {
         return true;
     }
 
-    virtual id_type id() const
+    virtual id_type id() const override
     {
         return _id;
     }
 
-    virtual id_type user_id() const
+    virtual id_type user_id() const override
     {
         return _user_id;
     }
 
-    virtual id_type next_dfa() const
+    virtual id_type next_dfa() const override
     {
         return _next_dfa;
     }
 
-    virtual id_type push_dfa() const
+    virtual id_type push_dfa() const override
     {
         return _push_dfa;
     }
 
-    virtual bool pop_dfa() const
+    virtual bool pop_dfa() const override
     {
         return _pop_dfa;
     }
@@ -100,7 +100,7 @@ private:
 
     virtual void copy_node(node_ptr_vector &/*node_ptr_vector_*/,
         node_stack &/*new_node_stack_*/, bool_stack &/*perform_op_stack_*/,
-        bool &/*down_*/) const
+        bool &/*down_*/) const override
     {
         // Nothing to do, as end_nodes are not copied.
     }

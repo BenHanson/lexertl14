@@ -1,5 +1,5 @@
 // string_token.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -74,8 +74,8 @@ struct basic_string_token
     bool negatable() const
     {
         std::size_t size_ = 0;
-        typename range_vector::const_iterator iter_ = _ranges.begin();
-        typename range_vector::const_iterator end_ = _ranges.end();
+        auto iter_ = _ranges.cbegin();
+        auto end_ = _ranges.cend();
 
         for (; iter_ != end_; ++iter_)
         {
@@ -93,8 +93,8 @@ struct basic_string_token
 
     void insert(const basic_string_token &rhs_)
     {
-        typename range_vector::const_iterator iter_ = rhs_._ranges.begin();
-        typename range_vector::const_iterator end_ = rhs_._ranges.end();
+        auto iter_ = rhs_._ranges.cbegin();
+        auto end_ = rhs_._ranges.cend();
 
         for (; iter_ != end_; ++iter_)
         {
@@ -106,8 +106,8 @@ struct basic_string_token
     typename range_vector::iterator insert(range rhs_)
     {
         bool insert_ = true;
-        typename range_vector::iterator iter_ = _ranges.begin();
-        typename range_vector::const_iterator end_ = _ranges.end();
+        auto iter_ = _ranges.begin();
+        auto end_ = _ranges.end();
 
         while (iter_ != end_)
         {
@@ -186,8 +186,8 @@ struct basic_string_token
         index_type next_ = 0;
         const index_type max_ = char_traits::max_val();
         string_token temp_;
-        typename range_vector::iterator iter_ = _ranges.begin();
-        typename range_vector::const_iterator end_ = _ranges.end();
+        auto iter_ = _ranges.cbegin();
+        auto end_ = _ranges.cend();
         bool finished_ = false;
 
         for (; iter_ != end_; ++iter_)
@@ -218,10 +218,10 @@ struct basic_string_token
 
     void intersect(basic_string_token &rhs_, basic_string_token &overlap_)
     {
-        typename range_vector::iterator lhs_iter_ = _ranges.begin();
-        typename range_vector::const_iterator lhs_end_ = _ranges.end();
-        typename range_vector::iterator rhs_iter_ = rhs_._ranges.begin();
-        typename range_vector::const_iterator rhs_end_ = rhs_._ranges.end();
+        auto lhs_iter_ = _ranges.begin();
+        auto lhs_end_ = _ranges.end();
+        auto rhs_iter_ = rhs_._ranges.begin();
+        auto rhs_end_ = rhs_._ranges.end();
 
         while (lhs_iter_ != lhs_end_ && rhs_iter_ != rhs_end_)
         {
@@ -264,10 +264,10 @@ struct basic_string_token
 
     void remove(basic_string_token &rhs_)
     {
-        typename range_vector::iterator lhs_iter_ = _ranges.begin();
-        typename range_vector::const_iterator lhs_end_ = _ranges.end();
-        typename range_vector::iterator rhs_iter_ = rhs_._ranges.begin();
-        typename range_vector::const_iterator rhs_end_ = rhs_._ranges.end();
+        auto lhs_iter_ = _ranges.begin();
+        auto lhs_end_ = _ranges.end();
+        auto rhs_iter_ = rhs_._ranges.begin();
+        auto rhs_end_ = rhs_._ranges.end();
 
         while (lhs_iter_ != lhs_end_ && rhs_iter_ != rhs_end_)
         {

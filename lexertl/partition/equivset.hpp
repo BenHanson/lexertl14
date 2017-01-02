@@ -1,5 +1,5 @@
 // equivset.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -62,10 +62,8 @@ struct basic_equivset
             overlap_._greedy = _greedy;
             overlap_._followpos = _followpos;
 
-            typename node_vector::const_iterator overlap_begin_ =
-                overlap_._followpos.begin();
-            typename node_vector::const_iterator overlap_end_ =
-                overlap_._followpos.end();
+            auto overlap_begin_ = overlap_._followpos.cbegin();
+            auto overlap_end_ = overlap_._followpos.cend();
 
             for (node *node_ : rhs_._followpos)
             {
@@ -93,10 +91,10 @@ struct basic_equivset
 private:
     void intersect_indexes(index_vector &rhs_, index_vector &overlap_)
     {
-        typename index_vector::iterator iter_ = _index_vector.begin();
-        typename index_vector::iterator end_ = _index_vector.end();
-        typename index_vector::iterator rhs_iter_ = rhs_.begin();
-        typename index_vector::iterator rhs_end_ = rhs_.end();
+        auto iter_ = _index_vector.begin();
+        auto end_ = _index_vector.end();
+        auto rhs_iter_ = rhs_.begin();
+        auto rhs_end_ = rhs_.end();
 
         while (iter_ != end_ && rhs_iter_ != rhs_end_)
         {

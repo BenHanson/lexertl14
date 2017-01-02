@@ -1,5 +1,5 @@
 // rules.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -231,8 +231,7 @@ public:
 
         if (iter_ == _macro_map.end())
         {
-            std::pair<typename macro_map::iterator, bool> pair_ =
-                _macro_map.insert(macro_pair(name_, token_vector()));
+            auto pair_ = _macro_map.insert(macro_pair(name_, token_vector()));
 
             tokenise(regex_, pair_.first->second, npos(), name_);
         }
@@ -691,11 +690,9 @@ private:
     void reverse(token_vector &vector_)
     {
         token_vector new_vector_(vector_.size(), token());
-        typename token_vector::reverse_iterator iter_ =
-            vector_.rbegin();
-        typename token_vector::reverse_iterator end_ =
-            vector_.rend();
-        typename token_vector::iterator dest_ = new_vector_.begin();
+        auto iter_ = vector_.rbegin();
+        auto end_ = vector_.rend();
+        auto dest_ = new_vector_.begin();
         std::stack<typename token_vector::reverse_iterator> stack_;
 
         for (; iter_ != end_; ++iter_, ++dest_)
@@ -740,7 +737,7 @@ private:
             case detail::REPEATN:
             case detail::AREPEATN:
             {
-                typename token_vector::reverse_iterator temp_ = iter_ + 1;
+                auto temp_ = iter_ + 1;
 
                 if (temp_->_type == detail::CLOSEPAREN)
                 {
@@ -817,7 +814,7 @@ private:
         id_type new_dfa_id_ = npos();
         id_type push_dfa_id_ = npos();
         typename string_id_type_map::const_iterator iter_;
-        typename string_id_type_map::const_iterator end_ = _statemap.end();
+        auto end_ = _statemap.cend();
         id_vector next_dfas_;
 
         if (!dot_ && !pop_)

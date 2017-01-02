@@ -1,5 +1,5 @@
 // tokeniser_helper.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -26,6 +26,7 @@ public:
     using char_state = basic_re_tokeniser_state<char, id_type>;
     using state = basic_re_tokeniser_state<rules_char_type, id_type>;
     using string_token = basic_string_token<input_char_type>;
+    using range = typename string_token::range;
 
     template<char ch>
     struct size
@@ -160,7 +161,7 @@ public:
             }
             else if (!chset_)
             {
-                typename string_token::range range_(prev_, prev_);
+                range range_(prev_, prev_);
 
                 token_.insert(range_);
 
@@ -195,8 +196,8 @@ public:
         }
     }
 
-    static void fold(const typename string_token::range &range_,
-        const std::locale &locale_, string_token &out_, const one &)
+    static void fold(const range &range_, const std::locale &locale_,
+        string_token &out_, const one &)
     {
         // If string_token::char_type is 16 bit may overflow,
         // so use std::size_t.
@@ -214,19 +215,19 @@ public:
 
             if (upper_ != static_cast<input_char_type>(start_))
             {
-                out_.insert(typename string_token::range(upper_, upper_));
+                out_.insert(range(upper_, upper_));
             }
 
             if (lower_ != static_cast<input_char_type>(start_))
             {
-                out_.insert(typename string_token::range(lower_, lower_));
+                out_.insert(range(lower_, lower_));
             }
         }
     }
 
     // http://www.unicode.org/Public/8.0.0/ucd/UnicodeData.txt
-    static void fold(const typename string_token::range &range_,
-        const std::locale &, string_token &out_, const two &)
+    static void fold(const range &range_, const std::locale &,
+        string_token &out_, const two &)
     {
         static const fold_pair mapping_[] =
             {{{0x0041, 0x005a}, {0x0061, 0x007a}},
@@ -982,18 +983,18 @@ public:
             {
                 if (ptr_->to.first <= ptr_->to.second)
                 {
-                    out_.insert(typename string_token::range
-                        (ptr_->to.first + (range_.first - ptr_->from.first),
-                            range_.second > ptr_->from.second ?
+                    out_.insert(range(ptr_->to.first +
+                        (range_.first - ptr_->from.first),
+                        range_.second > ptr_->from.second ?
                             ptr_->to.second :
                             ptr_->to.first +
                             (range_.second - ptr_->from.first)));
                 }
                 else
                 {
-                    out_.insert(typename string_token::range
-                        (ptr_->to.second + (range_.first - ptr_->from.first),
-                            range_.second > ptr_->from.second ?
+                    out_.insert(range(ptr_->to.second +
+                        (range_.first - ptr_->from.first),
+                        range_.second > ptr_->from.second ?
                             ptr_->to.first :
                             ptr_->to.second +
                             (range_.second - ptr_->from.first)));
@@ -1004,12 +1005,12 @@ public:
             {
                 if (ptr_->to.first <= ptr_->to.second)
                 {
-                    out_.insert(typename string_token::range(ptr_->to.first,
+                    out_.insert(range(ptr_->to.first,
                         ptr_->to.first + (range_.second - ptr_->from.first)));
                 }
                 else
                 {
-                    out_.insert(typename string_token::range(ptr_->to.second,
+                    out_.insert(range(ptr_->to.second,
                         ptr_->to.second + (range_.second - ptr_->from.first)));
                 }
             }
@@ -1019,20 +1020,18 @@ public:
             {
                 if (ptr_->to.first <= ptr_->to.second)
                 {
-                    out_.insert(typename string_token::range(ptr_->to.first,
-                        ptr_->to.second));
+                    out_.insert(range(ptr_->to.first, ptr_->to.second));
                 }
                 else
                 {
-                    out_.insert(typename string_token::range(ptr_->to.second,
-                        ptr_->to.first));
+                    out_.insert(range(ptr_->to.second, ptr_->to.first));
                 }
             }
         }
     }
 
-    static void fold(const typename string_token::range &range_,
-        const std::locale &locale_, string_token &out_, const four &)
+    static void fold(const range &range_, const std::locale &locale_,
+        string_token &out_, const four &)
     {
         if (range_.first < 0x10000)
         {
@@ -1056,23 +1055,23 @@ public:
             if (range_.first >= ptr_->from.first &&
                 range_.first <= ptr_->from.second)
             {
-                out_.insert(typename string_token::range
-                    (ptr_->to.first + (range_.first - ptr_->from.first),
-                    range_.second > ptr_->from.second ? ptr_->to.second :
-                    ptr_->to.first + (range_.second - ptr_->from.first)));
+                out_.insert(range(ptr_->to.first +
+                    (range_.first - ptr_->from.first),
+                    range_.second > ptr_->from.second ?
+                        ptr_->to.second :
+                        ptr_->to.first + (range_.second - ptr_->from.first)));
             }
             else if (range_.second >= ptr_->from.first &&
                 range_.second <= ptr_->from.second)
             {
-                out_.insert(typename string_token::range(ptr_->to.first,
+                out_.insert(range(ptr_->to.first,
                     ptr_->to.first + (range_.second - ptr_->from.first)));
             }
             // Either range fully encompasses from range or not at all.
             else if (ptr_->from.first >= range_.first &&
                 ptr_->from.first <= range_.second)
             {
-                out_.insert(typename string_token::range(ptr_->to.first,
-                    ptr_->to.second));
+                out_.insert(range(ptr_->to.first, ptr_->to.second));
             }
         }
     }
@@ -2864,7 +2863,7 @@ private:
     static input_char_type decode_octal(state_type &state_)
     {
         std::size_t oct_ = 0;
-        typename state_type::char_type ch_ = *state_._curr;
+        auto ch_ = *state_._curr;
         unsigned short count_ = 3;
         bool eos_ = false;
 
@@ -3107,10 +3106,8 @@ private:
 
         // Use index_type as char is generally signed
         // and we want to ignore signedness.
-        typename char_traits::index_type start_ =
-            static_cast<typename char_traits::index_type>(prev_);
-        typename char_traits::index_type end_ =
-            static_cast<typename char_traits::index_type>(curr_);
+        auto start_ = static_cast<typename char_traits::index_type>(prev_);
+        auto end_ = static_cast<typename char_traits::index_type>(curr_);
 
         // Semanic check
         if (end_ < start_)
@@ -3127,7 +3124,7 @@ private:
         // each character if icase is set.
         if (state_._flags & icase)
         {
-            typename string_token::range range_(start_, end_);
+            range range_(start_, end_);
             string_token folded_;
 
             chars_.insert(range_);
@@ -3141,7 +3138,7 @@ private:
         }
         else
         {
-            chars_.insert(typename string_token::range(prev_, curr_));
+            chars_.insert(range(prev_, curr_));
         }
     }
 };

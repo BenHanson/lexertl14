@@ -1,5 +1,5 @@
 // state_machine.hpp
-// Copyright (c) 2005-2015 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2017 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -151,7 +151,7 @@ private:
         {
             const id_type *front_ = &dfa_.front();
             id_type_vector new_dfa_(front_, front_ + dfa_alphabet_);
-            typename index_set::const_iterator set_end_ = index_set_.end();
+            auto set_end_ = index_set_.cend();
             const id_type *ptr_ = front_ + dfa_alphabet_;
             id_type *new_ptr_ = nullptr;
 
@@ -453,7 +453,7 @@ private:
         {
             const state *front_ = &dfa_._states.front();
             dfa new_dfa_(new_index_);
-            typename index_set::const_iterator set_end_ = index_set_.end();
+            auto set_end_ = index_set_.cend();
             const state *ptr_ = front_;
             state *new_ptr_ = &new_dfa_._states.front();
 
@@ -480,10 +480,8 @@ private:
                     new_ptr_->_eol_index = lookup_ptr_[ptr_->_eol_index];
                 }
 
-                typename state::id_type_string_token_map::const_iterator
-                    iter_ = ptr_->_transitions.begin();
-                typename state::id_type_string_token_map::const_iterator end_ =
-                    ptr_->_transitions.end();
+                auto iter_ = ptr_->_transitions.cbegin();
+                auto end_ = ptr_->_transitions.cend();
                 typename state::id_type_string_token_map::iterator find_;
 
                 for (; iter_ != end_; ++iter_)
