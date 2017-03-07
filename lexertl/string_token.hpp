@@ -194,7 +194,8 @@ struct basic_string_token
         {
             if (next_ < iter_->first)
             {
-                temp_.insert(range(next_, iter_->first - 1));
+                temp_.insert(range(next_,
+                    static_cast<index_type>(iter_->first - 1)));
             }
 
             if (iter_->second < max_)
@@ -389,7 +390,7 @@ struct basic_string_token
 private:
     void adjust(const range &range_, basic_string_token &token_,
         typename range_vector::iterator &iter_,
-        typename range_vector::const_iterator &end_)
+        typename range_vector::iterator &end_)
     {
         if (range_.first > iter_->first)
         {
@@ -399,7 +400,8 @@ private:
 
             if (range_.second < second_)
             {
-                range new_range_(range_.second + 1, second_);
+                range new_range_(static_cast<index_type>(range_.second + 1),
+                    second_);
 
                 iter_ = token_.insert(new_range_);
                 end_ = token_._ranges.end();

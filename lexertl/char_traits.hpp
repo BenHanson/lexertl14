@@ -19,8 +19,10 @@ struct basic_char_traits
 
     static index_type max_val()
     {
-        return sizeof(char_type) > 2 ? 0x10ffff :
-            ~static_cast<index_type>(0);
+        const uint32_t max_ = 0x10ffff;
+
+        return sizeof(char_type) > 2 ?
+            max_ : (max_ & 0xffff);
     }
 };
 

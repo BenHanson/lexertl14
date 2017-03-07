@@ -26,6 +26,7 @@ public:
     using char_state = basic_re_tokeniser_state<char, id_type>;
     using state = basic_re_tokeniser_state<rules_char_type, id_type>;
     using string_token = basic_string_token<input_char_type>;
+    using index_type = typename string_token::index_type;
     using range = typename string_token::range;
 
     template<char ch>
@@ -983,21 +984,25 @@ public:
             {
                 if (ptr_->to.first <= ptr_->to.second)
                 {
-                    out_.insert(range(ptr_->to.first +
-                        (range_.first - ptr_->from.first),
+                    const index_type first_ = ptr_->to.first +
+                        (range_.first - ptr_->from.first);
+
+                    out_.insert(range(first_,
                         range_.second > ptr_->from.second ?
-                            ptr_->to.second :
-                            ptr_->to.first +
-                            (range_.second - ptr_->from.first)));
+                        ptr_->to.second :
+                        static_cast<index_type>(ptr_->to.first +
+                        (range_.second - ptr_->from.first))));
                 }
                 else
                 {
-                    out_.insert(range(ptr_->to.second +
-                        (range_.first - ptr_->from.first),
+                    const index_type first_ = ptr_->to.second +
+                        (range_.first - ptr_->from.first);
+
+                    out_.insert(range(first_,
                         range_.second > ptr_->from.second ?
-                            ptr_->to.first :
-                            ptr_->to.second +
-                            (range_.second - ptr_->from.first)));
+                        ptr_->to.first :
+                        static_cast<index_type>(ptr_->to.second +
+                        (range_.second - ptr_->from.first))));
                 }
             }
             else if (range_.second >= ptr_->from.first &&
@@ -1005,13 +1010,17 @@ public:
             {
                 if (ptr_->to.first <= ptr_->to.second)
                 {
-                    out_.insert(range(ptr_->to.first,
-                        ptr_->to.first + (range_.second - ptr_->from.first)));
+                    const index_type second_ = ptr_->to.first +
+                        (range_.second - ptr_->from.first);
+
+                    out_.insert(range(ptr_->to.first, second_));
                 }
                 else
                 {
-                    out_.insert(range(ptr_->to.second,
-                        ptr_->to.second + (range_.second - ptr_->from.first)));
+                    const index_type second_ = ptr_->to.second +
+                        (range_.second - ptr_->from.first);
+
+                    out_.insert(range(ptr_->to.second, second_));
                 }
             }
             // Either range fully encompasses from range or not at all.
@@ -1058,8 +1067,8 @@ public:
                 out_.insert(range(ptr_->to.first +
                     (range_.first - ptr_->from.first),
                     range_.second > ptr_->from.second ?
-                        ptr_->to.second :
-                        ptr_->to.first + (range_.second - ptr_->from.first)));
+                    ptr_->to.second :
+                    ptr_->to.first + (range_.second - ptr_->from.first)));
             }
             else if (range_.second >= ptr_->from.first &&
                 range_.second <= ptr_->from.second)
