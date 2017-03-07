@@ -1,2 +1,2 @@
 # lexertl14
-C++14 Version of lexertl
+C++14 version of lexertl
