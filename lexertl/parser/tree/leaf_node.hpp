@@ -45,7 +45,7 @@ public:
 
     virtual void append_followpos(const node_vector &followpos_) override
     {
-        for (node *node_ : followpos_)
+        for (observer_ptr<node> node_ : followpos_)
         {
             _followpos.push_back(node_);
         }

@@ -62,8 +62,8 @@ public:
                 // Used to fix up $ and \n clashes.
                 id_type nl_id_ = sm_traits::npos();
                 // Regex syntax tree
-                node *root_ = build_tree(rules_, index_, node_ptr_vector_,
-                    charset_map_, nl_id_);
+                observer_ptr<node> root_ = build_tree(rules_, index_,
+                    node_ptr_vector_, charset_map_, nl_id_);
 
                 build_dfa(charset_map_, root_, internals_, temp_sm_, index_,
                     nl_id_);
@@ -84,9 +84,9 @@ public:
         sm_.swap(temp_sm_);
     }
 
-    static node *build_tree(const rules &rules_, const std::size_t dfa_,
-        node_ptr_vector &node_ptr_vector_, charset_map &charset_map_,
-        id_type &nl_id_)
+    static observer_ptr<node> build_tree(const rules &rules_,
+        const std::size_t dfa_, node_ptr_vector &node_ptr_vector_,
+        charset_map &charset_map_, id_type &nl_id_)
     {
         parser parser_(rules_.locale(), node_ptr_vector_, charset_map_,
             rules_.eoi());
@@ -104,7 +104,7 @@ public:
         auto push_dfa_iter_ = pushes_[dfa_].cbegin();
         auto pop_dfa_iter_ = pops_[dfa_].cbegin();
         const bool seen_bol_ = (rules_.features()[dfa_] & bol_bit) != 0;
-        node *root_ = nullptr;
+        observer_ptr<node> root_ = nullptr;
 
         root_ = parser_.parse(*regex_iter_, *id_iter_, *user_id_iter_,
             *next_dfa_iter_, *push_dfa_iter_, *pop_dfa_iter_,
@@ -119,9 +119,9 @@ public:
         // Build syntax trees
         while (regex_iter_ != regex_iter_end_)
         {
-            node *rhs_ = parser_.parse(*regex_iter_, *id_iter_, *user_id_iter_,
-                *next_dfa_iter_, *push_dfa_iter_, *pop_dfa_iter_,
-                rules_.flags(), nl_id_,
+            observer_ptr<node> rhs_ = parser_.parse(*regex_iter_, *id_iter_,
+                *user_id_iter_, *next_dfa_iter_, *push_dfa_iter_,
+                *pop_dfa_iter_, rules_.flags(), nl_id_,
                 (rules_.features()[dfa_] & bol_bit) != 0);
 
             node_ptr_vector_.emplace_back
@@ -155,7 +155,7 @@ protected:
     using index_set_vector = std::vector<index_set>;
     using is_dfa = std::integral_constant<bool, sm_traits::is_dfa>;
     using lookup = std::integral_constant<bool, sm_traits::lookup>;
-    using node_set = std::set<const node *>;
+    using node_set = std::set<observer_ptr<const node>>;
     using node_set_vector = std::vector<std::unique_ptr<node_set>>;
     using node_vector = typename node::node_vector;
     using node_vector_vector = std::vector<std::unique_ptr<node_vector>>;
@@ -163,9 +163,9 @@ protected:
     using size_t_vector = typename std::vector<std::size_t>;
     using string_token = typename parser::string_token;
 
-    static void build_dfa(const charset_map &charset_map_, const node *root_,
-        internals &internals_, sm &sm_, const id_type dfa_index_,
-        id_type &nl_id_)
+    static void build_dfa(const charset_map &charset_map_,
+        const observer_ptr<node> root_, internals &internals_, sm &sm_,
+        const id_type dfa_index_, id_type &nl_id_)
     {
         // partitioned charset list
         charset_list charset_list_;
@@ -173,7 +173,7 @@ protected:
         index_set_vector set_mapping_;
         auto &dfa_ = internals_._dfa[dfa_index_];
         std::size_t dfa_alphabet_ = 0;
-        const node_vector *followpos_ = &root_->firstpos();
+        const node_vector &followpos_ = root_->firstpos();
         node_set_vector seen_sets_;
         node_vector_vector seen_vectors_;
         size_t_vector hash_vector_;
@@ -214,19 +214,19 @@ protected:
         {
             equivset_list equiv_list_;
 
-            build_equiv_list(seen_vectors_[index_].get(), set_mapping_,
+            build_equiv_list(*seen_vectors_[index_].get(), set_mapping_,
                 equiv_list_, is_dfa());
 
             for (auto &equivset_ : equiv_list_)
             {
                 const id_type transition_ = closure
-                    (&equivset_->_followpos, seen_sets_, seen_vectors_,
+                    (equivset_->_followpos, seen_sets_, seen_vectors_,
                     hash_vector_, dfa_alphabet_, dfa_);
 
                 if (transition_ != sm_traits::npos())
                 {
-                    id_type *ptr_ = &dfa_.front() + ((index_ + 1) *
-                        dfa_alphabet_);
+                    observer_ptr<id_type> ptr_ = &dfa_.front() +
+                        ((index_ + 1) * dfa_alphabet_);
 
                     // Prune abstemious transitions from end states.
                     if (*ptr_ && !equivset_->_greedy) continue;
@@ -264,7 +264,7 @@ protected:
     {
         for (const auto &eol_ : eol_set_)
         {
-            id_type *ptr_ = &dfa_.front() + eol_ * dfa_alphabet_;
+            observer_ptr<id_type> ptr_ = &dfa_.front() + eol_ * dfa_alphabet_;
             const id_type eol_state_ = ptr_[eol_index];
             const id_type nl_state_ = ptr_[nl_id_ + transitions_index];
 
@@ -291,7 +291,7 @@ protected:
 
         for (const auto &eol_ : eol_set_)
         {
-            id_type *ptr_ = &dfa_.front() + eol_ * dfa_alphabet_;
+            observer_ptr<id_type> ptr_ = &dfa_.front() + eol_ * dfa_alphabet_;
             const id_type eol_state_ = ptr_[eol_index];
             id_type nl_state_ = 0;
 
@@ -467,7 +467,7 @@ protected:
 
         for (id_type index_ = 0; iter_ != end_; ++iter_, ++index_)
         {
-            const charset *cs_ = iter_->get();
+            observer_ptr<const charset> cs_ = iter_->get();
 
             fill_lookup(cs_->_token, &internals_._lookup[dfa_index_],
                 index_, lookup());
@@ -480,7 +480,7 @@ protected:
     }
 
     // char_state_machine version
-    static void fill_lookup(const string_token &, id_type_vector *,
+    static void fill_lookup(const string_token &, observer_ptr<id_type_vector> ,
         const id_type, const std::false_type &)
     {
         // Do nothing (lookup not used)
@@ -488,9 +488,10 @@ protected:
 
     // state_machine version
     static void fill_lookup(const string_token &charset_,
-        id_type_vector *lookup_, const id_type index_, const std::true_type &)
+        observer_ptr<id_type_vector> lookup_, const id_type index_,
+        const std::true_type &)
     {
-        id_type *ptr_ = &lookup_->front();
+        observer_ptr<id_type> ptr_ = &lookup_->front();
 
         for (const auto &range_ : charset_._ranges)
         {
@@ -506,7 +507,7 @@ protected:
         }
     }
 
-    static id_type closure(const node_vector *followpos_,
+    static id_type closure(const node_vector &followpos_,
         node_set_vector &seen_sets_, node_vector_vector &seen_vectors_,
         size_t_vector &hash_vector_, const id_type size_, id_type_vector &dfa_)
     {
@@ -518,18 +519,18 @@ protected:
         bool pop_dfa_ = false;
         std::size_t hash_ = 0;
 
-        if (followpos_->empty()) return sm_traits::npos();
+        if (followpos_.empty()) return sm_traits::npos();
 
         id_type index_ = 0;
         std::unique_ptr<node_set> set_ptr_ = std::make_unique<node_set>();
         std::unique_ptr<node_vector> vector_ptr_ =
             std::make_unique<node_vector>();
 
-        for (node *node_ : *followpos_)
+        for (observer_ptr<node> node_ : followpos_)
         {
             closure_ex(node_, end_state_, id_, user_id_, next_dfa_,
-                push_dfa_, pop_dfa_, set_ptr_.get(),
-                vector_ptr_.get(), hash_);
+                push_dfa_, pop_dfa_, *set_ptr_.get(),
+                *vector_ptr_.get(), hash_);
         }
 
         bool found_ = false;
@@ -576,10 +577,10 @@ protected:
         return index_;
     }
 
-    static void closure_ex(node *node_, bool &end_state_,
+    static void closure_ex(observer_ptr<node> node_, bool &end_state_,
         id_type &id_, id_type &user_id_, id_type &next_dfa_,
-        id_type &push_dfa_, bool &pop_dfa_, node_set *set_ptr_,
-        node_vector *vector_ptr_, std::size_t &hash_)
+        id_type &push_dfa_, bool &pop_dfa_, node_set &set_ptr_,
+        node_vector &vector_ptr_, std::size_t &hash_)
     {
         const bool temp_end_state_ = node_->end_state();
 
@@ -596,15 +597,15 @@ protected:
             }
         }
 
-        if (set_ptr_->insert(node_).second)
+        if (set_ptr_.insert(node_).second)
         {
-            vector_ptr_->push_back(node_);
+            vector_ptr_.push_back(node_);
             hash_ += reinterpret_cast<std::size_t>(node_);
         }
     }
 
     // NFA version
-    static void build_equiv_list(const node_vector *vector_,
+    static void build_equiv_list(const node_vector &vector_,
         const index_set_vector &set_mapping_, equivset_list &lhs_,
         const std::false_type &)
     {
@@ -612,7 +613,7 @@ protected:
     }
 
     // DFA version
-    static void build_equiv_list(const node_vector *vector_,
+    static void build_equiv_list(const node_vector &vector_,
         const index_set_vector &set_mapping_, equivset_list &lhs_,
         const std::true_type &)
     {
@@ -677,10 +678,10 @@ protected:
         }
     }
 
-    static void fill_rhs_list(const node_vector *vector_,
+    static void fill_rhs_list(const node_vector &vector_,
         const index_set_vector &set_mapping_, equivset_list &list_)
     {
-        for (const node *node_ : *vector_)
+        for (observer_ptr<const node> node_ : vector_)
         {
             if (!node_->end_state())
             {

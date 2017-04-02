@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include <memory>
+#include "../../observer_ptr.hpp"
 #include "../../runtime_error.hpp"
 #include <stack>
 #include <vector>
@@ -23,10 +24,9 @@ public:
     enum node_type {LEAF, SEQUENCE, SELECTION, ITERATION, END};
 
     using bool_stack = std::stack<bool>;
-    using node_stack = std::stack<basic_node *>;
-    // stack and vector not owner of node pointers
-    using const_node_stack = std::stack<const basic_node *>;
-    using node_vector = std::vector<basic_node *>;
+    using node_stack = std::stack<observer_ptr<basic_node>>;
+    using const_node_stack = std::stack<observer_ptr<const basic_node>>;
+    using node_vector = std::vector<observer_ptr<basic_node>>;
     using node_ptr_vector = std::vector<std::unique_ptr<basic_node>>;
 
     basic_node() :
@@ -74,9 +74,9 @@ public:
         throw runtime_error("Internal error node::append_followpos().");
     }
 
-    basic_node *copy(node_ptr_vector &node_ptr_vector_) const
+    observer_ptr<basic_node> copy(node_ptr_vector &node_ptr_vector_) const
     {
-        basic_node *new_root_ = nullptr;
+        observer_ptr<basic_node> new_root_ = nullptr;
         const_node_stack node_stack_;
         bool_stack perform_op_stack_;
         bool down_ = true;
@@ -94,7 +94,7 @@ public:
 
             while (!down_ && !node_stack_.empty())
             {
-                const basic_node *top_ = node_stack_.top();
+                observer_ptr<const basic_node> top_ = node_stack_.top();
 
                 top_->copy_node(node_ptr_vector_, new_node_stack_,
                     perform_op_stack_, down_);

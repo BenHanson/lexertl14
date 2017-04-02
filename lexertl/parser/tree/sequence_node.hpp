@@ -24,8 +24,7 @@ public:
     using node_type = typename node::node_type;
     using node_vector = typename node::node_vector;
 
-    basic_sequence_node(node *left_,
-        node *right_) :
+    basic_sequence_node(observer_ptr<node> left_, observer_ptr<node> right_) :
         node(left_->nullable() && right_->nullable()),
         _left(left_),
         _right(right_)
@@ -47,7 +46,7 @@ public:
         node_vector &lastpos_ = _left->lastpos();
         const node_vector &firstpos_ = _right->firstpos();
 
-        for (node *node_ : lastpos_)
+        for (observer_ptr<node> node_ : lastpos_)
         {
             node_->append_followpos(firstpos_);
         }
@@ -84,9 +83,8 @@ public:
     }
 
 private:
-    // Not owner of these pointers...
-    node *_left;
-    node *_right;
+    observer_ptr<node> _left;
+    observer_ptr<node> _right;
 
     virtual void copy_node(node_ptr_vector &node_ptr_vector_,
         node_stack &new_node_stack_, bool_stack &perform_op_stack_,
@@ -94,11 +92,11 @@ private:
     {
         if (perform_op_stack_.top())
         {
-            node *rhs_ = new_node_stack_.top();
+            observer_ptr<node> rhs_ = new_node_stack_.top();
 
             new_node_stack_.pop();
 
-            node *lhs_ = new_node_stack_.top();
+            observer_ptr<node> lhs_ = new_node_stack_.top();
 
             node_ptr_vector_.emplace_back
                 (std::make_unique<basic_sequence_node>(lhs_, rhs_));

@@ -104,12 +104,12 @@ private:
     void minimise_dfa(const id_type dfa_alphabet_,
         id_type_vector &dfa_, std::size_t size_)
     {
-        const id_type *first_ = &dfa_.front();
-        const id_type *end_ = first_ + size_;
+        observer_ptr<const id_type> first_ = &dfa_.front();
+        observer_ptr<const id_type> end_ = first_ + size_;
         id_type index_ = 1;
         id_type new_index_ = 1;
         id_type_vector lookup_(size_ / dfa_alphabet_, npos());
-        id_type *lookup_ptr_ = &lookup_.front();
+        observer_ptr<id_type> lookup_ptr_ = &lookup_.front();
         index_set index_set_;
         const id_type bol_index_ = dfa_.front();
 
@@ -119,7 +119,7 @@ private:
 
         for (; first_ < end_; first_ += dfa_alphabet_, ++index_)
         {
-            const id_type *second_ = first_ + dfa_alphabet_;
+            observer_ptr<const id_type> second_ = first_ + dfa_alphabet_;
 
             for (id_type curr_index_ = index_ + 1; second_ < end_;
                 ++curr_index_, second_ += dfa_alphabet_)
@@ -149,11 +149,11 @@ private:
 
         if (!index_set_.empty())
         {
-            const id_type *front_ = &dfa_.front();
+            observer_ptr<const id_type> front_ = &dfa_.front();
             id_type_vector new_dfa_(front_, front_ + dfa_alphabet_);
             auto set_end_ = index_set_.cend();
-            const id_type *ptr_ = front_ + dfa_alphabet_;
-            id_type *new_ptr_ = nullptr;
+            observer_ptr<const id_type> ptr_ = front_ + dfa_alphabet_;
+            observer_ptr<id_type> new_ptr_ = nullptr;
 
             new_dfa_.resize(size_ - index_set_.size() * dfa_alphabet_, 0);
             new_ptr_ = &new_dfa_.front() + dfa_alphabet_;
@@ -292,7 +292,7 @@ struct basic_char_state_machine
         const std::size_t dfa_alphabet_ = internals_._dfa_alphabet[dfa_index_];
         const std::size_t alphabet_ = dfa_alphabet_ - transitions_index;
         const id_type_vector &source_dfa_ = internals_._dfa[dfa_index_];
-        const id_type *ptr_ = &source_dfa_.front();
+        observer_ptr<const id_type> ptr_ = &source_dfa_.front();
         const std::size_t size_ = (source_dfa_.size() - dfa_alphabet_) /
             dfa_alphabet_;
         typename state::id_type_string_token_map::iterator trans_iter_;
@@ -375,7 +375,7 @@ struct basic_char_state_machine
 
         for (id_type i_ = 0; i_ < dfas_; ++i_)
         {
-            dfa *dfa_ = &_sm_vector[i_];
+            observer_ptr<dfa> dfa_ = &_sm_vector[i_];
 
             if (dfa_->size() > 0)
             {
@@ -415,17 +415,17 @@ private:
 
     void minimise_dfa(dfa &dfa_, std::size_t size_)
     {
-        const state *first_ = &dfa_._states.front();
-        const state *end_ = first_ + size_;
+        observer_ptr<const state> first_ = &dfa_._states.front();
+        observer_ptr<const state> end_ = first_ + size_;
         id_type index_ = 0;
         id_type new_index_ = 0;
         id_type_vector lookup_(size_, npos());
-        id_type *lookup_ptr_ = &lookup_.front();
+        observer_ptr<id_type> lookup_ptr_ = &lookup_.front();
         index_set index_set_;
 
         for (; first_ != end_; ++first_, ++index_)
         {
-            const state *second_ = first_ + 1;
+            observer_ptr<const state> second_ = first_ + 1;
 
             for (id_type curr_index_ = index_ + 1; second_ != end_;
                 ++curr_index_, ++second_)
@@ -451,11 +451,11 @@ private:
 
         if (!index_set_.empty())
         {
-            const state *front_ = &dfa_._states.front();
+            observer_ptr<const state> front_ = &dfa_._states.front();
             dfa new_dfa_(new_index_);
             auto set_end_ = index_set_.cend();
-            const state *ptr_ = front_;
-            state *new_ptr_ = &new_dfa_._states.front();
+            observer_ptr<const state> ptr_ = front_;
+            observer_ptr<state> new_ptr_ = &new_dfa_._states.front();
 
             if (dfa_._bol_index != npos())
             {

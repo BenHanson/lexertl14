@@ -84,15 +84,15 @@ public:
     {
     }
 
-    node *parse(const token_vector &regex_, const id_type id_,
+    observer_ptr<node> parse(const token_vector &regex_, const id_type id_,
         const id_type user_id_, const id_type next_dfa_,
         const id_type push_dfa_, const bool pop_dfa_,
         const std::size_t flags_, id_type &nl_id_, const bool seen_bol_)
     {
         auto iter_ = regex_.cbegin();
         auto end_ = regex_.cend();
-        node *root_ = nullptr;
-        token *lhs_token_ = nullptr;
+        observer_ptr<node> root_ = nullptr;
+        observer_ptr<token> lhs_token_ = nullptr;
         // There cannot be less than 2 tokens
         auto rhs_token_ = std::make_unique<token>(*iter_++);
         char action_ = 0;
@@ -145,13 +145,13 @@ public:
 
         assert(_tree_node_stack.size() == 1);
 
-        node *lhs_node_ = _tree_node_stack.top();
+        observer_ptr<node> lhs_node_ = _tree_node_stack.top();
 
         _tree_node_stack.pop();
         _node_ptr_vector.emplace_back(std::make_unique<end_node>
             (id_, user_id_, next_dfa_, push_dfa_, pop_dfa_));
 
-        node *rhs_node_ = _node_ptr_vector.back().get();
+        observer_ptr<node> rhs_node_ = _node_ptr_vector.back().get();
 
         _node_ptr_vector.emplace_back(std::make_unique<sequence_node>
             (lhs_node_, rhs_node_));
@@ -166,7 +166,7 @@ public:
         {
             const auto &firstpos_ = root_->firstpos();
 
-            for (const node *node_ : firstpos_)
+            for (observer_ptr<const node> node_ : firstpos_)
             {
                 if (node_->end_state())
                 {
@@ -210,8 +210,8 @@ private:
 
     void reduce(id_type &nl_id_)
     {
-        token *lhs_ = nullptr;
-        token *rhs_ = nullptr;
+        observer_ptr<token> lhs_ = nullptr;
+        observer_ptr<token> rhs_ = nullptr;
         token_stack handle_;
         char action_ = 0;
 
@@ -316,11 +316,11 @@ private:
     void perform_or()
     {
         // perform or
-        node *rhs_ = _tree_node_stack.top();
+        observer_ptr<node> rhs_ = _tree_node_stack.top();
 
         _tree_node_stack.pop();
 
-        node *lhs_ = _tree_node_stack.top();
+        observer_ptr<node> lhs_ = _tree_node_stack.top();
 
         _node_ptr_vector.emplace_back
             (std::make_unique<selection_node>(lhs_, rhs_));
@@ -683,7 +683,7 @@ private:
         }
     }
 
-    void push_range(const string_token *token_)
+    void push_range(observer_ptr<const string_token> token_)
     {
         const id_type id_ = lookup(*token_);
 
@@ -731,11 +731,11 @@ private:
 
     void sequence()
     {
-        node *rhs_ = _tree_node_stack.top();
+        observer_ptr<node> rhs_ = _tree_node_stack.top();
 
         _tree_node_stack.pop();
 
-        node *lhs_ = _tree_node_stack.top();
+        observer_ptr<node> lhs_ = _tree_node_stack.top();
 
         _node_ptr_vector.emplace_back
             (std::make_unique<sequence_node>(lhs_, rhs_));
@@ -745,11 +745,11 @@ private:
     void optional(const bool greedy_)
     {
         // perform ?
-        node *lhs_ = _tree_node_stack.top();
+        observer_ptr<node> lhs_ = _tree_node_stack.top();
         // Don't know if lhs_ is a leaf_node, so get firstpos.
         auto &firstpos_ = lhs_->firstpos();
 
-        for (node *node_ : firstpos_)
+        for (observer_ptr<node> node_ : firstpos_)
         {
             // These are leaf_nodes!
             node_->greedy(greedy_);
@@ -758,7 +758,7 @@ private:
         _node_ptr_vector.emplace_back(std::make_unique<leaf_node>
             (node::null_token(), greedy_));
 
-        node *rhs_ = _node_ptr_vector.back().get();
+        observer_ptr<node> rhs_ = _node_ptr_vector.back().get();
 
         _node_ptr_vector.emplace_back
             (std::make_unique<selection_node>(lhs_, rhs_));
@@ -768,7 +768,7 @@ private:
     void zero_or_more(const bool greedy_)
     {
         // perform *
-        node *ptr_ = _tree_node_stack.top();
+        observer_ptr<node> ptr_ = _tree_node_stack.top();
 
         _node_ptr_vector.emplace_back
             (std::make_unique<iteration_node>(ptr_, greedy_));
@@ -778,13 +778,13 @@ private:
     void one_or_more(const bool greedy_)
     {
         // perform +
-        node *lhs_ = _tree_node_stack.top();
-        node *copy_ = lhs_->copy(_node_ptr_vector);
+        observer_ptr<node> lhs_ = _tree_node_stack.top();
+        observer_ptr<node> copy_ = lhs_->copy(_node_ptr_vector);
 
         _node_ptr_vector.emplace_back(std::make_unique<iteration_node>
             (copy_, greedy_));
 
-        node *rhs_ = _node_ptr_vector.back().get();
+        observer_ptr<node> rhs_ = _node_ptr_vector.back().get();
 
         _node_ptr_vector.emplace_back
             (std::make_unique<sequence_node>(lhs_, rhs_));
@@ -797,7 +797,7 @@ private:
     // {0,1} = ?
     // {1,}  = +
     // therefore we do not check for these cases.
-    void repeatn(const bool greedy_, const token *token_)
+    void repeatn(const bool greedy_, observer_ptr<const token> token_)
     {
         const rules_char_type *str_ = token_->_extra.c_str();
         std::size_t min_ = 0;
@@ -831,9 +831,9 @@ private:
                 optional(greedy_);
             }
 
-            node *prev_ = _tree_node_stack.top()->
+            observer_ptr<node> prev_ = _tree_node_stack.top()->
                 copy(_node_ptr_vector);
-            node *curr_ = nullptr;
+            observer_ptr<node> curr_ = nullptr;
 
             for (std::size_t i_ = 2; i_ < top_; ++i_)
             {
@@ -884,12 +884,12 @@ private:
         }
     }
 
-    void fixup_bol(node * &root_)const
+    void fixup_bol(observer_ptr<node> &root_)const
     {
         const auto &first_ = root_->firstpos();
         bool found_ = false;
 
-        for (const node *node_ : first_)
+        for (observer_ptr<const node> node_ : first_)
         {
             found_ = !node_->end_state() && node_->token() == bol_token();
 
@@ -901,12 +901,12 @@ private:
             _node_ptr_vector.emplace_back
                 (std::make_unique<leaf_node>(bol_token(), true));
 
-            node *lhs_ = _node_ptr_vector.back().get();
+            observer_ptr<node> lhs_ = _node_ptr_vector.back().get();
 
             _node_ptr_vector.emplace_back
                 (std::make_unique<leaf_node>(node::null_token(), true));
 
-            node *rhs_ = _node_ptr_vector.back().get();
+            observer_ptr<node> rhs_ = _node_ptr_vector.back().get();
 
             _node_ptr_vector.emplace_back
                 (std::make_unique<selection_node>(lhs_, rhs_));

@@ -372,7 +372,7 @@ void next(const basic_state_machine<typename std::iterator_traits
     <iter_type>::value_type, id_type> &sm_, results &results_,
     const std::integral_constant<bool, compressed> &compressed_,
     const std::integral_constant<bool, recursive> &recursive_,
-    std::forward_iterator_tag)
+    const std::forward_iterator_tag &)
 {
     const auto &internals_ = sm_.data();
     auto end_token_ = results_.second;
@@ -463,15 +463,16 @@ void lookup(const basic_state_machine<typename std::iterator_traits
     <iter_type>::value_type, id_type> &sm_,
     match_results<iter_type, id_type, flags> &results_)
 {
+    using value_type = typename std::iterator_traits<iter_type>::value_type;
+    using cat = typename std::iterator_traits<iter_type>::iterator_category;
+
     // If this asserts, you have either not defined all the correct
     // flags, or you should be using recursive_match_results instead
     // of match_results.
     assert((sm_.data()._features & flags) == sm_.data()._features);
     detail::next<iter_type, flags, id_type>(sm_, results_,
-        std::integral_constant<bool, (sizeof
-        (typename std::iterator_traits<iter_type>::value_type) > 1)>(),
-        std::false_type(),
-        typename std::iterator_traits<iter_type>::iterator_category());
+        std::integral_constant<bool, (sizeof(value_type) > 1)>(),
+        std::false_type(), cat());
 }
 
 template<typename iter_type, typename id_type, std::size_t flags>
@@ -479,13 +480,14 @@ void lookup(const basic_state_machine<typename std::iterator_traits
     <iter_type>::value_type, id_type> &sm_,
     recursive_match_results<iter_type, id_type, flags> &results_)
 {
+    using value_type = typename std::iterator_traits<iter_type>::value_type;
+    using cat = typename std::iterator_traits<iter_type>::iterator_category;
+
     // If this asserts, you have not defined all the correct flags
     assert((sm_.data()._features & flags) == sm_.data()._features);
     detail::next<iter_type, flags | recursive_bit, id_type>(sm_, results_,
-        std::integral_constant<bool,
-            (sizeof(typename std::iterator_traits<iter_type>::
-                value_type) > 1)>(), std::true_type(),
-        typename std::iterator_traits<iter_type>::iterator_category());
+        std::integral_constant<bool, (sizeof(value_type) > 1)>(),
+        std::true_type(), cat());
 }
 }
 

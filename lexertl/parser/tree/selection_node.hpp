@@ -23,7 +23,7 @@ public:
     using node_stack = typename node::node_stack;
     using node_type = typename node::node_type;
 
-    basic_selection_node(node *left_, node *right_) :
+    basic_selection_node(observer_ptr<node> left_, observer_ptr<node> right_) :
         node(left_->nullable() || right_->nullable()),
         _left(left_),
         _right(right_)
@@ -65,9 +65,8 @@ public:
     }
 
 private:
-    // Not owner of these pointers...
-    node *_left;
-    node *_right;
+    observer_ptr<node> _left;
+    observer_ptr<node> _right;
 
     virtual void copy_node(node_ptr_vector &node_ptr_vector_,
         node_stack &new_node_stack_, bool_stack &perform_op_stack_,
@@ -75,11 +74,11 @@ private:
     {
         if (perform_op_stack_.top())
         {
-            node *rhs_ = new_node_stack_.top();
+            observer_ptr<node> rhs_ = new_node_stack_.top();
 
             new_node_stack_.pop();
 
-            node *lhs_ = new_node_stack_.top();
+            observer_ptr<node> lhs_ = new_node_stack_.top();
 
             node_ptr_vector_.emplace_back
                 (std::make_unique<basic_selection_node>(lhs_, rhs_));

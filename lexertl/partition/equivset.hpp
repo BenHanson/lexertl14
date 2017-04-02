@@ -19,9 +19,8 @@ struct basic_equivset
 {
     using index_set = std::set<id_type>;
     using index_vector = std::vector<id_type>;
-    // Not owner of nodes:
     using node = basic_node<id_type>;
-    using node_vector = std::vector<node *>;
+    using node_vector = std::vector<observer_ptr<node>>;
 
     index_vector _index_vector;
     id_type _id;
@@ -65,7 +64,7 @@ struct basic_equivset
             auto overlap_begin_ = overlap_._followpos.cbegin();
             auto overlap_end_ = overlap_._followpos.cend();
 
-            for (node *node_ : rhs_._followpos)
+            for (observer_ptr<node> node_ : rhs_._followpos)
             {
                 if (std::find(overlap_begin_, overlap_end_, node_) ==
                     overlap_end_)

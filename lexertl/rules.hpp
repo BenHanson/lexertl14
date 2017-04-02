@@ -10,6 +10,7 @@
 #include <locale>
 #include <map>
 #include "narrow.hpp"
+#include "observer_ptr.hpp"
 #include "parser/tokeniser/re_tokeniser.hpp"
 #include "runtime_error.hpp"
 #include <set>
@@ -457,7 +458,7 @@ private:
 
         do
         {
-            token *lhs_ = &tokens_.back();
+            observer_ptr<token> lhs_ = &tokens_.back();
             token rhs_;
 
             tokeniser::next(*lhs_, state_, rhs_);
