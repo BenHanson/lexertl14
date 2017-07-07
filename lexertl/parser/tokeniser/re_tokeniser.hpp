@@ -204,6 +204,7 @@ public:
                         if (state_._flags & dot_not_newline)
                         {
                             token_._str.insert(range('\n', '\n'));
+                            token_._str.insert(range('\r', '\r'));
                         }
 
                         token_._str.negate();
