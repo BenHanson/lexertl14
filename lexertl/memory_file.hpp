@@ -30,9 +30,11 @@ public:
     basic_memory_file() :
         _data(nullptr),
         _size(0),
-        _fh(0),
 #ifdef _WIN32
+        _fh(0),
         _fmh(0)
+#else
+        _fh(0)
 #endif
     {
     }
@@ -40,9 +42,11 @@ public:
     basic_memory_file(const char *pathname_) :
         _data(nullptr),
         _size(0),
-        _fh(0),
 #ifdef _WIN32
+        _fh(0),
         _fmh(0)
+#else
+        _fh(0)
 #endif
     {
         open(pathname_);
