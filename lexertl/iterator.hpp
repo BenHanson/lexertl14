@@ -111,29 +111,25 @@ private:
 };
 
 using siterator =
-    iterator<std::string::const_iterator, lexertl::state_machine, smatch>;
-using citerator = iterator<const char *, lexertl::state_machine, cmatch>;
+    iterator<std::string::const_iterator, state_machine, smatch>;
+using citerator = iterator<const char *, state_machine, cmatch>;
 using wsiterator =
-    iterator<std::wstring::const_iterator, lexertl::wstate_machine, wsmatch>;
-using wciterator = iterator<const wchar_t *, lexertl::wstate_machine, wcmatch>;
-using u32siterator =
-    iterator<std::u32string::const_iterator,
-        lexertl::u32state_machine, u32smatch>;
-using u32citerator =
-    iterator<const char32_t *, lexertl::u32state_machine, u32cmatch>;
+    iterator<std::wstring::const_iterator, wstate_machine, wsmatch>;
+using wciterator = iterator<const wchar_t *, wstate_machine, wcmatch>;
+using u32siterator = iterator<std::u32string::const_iterator,
+    u32state_machine, u32smatch>;
+using u32citerator = iterator<const char32_t *, u32state_machine, u32cmatch>;
 
 using sriterator =
-    iterator<std::string::const_iterator, lexertl::state_machine, srmatch>;
-using criterator = iterator<const char *, lexertl::state_machine, crmatch>;
+    iterator<std::string::const_iterator, state_machine, srmatch>;
+using criterator = iterator<const char *, state_machine, crmatch>;
 using wsriterator =
-    iterator<std::wstring::const_iterator, lexertl::wstate_machine, wsrmatch>;
+    iterator<std::wstring::const_iterator, wstate_machine, wsrmatch>;
 using wcriterator =
-    iterator<const wchar_t *, lexertl::wstate_machine, wcrmatch>;
-using u32sriterator =
-    iterator<std::u32string::const_iterator,
-        lexertl::u32state_machine, u32srmatch>;
-using u32criterator =
-    iterator<const char32_t *, lexertl::u32state_machine, u32crmatch>;
+    iterator<const wchar_t *, wstate_machine, wcrmatch>;
+using u32sriterator = iterator<std::u32string::const_iterator,
+    u32state_machine, u32srmatch>;
+using u32criterator = iterator<const char32_t *, u32state_machine, u32crmatch>;
 }
 
 #endif

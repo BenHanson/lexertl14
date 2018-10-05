@@ -25,8 +25,8 @@ class basic_dot
 {
 public:
     using char_state_machine =
-        lexertl::basic_char_state_machine<char_type, id_type, is_dfa>;
-    using rules = lexertl::basic_rules<char_type, char_type, id_type>;
+        basic_char_state_machine<char_type, id_type, is_dfa>;
+    using rules = basic_rules<char_type, char_type, id_type>;
     using ostream = std::basic_ostream<char_type>;
     using string = std::basic_string<char_type>;
 

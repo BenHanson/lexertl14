@@ -10,6 +10,7 @@
 #include <cstring>
 #include "internals.hpp"
 #include <map>
+#include "observer_ptr.hpp"
 #include <set>
 #include "sm_traits.hpp"
 #include "string_token.hpp"
