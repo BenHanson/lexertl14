@@ -60,6 +60,12 @@ public:
         return _followpos;
     }
 
+    virtual node_vector &followpos() override
+    {
+        // _followpos is always empty..!
+        return _followpos;
+    }
+
     virtual bool end_state() const override
     {
         return true;
