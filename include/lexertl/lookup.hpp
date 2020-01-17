@@ -374,10 +374,9 @@ void next(const sm_type &sm_, results &results_,
     using id_type = typename sm_type::id_type;
     const auto &internals_ = sm_.data();
     auto end_token_ = results_.second;
-
-skip:
     auto curr_ = results_.second;
 
+skip:
     results_.first = curr_;
 
 again:
@@ -403,7 +402,6 @@ again:
             const id_type state_ = lu_state_.next_char(prev_char_,
                 compressed_);
 
-            ++curr_;
             lu_state_.bol(prev_char_,
                 std::integral_constant<bool, (flags & bol_bit) != 0>());
 
@@ -413,6 +411,8 @@ again:
                     std::integral_constant<bool, (flags & eol_bit) != 0>());
                 break;
             }
+
+            ++curr_;
         }
 
         lu_state_.end_state(end_token_, curr_);

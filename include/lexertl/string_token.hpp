@@ -284,12 +284,12 @@ struct basic_string_token
         }
     }
 
-    void remove(basic_string_token &rhs_)
+    void remove(const basic_string_token &rhs_)
     {
         auto lhs_iter_ = _ranges.begin();
         auto lhs_end_ = _ranges.end();
-        auto rhs_iter_ = rhs_._ranges.begin();
-        auto rhs_end_ = rhs_._ranges.end();
+        auto rhs_iter_ = rhs_._ranges.cbegin();
+        auto rhs_end_ = rhs_._ranges.cend();
 
         while (lhs_iter_ != lhs_end_ && rhs_iter_ != rhs_end_)
         {
