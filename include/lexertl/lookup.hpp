@@ -374,9 +374,9 @@ void next(const sm_type &sm_, results &results_,
     using id_type = typename sm_type::id_type;
     const auto &internals_ = sm_.data();
     auto end_token_ = results_.second;
+skip:
     auto curr_ = results_.second;
 
-skip:
     results_.first = curr_;
 
 again:

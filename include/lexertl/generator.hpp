@@ -60,13 +60,14 @@ public:
                 // Map of regex charset tokens (strings) to index
                 charset_map charset_map_;
                 // Used to fix up $ and \n clashes.
+                id_type cr_id_ = sm_traits::npos();
                 id_type nl_id_ = sm_traits::npos();
                 // Regex syntax tree
                 observer_ptr<node> root_ = build_tree(rules_, index_,
-                    node_ptr_vector_, charset_map_, nl_id_);
+                    node_ptr_vector_, charset_map_, cr_id_, nl_id_);
 
                 build_dfa(charset_map_, root_, internals_, temp_sm_, index_,
-                    nl_id_);
+                    cr_id_, nl_id_);
 
                 if (internals_._dfa[index_].size() /
                     internals_._dfa_alphabet[index_] >= sm_traits::npos())
@@ -86,7 +87,7 @@ public:
 
     static observer_ptr<node> build_tree(const rules &rules_,
         const std::size_t dfa_, node_ptr_vector &node_ptr_vector_,
-        charset_map &charset_map_, id_type &nl_id_)
+        charset_map &charset_map_, id_type &cr_id_, id_type &nl_id_)
     {
         parser parser_(rules_.locale(), node_ptr_vector_, charset_map_,
             rules_.eoi());
@@ -108,7 +109,7 @@ public:
 
         root_ = parser_.parse(*regex_iter_, *id_iter_, *user_id_iter_,
             *next_dfa_iter_, *push_dfa_iter_, *pop_dfa_iter_,
-            rules_.flags(), nl_id_, seen_bol_);
+            rules_.flags(), cr_id_, nl_id_, seen_bol_);
         ++regex_iter_;
         ++id_iter_;
         ++user_id_iter_;
@@ -121,7 +122,7 @@ public:
         {
             observer_ptr<node> rhs_ = parser_.parse(*regex_iter_, *id_iter_,
                 *user_id_iter_, *next_dfa_iter_, *push_dfa_iter_,
-                *pop_dfa_iter_, rules_.flags(), nl_id_,
+                *pop_dfa_iter_, rules_.flags(), cr_id_, nl_id_,
                 (rules_.features()[dfa_] & bol_bit) != 0);
 
             node_ptr_vector_.emplace_back
@@ -165,7 +166,7 @@ protected:
 
     static void build_dfa(const charset_map &charset_map_,
         const observer_ptr<node> root_, internals &internals_, sm &sm_,
-        const id_type dfa_index_, id_type &nl_id_)
+        const id_type dfa_index_, id_type &cr_id_, id_type &nl_id_)
     {
         // partitioned charset list
         charset_list charset_list_;
@@ -185,16 +186,25 @@ protected:
         build_set_mapping(charset_list_, internals_, dfa_index_,
             set_mapping_);
 
-        if (nl_id_ != sm_traits::npos())
+        if (cr_id_ != sm_traits::npos() || nl_id_ != sm_traits::npos())
         {
-            nl_id_ = *set_mapping_[nl_id_].begin();
+            if (cr_id_ != sm_traits::npos())
+            {
+                cr_id_ = *set_mapping_[cr_id_].begin();
+            }
+
+            if (nl_id_ != sm_traits::npos())
+            {
+                nl_id_ = *set_mapping_[nl_id_].begin();
+            }
+
             zero_id_ = sm_traits::compressed ?
                 *set_mapping_[charset_map_.find(string_token(0, 0))->
                 second].begin() : sm_traits::npos();
         }
 
         dfa_alphabet_ = charset_list_.size() + transitions_index +
-            (nl_id_ == sm_traits::npos() ? 0 : 1);
+            (cr_id_ == sm_traits::npos() && nl_id_ == sm_traits::npos() ? 0 : 1);
 
         if (dfa_alphabet_ > sm_traits::npos())
         {
@@ -240,7 +250,7 @@ protected:
             }
         }
 
-        fix_clashes(eol_set_, nl_id_, zero_id_, dfa_, dfa_alphabet_,
+        fix_clashes(eol_set_, cr_id_, nl_id_, zero_id_, dfa_, dfa_alphabet_,
             compressed());
         append_dfa(charset_list_, internals_, sm_, dfa_index_, lookup());
     }
@@ -274,7 +284,7 @@ protected:
 
     // Uncompressed
     static void fix_clashes(const id_type_set &eol_set_,
-        const id_type nl_id_, const id_type /*zero_id_*/,
+        const id_type cr_id_, const id_type nl_id_, const id_type /*zero_id_*/,
         typename internals::id_type_vector &dfa_,
         const std::size_t dfa_alphabet_, const std::false_type &)
     {
@@ -282,7 +292,19 @@ protected:
         {
             observer_ptr<id_type> ptr_ = &dfa_.front() + eol_ * dfa_alphabet_;
             const id_type eol_state_ = ptr_[eol_index];
+            const id_type cr_state_ = ptr_[cr_id_ + transitions_index];
             const id_type nl_state_ = ptr_[nl_id_ + transitions_index];
+
+            if (cr_state_)
+            {
+                ptr_[transitions_index + cr_id_] = 0;
+                ptr_ = &dfa_.front() + eol_state_ * dfa_alphabet_;
+
+                if (ptr_[transitions_index + cr_id_] == 0)
+                {
+                    ptr_[transitions_index + cr_id_] = cr_state_;
+                }
+            }
 
             if (nl_state_)
             {
@@ -299,7 +321,7 @@ protected:
 
     // Compressed
     static void fix_clashes(const id_type_set &eol_set_,
-        const id_type nl_id_, const id_type zero_id_,
+        const id_type cr_id_, const id_type nl_id_, const id_type zero_id_,
         typename internals::id_type_vector &dfa_,
         const std::size_t dfa_alphabet_, const std::true_type &)
     {
@@ -309,12 +331,37 @@ protected:
         {
             observer_ptr<id_type> ptr_ = &dfa_.front() + eol_ * dfa_alphabet_;
             const id_type eol_state_ = ptr_[eol_index];
+            id_type cr_state_ = 0;
             id_type nl_state_ = 0;
 
             for (; i_ < (sm_traits::char_24_bit ? 2 : 1); ++i_)
             {
                 ptr_ = &dfa_.front() + ptr_[transitions_index + zero_id_] *
                     dfa_alphabet_;
+            }
+
+            cr_state_ = ptr_[transitions_index + cr_id_];
+
+            if (cr_state_)
+            {
+                ptr_ = &dfa_.front() + eol_state_ * dfa_alphabet_;
+
+                if (ptr_[transitions_index + zero_id_] != 0) continue;
+
+                ptr_[transitions_index + zero_id_] =
+                    static_cast<id_type>(dfa_.size() / dfa_alphabet_);
+                dfa_.resize(dfa_.size() + dfa_alphabet_, 0);
+
+                for (i_ = 0; i_ < (sm_traits::char_24_bit ? 1 : 0); ++i_)
+                {
+                    ptr_ = &dfa_.front() + dfa_.size() - dfa_alphabet_;
+                    ptr_[transitions_index + zero_id_] =
+                        static_cast<id_type>(dfa_.size() / dfa_alphabet_);
+                    dfa_.resize(dfa_.size() + dfa_alphabet_, 0);
+                }
+
+                ptr_ = &dfa_.front() + dfa_.size() - dfa_alphabet_;
+                ptr_[transitions_index + cr_id_] = cr_state_;
             }
 
             nl_state_ = ptr_[transitions_index + nl_id_];

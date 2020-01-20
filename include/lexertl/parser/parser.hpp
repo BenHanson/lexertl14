@@ -87,7 +87,8 @@ public:
     observer_ptr<node> parse(const token_vector &regex_, const id_type id_,
         const id_type user_id_, const id_type next_dfa_,
         const id_type push_dfa_, const bool pop_dfa_,
-        const std::size_t flags_, id_type &nl_id_, const bool seen_bol_)
+        const std::size_t flags_, id_type &cr_id_, id_type &nl_id_,
+        const bool seen_bol_)
     {
         auto iter_ = regex_.cbegin();
         auto end_ = regex_.cend();
@@ -118,7 +119,7 @@ public:
 
                     break;
                 case '>':
-                    reduce(nl_id_);
+                    reduce(cr_id_, nl_id_);
                     break;
                 default:
                 {
@@ -208,7 +209,7 @@ private:
     token_stack _token_stack;
     tree_node_stack _tree_node_stack;
 
-    void reduce(id_type &nl_id_)
+    void reduce(id_type &cr_id_, id_type &nl_id_)
     {
         observer_ptr<token> lhs_ = nullptr;
         observer_ptr<token> rhs_ = nullptr;
@@ -258,7 +259,7 @@ private:
             bol(handle_);
             break;
         case EOL:
-            eol(handle_, nl_id_);
+            eol(handle_, cr_id_, nl_id_);
             break;
         case CHARSET:
             charset(handle_, compressed());
@@ -380,16 +381,23 @@ private:
     }
 
 #ifndef NDEBUG
-    void eol(token_stack &handle_, id_type &nl_id_)
+    void eol(token_stack &handle_, id_type &cr_id_, id_type &nl_id_)
 #else
-    void eol(token_stack &, id_type &nl_id_)
+    void eol(token_stack &, id_type &cr_id_, id_type &nl_id_)
 #endif
     {
+        const string_token cr_('\r');
         const string_token nl_('\n');
+        const id_type temp_cr_id_ = lookup(cr_);
         const id_type temp_nl_id_ = lookup(nl_);
 
         assert(handle_.top()->_type == EOL &&
             handle_.size() == 1);
+
+        if (temp_cr_id_ != sm_traits::npos())
+        {
+            cr_id_ = temp_cr_id_;
+        }
 
         if (temp_nl_id_ != sm_traits::npos())
         {
