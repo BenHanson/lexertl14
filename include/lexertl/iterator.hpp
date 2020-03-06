@@ -17,6 +17,7 @@ template<typename iter, typename sm_type, typename results>
 class iterator
 {
 public:
+    using id_type = typename results::id_type;
     using value_type = results;
     using difference_type = ptrdiff_t;
     using pointer = const value_type *;
@@ -29,8 +30,9 @@ public:
     {
     }
 
-    iterator(const iter &start_, const iter &end_, const sm_type &sm_) :
-        _results(start_, end_),
+    iterator(const iter &start_, const iter &end_, const sm_type &sm_,
+        const bool bol_ = true, const id_type state_ = 0) :
+        _results(start_, end_, bol_, state_),
         _sm(&sm_)
     {
         lookup();

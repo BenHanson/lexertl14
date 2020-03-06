@@ -14,11 +14,12 @@
 
 namespace lexertl
 {
-template<typename iter, typename id_type = uint16_t,
+template<typename iter, typename id_t = uint16_t,
     std::size_t flags = bol_bit | eol_bit | skip_bit | again_bit |
         multi_state_bit | advance_bit>
 struct match_results
 {
+    using id_type = id_t;
     using iter_type = iter;
     using char_type = typename std::iterator_traits<iter_type>::value_type;
     using index_type = typename basic_char_traits<char_type>::index_type;
@@ -43,14 +44,15 @@ struct match_results
     {
     }
 
-    match_results(const iter_type &start_, const iter_type &end_) :
+    match_results(const iter_type &start_, const iter_type &end_,
+        const bool bol_ = true, id_type state_ = 0) :
         id(0),
         user_id(npos()),
         first(start_),
         second(start_),
         eoi(end_),
-        bol(true),
-        state(0)
+        bol(bol_),
+        state(state_)
     {
     }
 
