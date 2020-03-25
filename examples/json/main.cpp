@@ -88,7 +88,7 @@ int main()
                 std::cout << std::string(utf_out_iter(results.first, results.second),
                     utf_out_iter(results.second, results.second));
             }
-            
+
             std::cout << " state = " << results.state << '\n';
             lexertl::lookup(sm, results);
         }

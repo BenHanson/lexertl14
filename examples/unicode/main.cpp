@@ -42,7 +42,7 @@ void lex_unicode_data()
         if (results_.id == eNumber)
         {
             std::stringstream ss_;
-            
+
             ss_ << results_.str();
             ss_ >> std::hex >> num_;
         }
