@@ -1,7 +1,7 @@
-#include <lexertl/generator.hpp>
-#include <lexertl/lookup.hpp>
-#include <lexertl/memory_file.hpp>
-#include <lexertl/utf_iterators.hpp>
+#include <include/lexertl/generator.hpp>
+#include <include/lexertl/lookup.hpp>
+#include <include/lexertl/memory_file.hpp>
+#include <include/lexertl/utf_iterators.hpp>
 
 int main()
 {

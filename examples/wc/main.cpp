@@ -1,7 +1,7 @@
 //#include <lexertl/debug.hpp>
-#include <lexertl/generator.hpp>
-#include <lexertl/lookup.hpp>
-#include <lexertl/memory_file.hpp>
+#include <include/lexertl/generator.hpp>
+#include <include/lexertl/lookup.hpp>
+#include <include/lexertl/memory_file.hpp>
 
 int main(int argc, char *argv[])
 {

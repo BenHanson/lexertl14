@@ -1,10 +1,10 @@
 #include <fstream>
-#include <lexertl/generator.hpp>
+#include <include/lexertl/generator.hpp>
 #include <iomanip>
-#include <lexertl/lookup.hpp>
-#include <lexertl/memory_file.hpp>
-#include <lexertl/stream_shared_iterator.hpp>
-#include <lexertl/utf_iterators.hpp>
+#include <include/lexertl/lookup.hpp>
+#include <include/lexertl/memory_file.hpp>
+#include <include/lexertl/stream_shared_iterator.hpp>
+#include <include/lexertl/utf_iterators.hpp>
 
 #ifdef WIN32
 #include <windows.h>
@@ -316,9 +316,9 @@ void test_unicode()
         lexertl::lookup(sm_, results_);
 
 #ifdef WIN32
-        str_.assign(lexertl::basic_utf16_out_iterator<const int *>
+        str_.assign(lexertl::basic_utf16_out_iterator<const int *, wchar_t>
             (results_.first, results_.second),
-            lexertl::basic_utf16_out_iterator<const int *>
+            lexertl::basic_utf16_out_iterator<const int *, wchar_t>
             (results_.second, results_.second));
         std::wcout << L"Id: " << results_.id << L", Token: '";
         ::WriteConsoleW(hStdOut, str_.c_str(), str_.size(), &dwBytesWritten, 0);

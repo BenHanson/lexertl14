@@ -1,5 +1,5 @@
-#include <lexertl/generator.hpp>
-#include <lexertl/lookup.hpp>
+#include <include/lexertl/generator.hpp>
+#include <include/lexertl/lookup.hpp>
 
 int main(int /*argc*/, char ** /*argv*/)
 {
