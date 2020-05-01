@@ -45,7 +45,7 @@ namespace lexertl
         }
 
         match_results(const iter_type& start_, const iter_type& end_,
-            const bool bol_ = true, id_type state_ = 0) :
+            const bool bol_ = true, const id_type state_ = 0) :
             id(0),
             user_id(npos()),
             first(start_),
@@ -129,8 +129,9 @@ namespace lexertl
         {
         }
 
-        recursive_match_results(const iter& start_, const iter& end_) :
-            match_results<iter, id_type, flags>(start_, end_),
+        recursive_match_results(const iter& start_, const iter& end_,
+            const bool bol_ = true, const id_type state_ = 0) :
+            match_results<iter, id_type, flags>(start_, end_, bol_, state_),
             stack()
         {
         }
