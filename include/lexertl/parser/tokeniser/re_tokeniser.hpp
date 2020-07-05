@@ -444,7 +444,7 @@ namespace lexertl
                 if (str_)
                 {
                     char_state state2_(str_ + 1, str_ + str_len_, state_._id,
-                        state_._flags, state_._locale, 0);
+                        state_._flags, state_._locale, nullptr);
 
                     tokeniser_helper::charset(state2_, token_);
                 }

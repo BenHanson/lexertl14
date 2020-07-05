@@ -56,9 +56,7 @@ namespace lexertl
         {
         }
 
-        virtual ~match_results()
-        {
-        }
+        virtual ~match_results() = default;
 
         string str() const
         {

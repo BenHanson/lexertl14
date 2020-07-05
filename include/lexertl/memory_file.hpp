@@ -36,6 +36,11 @@ namespace lexertl
             open(pathname_);
         }
 
+        // No copy construction.
+        basic_memory_file(const basic_memory_file&) = delete;
+        // No assignment.
+        basic_memory_file& operator =(const basic_memory_file&) = delete;
+
         ~basic_memory_file()
         {
             close();
@@ -43,24 +48,31 @@ namespace lexertl
 
         void open(const char* pathname_)
         {
-            if (_data) close();
+            if (_data)
+            {
+                close();
+            }
 
 #ifdef _WIN32
-            _fh = ::CreateFileA(pathname_, GENERIC_READ, FILE_SHARE_READ, 0,
-                OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-            _fmh = 0;
+            _fh = ::CreateFileA(pathname_, GENERIC_READ, FILE_SHARE_READ,
+                nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+            _fmh = nullptr;
 
             if (_fh != INVALID_HANDLE_VALUE)
             {
-                _fmh = ::CreateFileMapping(_fh, 0, PAGE_READONLY, 0, 0, 0);
+                _fmh = ::CreateFileMapping(_fh, nullptr, PAGE_READONLY, 0, 0,
+                    nullptr);
 
-                if (_fmh != 0)
+                if (_fmh != nullptr)
                 {
                     _data = static_cast<char_type*>(::MapViewOfFile
                     (_fmh, FILE_MAP_READ, 0, 0, 0));
 
                     if (_data)
-                        _size = ::GetFileSize(_fh, 0) / sizeof(char_type);
+                    {
+                        _size = ::GetFileSize(_fh, nullptr) /
+                            sizeof(char_type);
+                    }
                 }
             }
 #else
@@ -113,9 +125,9 @@ namespace lexertl
 #endif
                 _data = nullptr;
                 _size = 0;
-                _fh = 0;
+                _fh = nullptr;
 #ifdef _WIN32
-                _fmh = 0;
+                _fmh = nullptr;
 #endif
             }
         }
@@ -124,16 +136,11 @@ namespace lexertl
         const char_type* _data = nullptr;
         std::size_t _size = 0;
 #ifdef _WIN32
-        HANDLE _fh = 0;
-        HANDLE _fmh = 0;
+        HANDLE _fh = nullptr;
+        HANDLE _fmh = nullptr;
 #else
         int _fh = 0;
 #endif
-
-        // No copy construction.
-        basic_memory_file(const basic_memory_file&) = delete;
-        // No assignment.
-        basic_memory_file& operator =(const basic_memory_file&) = delete;
     };
 
     using memory_file = basic_memory_file<char>;

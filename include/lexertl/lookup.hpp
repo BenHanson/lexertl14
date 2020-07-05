@@ -6,7 +6,7 @@
 #ifndef LEXERTL_LOOKUP_HPP
 #define LEXERTL_LOOKUP_HPP
 
-#include <assert.h>
+#include <cassert>
 #include "match_results.hpp"
 #include <type_traits>
 

@@ -101,7 +101,7 @@ namespace lexertl
                 bool&/*down_*/) const override
             {
                 node_ptr_vector_.emplace_back(std::make_unique<basic_leaf_node>
-                (_token, _greedy));
+                    (_token, _greedy));
                 new_node_stack_.push(node_ptr_vector_.back().get());
             }
         };

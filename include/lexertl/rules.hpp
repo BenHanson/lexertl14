@@ -277,7 +277,7 @@ namespace lexertl
         {
             check_for_invalid_id(id_);
             _regexes.front().push_back(token_vector());
-            tokenise(regex_, _regexes.front().back(), id_, 0);
+            tokenise(regex_, _regexes.front().back(), id_, nullptr);
 
             if (_regexes.front().back()[1]._type == detail::BOL)
             {
@@ -486,7 +486,7 @@ namespace lexertl
                         "' preceding index " << state_.index() <<
                         " in ";
 
-                    if (name_ != 0)
+                    if (name_ != nullptr)
                     {
                         ss_ << "macro ";
                         narrow(name_, ss_);
@@ -545,7 +545,7 @@ namespace lexertl
                                     "follow {-} or {+} at index " <<
                                     state_.index() - 1 << " in ";
 
-                                if (name_ != 0)
+                                if (name_ != nullptr)
                                 {
                                     ss_ << "macro ";
                                     narrow(name_, ss_);
@@ -635,7 +635,7 @@ namespace lexertl
                             ss_ << "Single CHARSET must precede {-} or {+} at "
                                 "index " << state_.index() - 1 << " in ";
 
-                            if (name_ != 0)
+                            if (name_ != nullptr)
                             {
                                 ss_ << "macro ";
                                 narrow(name_, ss_);
@@ -671,7 +671,7 @@ namespace lexertl
                         ss_ << "CHARSET must follow {-} or {+} at index " <<
                             state_.index() - 1 << " in ";
 
-                        if (name_ != 0)
+                        if (name_ != nullptr)
                         {
                             ss_ << "macro ";
                             narrow(name_, ss_);
@@ -697,7 +697,7 @@ namespace lexertl
                             ss_ << "Empty charset created by {-} at index " <<
                                 state_.index() - 1 << " in ";
 
-                            if (name_ != 0)
+                            if (name_ != nullptr)
                             {
                                 ss_ << "macro ";
                                 narrow(name_, ss_);
@@ -727,7 +727,7 @@ namespace lexertl
 
                 ss_ << "Empty regex in ";
 
-                if (name_ != 0)
+                if (name_ != nullptr)
                 {
                     ss_ << "macro ";
                     narrow(name_, ss_);

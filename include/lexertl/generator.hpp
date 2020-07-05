@@ -229,7 +229,7 @@ namespace lexertl
                 equivset_list equiv_list_;
 
                 // Intersect charsets
-                build_equiv_list(*seen_vectors_[index_].get(), set_mapping_,
+                build_equiv_list(*seen_vectors_[index_], set_mapping_,
                     equiv_list_, is_dfa());
 
                 for (auto& equivset_ : equiv_list_)
@@ -523,7 +523,7 @@ namespace lexertl
             for (const auto& pair_ : map_)
             {
                 list_.emplace_back(std::make_unique<charset>
-                (pair_.first, pair_.second));
+                    (pair_.first, pair_.second));
             }
         }
 
@@ -600,8 +600,7 @@ namespace lexertl
             for (observer_ptr<node> node_ : followpos_)
             {
                 closure_ex(node_, end_state_, id_, user_id_, next_dfa_,
-                    push_dfa_, pop_dfa_, *set_ptr_.get(),
-                    *vector_ptr_.get(), hash_);
+                    push_dfa_, pop_dfa_, *set_ptr_, *vector_ptr_, hash_);
             }
 
             bool found_ = false;
@@ -773,8 +772,8 @@ namespace lexertl
                         else
                         {
                             list_.emplace_back(std::make_unique<equivset>
-                            (set_mapping_[token_], token_, node_->greedy(),
-                                node_->followpos()));
+                                (set_mapping_[token_], token_, node_->greedy(),
+                                    node_->followpos()));
                         }
                     }
                 }

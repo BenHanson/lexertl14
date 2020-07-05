@@ -6,7 +6,7 @@
 #ifndef LEXERTL_PARSER_HPP
 #define LEXERTL_PARSER_HPP
 
-#include <assert.h>
+#include <cassert>
 #include <algorithm>
 #include "tree/end_node.hpp"
 #include "tree/iteration_node.hpp"
@@ -153,12 +153,12 @@ namespace lexertl
 
                 _tree_node_stack.pop();
                 _node_ptr_vector.emplace_back(std::make_unique<end_node>
-                (id_, user_id_, next_dfa_, push_dfa_, pop_dfa_));
+                    (id_, user_id_, next_dfa_, push_dfa_, pop_dfa_));
 
                 observer_ptr<node> rhs_node_ = _node_ptr_vector.back().get();
 
                 _node_ptr_vector.emplace_back(std::make_unique<sequence_node>
-                (lhs_node_, rhs_node_));
+                    (lhs_node_, rhs_node_));
                 root_ = _node_ptr_vector.back().get();
 
                 if (seen_bol_)
@@ -302,7 +302,7 @@ namespace lexertl
             void orexp(token_stack& handle_)
             {
                 assert(handle_.top()->_type == OREXP &&
-                (handle_.size() == 1 || handle_.size() == 3));
+                    (handle_.size() == 1 || handle_.size() == 3));
 
                 if (handle_.size() == 1)
                 {
@@ -787,7 +787,7 @@ namespace lexertl
                 }
 
                 _node_ptr_vector.emplace_back(std::make_unique<leaf_node>
-                (node::null_token(), greedy_));
+                    (node::null_token(), greedy_));
 
                 observer_ptr<node> rhs_ = _node_ptr_vector.back().get();
 
@@ -813,7 +813,7 @@ namespace lexertl
                 observer_ptr<node> copy_ = lhs_->copy(_node_ptr_vector);
 
                 _node_ptr_vector.emplace_back(std::make_unique<iteration_node>
-                (copy_, greedy_));
+                    (copy_, greedy_));
 
                 observer_ptr<node> rhs_ = _node_ptr_vector.back().get();
 
