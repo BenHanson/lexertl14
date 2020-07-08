@@ -59,7 +59,7 @@ namespace lexertl
 
             virtual node_type what_type() const override
             {
-                return node::SEQUENCE;
+                return node::node_type::SEQUENCE;
             }
 
             virtual bool traverse(const_node_stack& node_stack_,
@@ -69,9 +69,9 @@ namespace lexertl
 
                 switch (_right->what_type())
                 {
-                case node::SEQUENCE:
-                case node::SELECTION:
-                case node::ITERATION:
+                case node::node_type::SEQUENCE:
+                case node::node_type::SELECTION:
+                case node::node_type::ITERATION:
                     perform_op_stack_.push(false);
                     break;
                 default:

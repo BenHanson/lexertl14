@@ -1,4 +1,4 @@
-//#include <lexertl/debug.hpp>
+//#include <include/lexertl/debug.hpp>
 #include <include/lexertl/generator.hpp>
 #include <include/lexertl/lookup.hpp>
 #include <include/lexertl/memory_file.hpp>

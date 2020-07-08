@@ -52,7 +52,7 @@ namespace lexertl
 
             virtual node_type what_type() const override
             {
-                return node::LEAF;
+                return node::node_type::LEAF;
             }
 
             virtual bool traverse(const_node_stack&/*node_stack_*/,

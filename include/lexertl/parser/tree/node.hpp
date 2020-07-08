@@ -21,7 +21,7 @@ namespace lexertl
         class basic_node
         {
         public:
-            enum node_type { LEAF, SEQUENCE, SELECTION, ITERATION, END };
+            enum class node_type { LEAF, SEQUENCE, SELECTION, ITERATION, END };
 
             using bool_stack = std::stack<bool>;
             using node_stack = std::stack<observer_ptr<basic_node>>;
