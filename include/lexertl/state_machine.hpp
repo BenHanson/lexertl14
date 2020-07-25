@@ -215,7 +215,7 @@ namespace lexertl
             using string_token = basic_string_token<char_type>;
             using id_type_string_token_map = std::map<id_type, string_token>;
             using id_type_string_token_pair = std::pair<id_type, string_token>;
-            enum push_pop_dfa { neither, push_dfa, pop_dfa };
+            enum class push_pop_dfa { neither, push_dfa, pop_dfa };
 
             bool _end_state;
             push_pop_dfa _push_pop_dfa;
@@ -228,7 +228,7 @@ namespace lexertl
 
             state() :
                 _end_state(false),
-                _push_pop_dfa(neither),
+                _push_pop_dfa(push_pop_dfa::neither),
                 _id(0),
                 _user_id(traits::npos()),
                 _push_dfa(traits::npos()),
@@ -324,11 +324,11 @@ namespace lexertl
 
                 if (ptr_[push_dfa_index] != npos())
                 {
-                    state_._push_pop_dfa = state::push_dfa;
+                    state_._push_pop_dfa = state::push_pop_dfa::push_dfa;
                 }
                 else if (ptr_[end_state_index] & pop_dfa_bit)
                 {
-                    state_._push_pop_dfa = state::pop_dfa;
+                    state_._push_pop_dfa = state::push_pop_dfa::pop_dfa;
                 }
 
                 state_._id = ptr_[id_index];

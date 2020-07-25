@@ -80,7 +80,7 @@ namespace lexertl
                         throw runtime_error(ss_.str());
                     }
 
-                    token_._type = END;
+                    token_._type = token_type::END;
                 }
                 else
                 {
@@ -88,14 +88,14 @@ namespace lexertl
                     {
                         // Even if we are in a string,
                         // respect escape sequences...
-                        token_._type = CHARSET;
+                        token_._type = token_type::CHARSET;
                         escape(state_, token_._str);
                     }
                     else if (state_._in_string)
                     {
                         // All other meta characters lose their special meaning
                         // inside a string.
-                        token_._type = CHARSET;
+                        token_._type = token_type::CHARSET;
                         add_char(ch_, state_, token_._str);
                     }
                     else
@@ -105,7 +105,7 @@ namespace lexertl
                         switch (ch_)
                         {
                         case '(':
-                            token_._type = OPENPAREN;
+                            token_._type = token_type::OPENPAREN;
                             ++state_._paren_count;
                             read_options(state_);
                             break;
@@ -122,7 +122,7 @@ namespace lexertl
                                 throw runtime_error(ss_.str());
                             }
 
-                            token_._type = CLOSEPAREN;
+                            token_._type = token_type::CLOSEPAREN;
 
                             if (!state_._flags_stack.empty())
                             {
@@ -134,36 +134,36 @@ namespace lexertl
                         case '?':
                             if (!state_.eos() && *state_._curr == '?')
                             {
-                                token_._type = AOPT;
+                                token_._type = token_type::AOPT;
                                 state_.increment();
                             }
                             else
                             {
-                                token_._type = OPT;
+                                token_._type = token_type::OPT;
                             }
 
                             break;
                         case '*':
                             if (!state_.eos() && *state_._curr == '?')
                             {
-                                token_._type = AZEROORMORE;
+                                token_._type = token_type::AZEROORMORE;
                                 state_.increment();
                             }
                             else
                             {
-                                token_._type = ZEROORMORE;
+                                token_._type = token_type::ZEROORMORE;
                             }
 
                             break;
                         case '+':
                             if (!state_.eos() && *state_._curr == '?')
                             {
-                                token_._type = AONEORMORE;
+                                token_._type = token_type::AONEORMORE;
                                 state_.increment();
                             }
                             else
                             {
-                                token_._type = ONEORMORE;
+                                token_._type = token_type::ONEORMORE;
                             }
 
                             break;
@@ -171,17 +171,17 @@ namespace lexertl
                             open_curly(lhs_, state_, token_);
                             break;
                         case '|':
-                            token_._type = OR;
+                            token_._type = token_type::OR;
                             break;
                         case '^':
                             if (!state_._macro_name &&
                                 state_._curr - 1 == state_._start)
                             {
-                                token_._type = BOL;
+                                token_._type = token_type::BOL;
                             }
                             else
                             {
-                                token_._type = CHARSET;
+                                token_._type = token_type::CHARSET;
                                 token_._str.insert(range(ch_, ch_));
                             }
 
@@ -190,18 +190,18 @@ namespace lexertl
                             if (!state_._macro_name && state_._curr ==
                                 state_._end)
                             {
-                                token_._type = EOL;
+                                token_._type = token_type::EOL;
                             }
                             else
                             {
-                                token_._type = CHARSET;
+                                token_._type = token_type::CHARSET;
                                 token_._str.insert(range(ch_, ch_));
                             }
 
                             break;
                         case '.':
                         {
-                            token_._type = CHARSET;
+                            token_._type = token_type::CHARSET;
 
                             if (state_._flags & dot_not_newline)
                             {
@@ -218,7 +218,7 @@ namespace lexertl
                         }
                         case '[':
                         {
-                            token_._type = CHARSET;
+                            token_._type = token_type::CHARSET;
                             tokeniser_helper::charset(state_, token_._str);
                             break;
                         }
@@ -232,7 +232,7 @@ namespace lexertl
                             break;
                         }
                         default:
-                            token_._type = CHARSET;
+                            token_._type = token_type::CHARSET;
                             add_char(ch_, state_, token_._str);
                             break;
                         }
@@ -493,7 +493,7 @@ namespace lexertl
                 {
                     rules_char_type ch_ = 0;
 
-                    if (lhs_._type != CHARSET)
+                    if (lhs_._type != token_type::CHARSET)
                     {
                         std::ostringstream ss_;
 
@@ -505,7 +505,7 @@ namespace lexertl
                     }
 
                     state_.next(ch_);
-                    token_._type = DIFF;
+                    token_._type = token_type::DIFF;
                     token_._extra = ch_;
 
                     if (state_.next(ch_))
@@ -558,7 +558,7 @@ namespace lexertl
                 while (!eos_ && ch_ >= '0' && ch_ <= '9')
                 {
                     min_ *= 10;
-                    min_ += ch_ - '0';
+                    min_ += static_cast<std::size_t>(ch_) - '0';
                     token_._extra += ch_;
                     eos_ = state_.next(ch_);
                 }
@@ -598,13 +598,13 @@ namespace lexertl
                         // Small optimisation: Check for '*' equivalency.
                         if (min_ == 0)
                         {
-                            token_._type = ZEROORMORE;
+                            token_._type = token_type::ZEROORMORE;
                             repeatn_ = false;
                         }
                         // Small optimisation: Check for '+' equivalency.
                         else if (min_ == 1)
                         {
-                            token_._type = ONEORMORE;
+                            token_._type = token_type::ONEORMORE;
                             repeatn_ = false;
                         }
                     }
@@ -625,7 +625,7 @@ namespace lexertl
                         do
                         {
                             max_ *= 10;
-                            max_ += ch_ - '0';
+                            max_ += static_cast<std::size_t>(ch_) - '0';
                             token_._extra += ch_;
                             eos_ = state_.next(ch_);
                         } while (!eos_ && ch_ >= '0' && ch_ <= '9');
@@ -644,7 +644,7 @@ namespace lexertl
                         // Small optimisation: Check for '?' equivalency.
                         if (min_ == 0 && max_ == 1)
                         {
-                            token_._type = OPT;
+                            token_._type = token_type::OPT;
                             repeatn_ = false;
                         }
                         // Small optimisation: if min == max, then min.
@@ -695,35 +695,35 @@ namespace lexertl
 
                     if (!state_.eos() && *state_._curr == '?')
                     {
-                        token_._type = AREPEATN;
+                        token_._type = token_type::AREPEATN;
                         state_.increment();
                     }
                     else
                     {
-                        token_._type = REPEATN;
+                        token_._type = token_type::REPEATN;
                     }
                 }
-                else if (token_._type == ZEROORMORE)
+                else if (token_._type == token_type::ZEROORMORE)
                 {
                     if (!state_.eos() && *state_._curr == '?')
                     {
-                        token_._type = AZEROORMORE;
+                        token_._type = token_type::AZEROORMORE;
                         state_.increment();
                     }
                 }
-                else if (token_._type == ONEORMORE)
+                else if (token_._type == token_type::ONEORMORE)
                 {
                     if (!state_.eos() && *state_._curr == '?')
                     {
-                        token_._type = AONEORMORE;
+                        token_._type = token_type::AONEORMORE;
                         state_.increment();
                     }
                 }
-                else if (token_._type == OPT)
+                else if (token_._type == token_type::OPT)
                 {
                     if (!state_.eos() && *state_._curr == '?')
                     {
-                        token_._type = AOPT;
+                        token_._type = token_type::AOPT;
                         state_.increment();
                     }
                 }
@@ -776,7 +776,7 @@ namespace lexertl
                     throw runtime_error(ss_.str());
                 }
 
-                token_._type = MACRO;
+                token_._type = token_type::MACRO;
             }
         };
     }

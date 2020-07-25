@@ -90,12 +90,14 @@ namespace lexertl
                 {
                     end_state(stream_);
 
-                    if (state_._push_pop_dfa == dfa_state::push_dfa)
+                    if (state_._push_pop_dfa ==
+                        dfa_state::push_pop_dfa::push_dfa)
                     {
                         push(stream_);
                         stream_ << state_._push_dfa;
                     }
-                    else if (state_._push_pop_dfa == dfa_state::pop_dfa)
+                    else if (state_._push_pop_dfa ==
+                        dfa_state::push_pop_dfa::pop_dfa)
                     {
                         pop(stream_);
                     }

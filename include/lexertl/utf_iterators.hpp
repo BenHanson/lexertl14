@@ -487,7 +487,7 @@ namespace lexertl
 
     private:
         char_iterator _it;
-        out_char _chars[2];
+        out_char _chars[2]{};
         unsigned char _count;
         unsigned char _index;
 

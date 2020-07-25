@@ -242,7 +242,8 @@ namespace lexertl
                     if (transition_ != sm_traits::npos())
                     {
                         observer_ptr<id_type> ptr_ = &dfa_.front() +
-                            ((static_cast<std::size_t>(index_) + 1) * dfa_alphabet_);
+                            ((static_cast<std::size_t>(index_) + 1) *
+                                dfa_alphabet_);
 
                         // Prune abstemious transitions from end states.
                         if (*ptr_ && !equivset_->_greedy) continue;

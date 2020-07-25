@@ -13,7 +13,7 @@ namespace lexertl
     namespace detail
     {
         // Note that tokens following END are never seen by parser.hpp.
-        enum token_type
+        enum class token_type
         {
             BEGIN, REGEX, OREXP, SEQUENCE, SUB, EXPRESSION, REPEAT,
             DUP, OR, CHARSET, BOL, EOL, MACRO, OPENPAREN, CLOSEPAREN, OPT, AOPT,
@@ -31,7 +31,7 @@ namespace lexertl
             string _extra;
             string_token _str;
 
-            basic_re_token(const token_type type_ = BEGIN) :
+            basic_re_token(const token_type type_ = token_type::BEGIN) :
                 _type(type_),
                 _extra(),
                 _str()
@@ -40,7 +40,7 @@ namespace lexertl
 
             void clear()
             {
-                _type = BEGIN;
+                _type = token_type::BEGIN;
                 _extra.clear();
                 _str.clear();
             }
@@ -55,7 +55,10 @@ namespace lexertl
             char precedence(const token_type type_) const
             {
                 // Moved in here for Solaris compiler.
-                static const char precedence_table_[END + 1][END + 1] = {
+                static const char precedence_table_
+                    [static_cast<int>(token_type::END) + 1]
+                    [static_cast<int>(token_type::END) + 1] =
+                {
                     //        BEG, REG, ORE, SEQ, SUB, EXP, RPT, DUP,  | , CHR, BOL, EOL, MCR,  ( ,  ) ,  ? , ?? ,  * , *? ,  + , +?, {n}?, {n}, END
                     /*BEGIN*/{ ' ', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '<', '<', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '>' },
                     /*REGEX*/{ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '=', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '>' },
@@ -83,13 +86,15 @@ namespace lexertl
                     /* END */{ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' }
                 };
 
-                return precedence_table_[_type][type_];
+                return precedence_table_[static_cast<int>(_type)]
+                    [static_cast<int>(type_)];
             }
 
             const char* precedence_string() const
             {
                 // Moved in here for Solaris compiler.
-                static const char* precedence_strings_[END + 1] =
+                static const char* precedence_strings_
+                    [static_cast<int>(token_type::END) + 1] =
                 {
                     "BEGIN", "REGEX", "OREXP", "SEQUENCE", "SUB", "EXPRESSION",
                     "REPEAT", "DUPLICATE", "|", "CHARSET", "^", "$", "MACRO",
@@ -97,7 +102,7 @@ namespace lexertl
                     "{n[,[m]]}?", "END"
                 };
 
-                return precedence_strings_[_type];
+                return precedence_strings_[static_cast<int>(_type)];
             }
         };
     }

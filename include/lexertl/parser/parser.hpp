@@ -239,58 +239,65 @@ namespace lexertl
 
                 switch (rhs_->_type)
                 {
-                case BEGIN:
+                case token_type::BEGIN:
                     // finished processing so exit
                     break;
-                case REGEX:
+                case token_type::REGEX:
                     // finished parsing, nothing to do
                     break;
-                case OREXP:
+                case token_type::OREXP:
                     orexp(handle_);
                     break;
-                case SEQUENCE:
-                    _token_stack.emplace(std::make_unique<token>(OREXP));
+                case token_type::SEQUENCE:
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::OREXP));
                     break;
-                case SUB:
+                case token_type::SUB:
                     sub(handle_);
                     break;
-                case EXPRESSION:
-                    _token_stack.emplace(std::make_unique<token>(SUB));
+                case token_type::EXPRESSION:
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::SUB));
                     break;
-                case REPEAT:
+                case token_type::REPEAT:
                     repeat(handle_);
                     break;
-                case BOL:
+                case token_type::BOL:
                     bol(handle_);
                     break;
-                case EOL:
+                case token_type::EOL:
                     eol(handle_, cr_id_, nl_id_);
                     break;
-                case CHARSET:
+                case token_type::CHARSET:
                     charset(handle_, compressed());
                     break;
-                case OPENPAREN:
+                case token_type::OPENPAREN:
                     openparen(handle_);
                     break;
-                case OPT:
-                case AOPT:
-                    optional(rhs_->_type == OPT);
-                    _token_stack.emplace(std::make_unique<token>(DUP));
+                case token_type::OPT:
+                case token_type::AOPT:
+                    optional(rhs_->_type == token_type::OPT);
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::DUP));
                     break;
-                case ZEROORMORE:
-                case AZEROORMORE:
-                    zero_or_more(rhs_->_type == ZEROORMORE);
-                    _token_stack.emplace(std::make_unique<token>(DUP));
+                case token_type::ZEROORMORE:
+                case token_type::AZEROORMORE:
+                    zero_or_more(rhs_->_type == token_type::ZEROORMORE);
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::DUP));
                     break;
-                case ONEORMORE:
-                case AONEORMORE:
-                    one_or_more(rhs_->_type == ONEORMORE);
-                    _token_stack.emplace(std::make_unique<token>(DUP));
+                case token_type::ONEORMORE:
+                case token_type::AONEORMORE:
+                    one_or_more(rhs_->_type == token_type::ONEORMORE);
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::DUP));
                     break;
-                case REPEATN:
-                case AREPEATN:
-                    repeatn(rhs_->_type == REPEATN, handle_.top().get());
-                    _token_stack.emplace(std::make_unique<token>(DUP));
+                case token_type::REPEATN:
+                case token_type::AREPEATN:
+                    repeatn(rhs_->_type == token_type::REPEATN,
+                        handle_.top().get());
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::DUP));
                     break;
                 default:
                     throw runtime_error
@@ -301,21 +308,23 @@ namespace lexertl
 
             void orexp(token_stack& handle_)
             {
-                assert(handle_.top()->_type == OREXP &&
+                assert(handle_.top()->_type == token_type::OREXP &&
                     (handle_.size() == 1 || handle_.size() == 3));
 
                 if (handle_.size() == 1)
                 {
-                    _token_stack.emplace(std::make_unique<token>(REGEX));
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::REGEX));
                 }
                 else
                 {
                     handle_.pop();
-                    assert(handle_.top()->_type == OR);
+                    assert(handle_.top()->_type == token_type::OR);
                     handle_.pop();
-                    assert(handle_.top()->_type == SEQUENCE);
+                    assert(handle_.top()->_type == token_type::SEQUENCE);
                     perform_or();
-                    _token_stack.emplace(std::make_unique<token>(OREXP));
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::OREXP));
                 }
             }
 
@@ -335,37 +344,41 @@ namespace lexertl
 
             void sub(token_stack& handle_)
             {
-                assert((handle_.top()->_type == SUB &&
+                assert((handle_.top()->_type == token_type::SUB &&
                     handle_.size() == 1) || handle_.size() == 2);
 
                 if (handle_.size() == 1)
                 {
-                    _token_stack.emplace(std::make_unique<token>(SEQUENCE));
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::SEQUENCE));
                 }
                 else
                 {
                     handle_.pop();
-                    assert(handle_.top()->_type == EXPRESSION);
+                    assert(handle_.top()->_type == token_type::EXPRESSION);
                     // perform join
                     sequence();
-                    _token_stack.emplace(std::make_unique<token>(SUB));
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::SUB));
                 }
             }
 
             void repeat(token_stack& handle_)
             {
-                assert(handle_.top()->_type == REPEAT &&
+                assert(handle_.top()->_type == token_type::REPEAT &&
                     handle_.size() >= 1 && handle_.size() <= 3);
 
                 if (handle_.size() == 1)
                 {
-                    _token_stack.emplace(std::make_unique<token>(EXPRESSION));
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::EXPRESSION));
                 }
                 else
                 {
                     handle_.pop();
-                    assert(handle_.top()->_type == DUP);
-                    _token_stack.emplace(std::make_unique<token>(REPEAT));
+                    assert(handle_.top()->_type == token_type::DUP);
+                    _token_stack.emplace(std::make_unique<token>
+                        (token_type::REPEAT));
                 }
             }
 
@@ -375,14 +388,15 @@ namespace lexertl
             void bol(token_stack&)
 #endif
             {
-                assert(handle_.top()->_type == BOL &&
+                assert(handle_.top()->_type == token_type::BOL &&
                     handle_.size() == 1);
 
                 // store charset
                 _node_ptr_vector.emplace_back
                 (std::make_unique<leaf_node>(bol_token(), true));
                 _tree_node_stack.push(_node_ptr_vector.back().get());
-                _token_stack.emplace(std::make_unique<token>(REPEAT));
+                _token_stack.emplace(std::make_unique<token>
+                    (token_type::REPEAT));
             }
 
 #ifndef NDEBUG
@@ -396,7 +410,7 @@ namespace lexertl
                 const id_type temp_cr_id_ = lookup(cr_);
                 const id_type temp_nl_id_ = lookup(nl_);
 
-                assert(handle_.top()->_type == EOL &&
+                assert(handle_.top()->_type == token_type::EOL &&
                     handle_.size() == 1);
 
                 if (temp_cr_id_ != sm_traits::npos())
@@ -413,13 +427,14 @@ namespace lexertl
                 _node_ptr_vector.emplace_back
                 (std::make_unique<leaf_node>(eol_token(), true));
                 _tree_node_stack.push(_node_ptr_vector.back().get());
-                _token_stack.emplace(std::make_unique<token>(REPEAT));
+                _token_stack.emplace(std::make_unique<token>
+                    (token_type::REPEAT));
             }
 
             // Uncompressed
             void charset(token_stack& handle_, const std::false_type&)
             {
-                assert(handle_.top()->_type == CHARSET &&
+                assert(handle_.top()->_type == token_type::CHARSET &&
                     handle_.size() == 1);
 
                 const id_type id_ = lookup(handle_.top()->_str);
@@ -428,13 +443,14 @@ namespace lexertl
                 _node_ptr_vector.
                     emplace_back(std::make_unique<leaf_node>(id_, true));
                 _tree_node_stack.push(_node_ptr_vector.back().get());
-                _token_stack.emplace(std::make_unique<token>(REPEAT));
+                _token_stack.emplace(std::make_unique<token>
+                    (token_type::REPEAT));
             }
 
             // Compressed
             void charset(token_stack& handle_, const std::true_type&)
             {
-                assert(handle_.top()->_type == CHARSET &&
+                assert(handle_.top()->_type == token_type::CHARSET &&
                     handle_.size() == 1);
 
                 std::unique_ptr<token> token_(handle_.top().release());
@@ -456,9 +472,12 @@ namespace lexertl
 
                 push_ranges(data_, std::integral_constant<bool, char_24_bit>());
 
-                _token_stack.emplace(std::make_unique<token>(OPENPAREN));
-                _token_stack.emplace(std::make_unique<token>(REGEX));
-                _token_stack.emplace(std::make_unique<token>(CLOSEPAREN));
+                _token_stack.emplace(std::make_unique<token>
+                    (token_type::OPENPAREN));
+                _token_stack.emplace(std::make_unique<token>
+                    (token_type::REGEX));
+                _token_stack.emplace(std::make_unique<token>
+                    (token_type::CLOSEPAREN));
             }
 
             // 16 bit unicode
@@ -750,14 +769,15 @@ namespace lexertl
 
             void openparen(token_stack& handle_)
             {
-                assert(handle_.top()->_type == OPENPAREN &&
+                assert(handle_.top()->_type == token_type::OPENPAREN &&
                     handle_.size() == 3);
 
                 handle_.pop();
-                assert(handle_.top()->_type == REGEX);
+                assert(handle_.top()->_type == token_type::REGEX);
                 handle_.pop();
-                assert(handle_.top()->_type == CLOSEPAREN);
-                _token_stack.emplace(std::make_unique<token>(REPEAT));
+                assert(handle_.top()->_type == token_type::CLOSEPAREN);
+                _token_stack.emplace(std::make_unique<token>
+                    (token_type::REPEAT));
             }
 
             void sequence()
@@ -838,7 +858,7 @@ namespace lexertl
                 while (*str_ >= '0' && *str_ <= '9')
                 {
                     min_ *= 10;
-                    min_ += *str_ - '0';
+                    min_ += static_cast<std::size_t>(*str_) - '0';
                     ++str_;
                 }
 
@@ -849,7 +869,7 @@ namespace lexertl
                 while (*str_ >= '0' && *str_ <= '9')
                 {
                     max_ *= 10;
-                    max_ += *str_ - '0';
+                    max_ += static_cast<std::size_t>(*str_) - '0';
                     ++str_;
                 }
 

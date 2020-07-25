@@ -279,13 +279,13 @@ namespace lexertl
             _regexes.front().push_back(token_vector());
             tokenise(regex_, _regexes.front().back(), id_, nullptr);
 
-            if (_regexes.front().back()[1]._type == detail::BOL)
+            if (_regexes.front().back()[1]._type == detail::token_type::BOL)
             {
                 _features.front() |= bol_bit;
             }
 
             if (_regexes.front().back()[_regexes.front().back().size() - 2].
-                _type == detail::EOL)
+                _type == detail::token_type::EOL)
             {
                 _features.front() |= eol_bit;
             }
@@ -475,7 +475,7 @@ namespace lexertl
 
                 tokeniser::next(*lhs_, state_, rhs_);
 
-                if (rhs_._type != detail::DIFF &&
+                if (rhs_._type != detail::token_type::DIFF &&
                     lhs_->precedence(rhs_._type) == ' ')
                 {
                     std::ostringstream ss_;
@@ -500,7 +500,7 @@ namespace lexertl
                     throw runtime_error(ss_.str());
                 }
 
-                if (rhs_._type == detail::MACRO)
+                if (rhs_._type == detail::token_type::MACRO)
                 {
                     typename macro_map::const_iterator iter_ =
                         _macro_map.find(rhs_._extra);
@@ -524,13 +524,13 @@ namespace lexertl
                         const token& second_ =
                             iter_->second[iter_->second.size() - 2];
                         const bool bol_ = tokens_.size() == 1 &&
-                            first_._type == detail::CHARSET &&
+                            first_._type == detail::token_type::CHARSET &&
                             first_._str.size() == 1 &&
                             first_._str._ranges[0] ==
                             typename token::string_token::range('^', '^');
                         const bool eol_ = state_._end == regex_.c_str() +
                             regex_.size() &&
-                            second_._type == detail::CHARSET &&
+                            second_._type == detail::token_type::CHARSET &&
                             second_._str.size() == 1 &&
                             second_._str._ranges[0] ==
                             typename token::string_token::range('$', '$');
@@ -570,7 +570,7 @@ namespace lexertl
                         {
                             token open_;
 
-                            open_._type = detail::OPENPAREN;
+                            open_._type = detail::token_type::OPENPAREN;
                             open_._str.insert('(');
                             tokens_.push_back(open_);
                         }
@@ -585,7 +585,7 @@ namespace lexertl
                             {
                                 token token_;
 
-                                token_._type = detail::BOL;
+                                token_._type = detail::token_type::BOL;
                                 tokens_.push_back(token_);
                                 ++start_offset_;
                             }
@@ -604,7 +604,7 @@ namespace lexertl
                             {
                                 token token_;
 
-                                token_._type = detail::EOL;
+                                token_._type = detail::token_type::EOL;
                                 tokens_.push_back(token_);
                             }
 
@@ -615,13 +615,13 @@ namespace lexertl
                         {
                             token close_;
 
-                            close_._type = detail::CLOSEPAREN;
+                            close_._type = detail::token_type::CLOSEPAREN;
                             close_._str.insert(')');
                             tokens_.push_back(close_);
                         }
                     }
                 }
-                else if (rhs_._type == detail::DIFF)
+                else if (rhs_._type == detail::token_type::DIFF)
                 {
                     if (!macro_.empty())
                     {
@@ -664,7 +664,7 @@ namespace lexertl
                 // diff_ may have been set by previous conditional.
                 if (diff_)
                 {
-                    if (rhs_._type != detail::CHARSET)
+                    if (rhs_._type != detail::token_type::CHARSET)
                     {
                         std::ostringstream ss_;
 
@@ -719,7 +719,7 @@ namespace lexertl
 
                     diff_ = 0;
                 }
-            } while (tokens_.back()._type != detail::END);
+            } while (tokens_.back()._type != detail::token_type::END);
 
             if (tokens_.size() == 2)
             {
@@ -754,21 +754,21 @@ namespace lexertl
             {
                 switch (iter_->_type)
                 {
-                case detail::BEGIN:
+                case detail::token_type::BEGIN:
                     iter_->swap(*dest_);
-                    dest_->_type = detail::END;
+                    dest_->_type = detail::token_type::END;
                     break;
-                case detail::BOL:
+                case detail::token_type::BOL:
                     iter_->swap(*dest_);
-                    dest_->_type = detail::EOL;
+                    dest_->_type = detail::token_type::EOL;
                     break;
-                case detail::EOL:
+                case detail::token_type::EOL:
                     iter_->swap(*dest_);
-                    dest_->_type = detail::BOL;
+                    dest_->_type = detail::token_type::BOL;
                     break;
-                case detail::OPENPAREN:
+                case detail::token_type::OPENPAREN:
                     iter_->swap(*dest_);
-                    dest_->_type = detail::CLOSEPAREN;
+                    dest_->_type = detail::token_type::CLOSEPAREN;
 
                     if (stack_.top() != end_)
                     {
@@ -778,28 +778,28 @@ namespace lexertl
 
                     stack_.pop();
                     break;
-                case detail::CLOSEPAREN:
+                case detail::token_type::CLOSEPAREN:
                     iter_->swap(*dest_);
-                    dest_->_type = detail::OPENPAREN;
+                    dest_->_type = detail::token_type::OPENPAREN;
                     stack_.push(end_);
                     break;
-                case detail::OPT:
-                case detail::AOPT:
-                case detail::ZEROORMORE:
-                case detail::AZEROORMORE:
-                case detail::ONEORMORE:
-                case detail::AONEORMORE:
-                case detail::REPEATN:
-                case detail::AREPEATN:
+                case detail::token_type::OPT:
+                case detail::token_type::AOPT:
+                case detail::token_type::ZEROORMORE:
+                case detail::token_type::AZEROORMORE:
+                case detail::token_type::ONEORMORE:
+                case detail::token_type::AONEORMORE:
+                case detail::token_type::REPEATN:
+                case detail::token_type::AREPEATN:
                 {
                     auto temp_ = iter_ + 1;
 
-                    if (temp_->_type == detail::CLOSEPAREN)
+                    if (temp_->_type == detail::token_type::CLOSEPAREN)
                     {
                         stack_.push(iter_);
                         ++iter_;
                         iter_->swap(*dest_);
-                        dest_->_type = detail::OPENPAREN;
+                        dest_->_type = detail::token_type::OPENPAREN;
                     }
                     else
                     {
@@ -811,13 +811,13 @@ namespace lexertl
 
                     break;
                 }
-                case detail::END:
+                case detail::token_type::END:
                     iter_->swap(*dest_);
-                    dest_->_type = detail::BEGIN;
+                    dest_->_type = detail::token_type::BEGIN;
                     break;
                 default:
-                    // detail::OR
-                    // detail::CHARSET
+                    // detail::token_type::OR
+                    // detail::token_type::CHARSET
                     iter_->swap(*dest_);
                     break;
                 }
@@ -968,13 +968,13 @@ namespace lexertl
                 _regexes[curr_].push_back(token_vector());
                 tokenise(regex_, _regexes[curr_].back(), id_, 0);
 
-                if (_regexes[curr_].back()[1]._type == detail::BOL)
+                if (_regexes[curr_].back()[1]._type == detail::token_type::BOL)
                 {
                     _features[curr_] |= bol_bit;
                 }
 
                 if (_regexes[curr_].back()[_regexes[curr_].back().size() - 2].
-                    _type == detail::EOL)
+                    _type == detail::token_type::EOL)
                 {
                     _features[curr_] |= eol_bit;
                 }
