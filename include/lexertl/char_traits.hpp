@@ -7,7 +7,7 @@
 #ifndef LEXERTL_CHAR_TRAITS_HPP
 #define LEXERTL_CHAR_TRAITS_HPP
 
-#include <cstddef>
+#include <cstdint>
 
 namespace lexertl
 {
