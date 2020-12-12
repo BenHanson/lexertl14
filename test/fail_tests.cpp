@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "../lexertl/generator.hpp"
+#include <lexertl/generator.hpp>
 
 const char *error_regexes_[] =
 {
