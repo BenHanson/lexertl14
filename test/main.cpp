@@ -4,7 +4,7 @@
 #include "stdafx.h"
 
 #include "fail_tests.h"
-#include "../lexertl/parser/tokeniser/re_tokeniser.hpp"
+#include <lexertl/parser/tokeniser/re_tokeniser.hpp>
 
 void charsets()
 {

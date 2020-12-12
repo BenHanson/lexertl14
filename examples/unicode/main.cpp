@@ -1,10 +1,10 @@
 #include <fstream>
-#include <include/lexertl/generator.hpp>
+#include <lexertl/generator.hpp>
 #include <iomanip>
-#include <include/lexertl/lookup.hpp>
-#include <include/lexertl/memory_file.hpp>
-#include <include/lexertl/stream_shared_iterator.hpp>
-#include <include/lexertl/utf_iterators.hpp>
+#include <lexertl/lookup.hpp>
+#include <lexertl/memory_file.hpp>
+#include <lexertl/stream_shared_iterator.hpp>
+#include <lexertl/utf_iterators.hpp>
 
 #ifdef WIN32
 #include <windows.h>

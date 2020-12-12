@@ -1,6 +1,6 @@
-#include <include/lexertl/memory_file.hpp>
-#include <include/lexertl/generator.hpp>
-#include <include/lexertl/lookup.hpp>
+#include <lexertl/memory_file.hpp>
+#include <lexertl/generator.hpp>
+#include <lexertl/lookup.hpp>
 
 struct entry
 {
