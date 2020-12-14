@@ -252,8 +252,8 @@ void case_mapping(lexertl::memory_file& mf_, std::ostream& os2_, std::ostream& o
 
 int main()
 {
-	// http://www.unicode.org/Public/14.0.0/ucd/UnicodeData.txt
-	lexertl::memory_file mf_("UnicodeData-14.0.0d1.txt");
+	// http://www.unicode.org/Public/14.0.0/ucd/
+	lexertl::memory_file mf_("UnicodeData-14.0.0d3.txt");
 	std::ofstream us_("../include/lexertl/parser/tokeniser/unicode.hpp", std::ofstream::out);
 	std::ofstream fs2_("../include/lexertl/parser/tokeniser/fold2.inc", std::ofstream::out);
 	std::ofstream fs4_("../include/lexertl/parser/tokeniser/fold4.inc", std::ofstream::out);
