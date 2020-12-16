@@ -1,10 +1,12 @@
 #include "../include/lexertl/generator.hpp"
 #include <iomanip>
 #include <fstream>
+#include "../include/lexertl/iterator.hpp"
 #include "../include/lexertl/lookup.hpp"
 #include "../include/lexertl/memory_file.hpp"
 
-void lex_unicode_data(lexertl::memory_file& mf_, std::ostream& os_)
+void lex_unicode_data(lexertl::memory_file& mf_, std::ostream& os_,
+	std::ostream& ucs_)
 {
 	lexertl::rules rules_;
 	lexertl::state_machine state_machine_;
@@ -49,44 +51,37 @@ void lex_unicode_data(lexertl::memory_file& mf_, std::ostream& os_)
 	} while (results_.id != 0);
 
 	using string_map = std::map<std::string, std::string>;
-	string_map code_map;
 	map::const_iterator i_ = map_.begin();
 	map::const_iterator e_ = map_.end();
 	std::string line_;
-
-	code_map["Cc"] = "other_control";
-	code_map["Cf"] = "other_format";
-	code_map["Co"] = "other_private";
-	code_map["Cs"] = "other_surrogate";
-	code_map["Ll"] = "letter_lowercase";
-	code_map["Lm"] = "letter_modifier";
-	code_map["Lo"] = "letter_other";
-	code_map["Lt"] = "letter_titlecase";
-	code_map["Lu"] = "letter_uppercase";
-	code_map["Mc"] = "mark_combining";
-	code_map["Me"] = "mark_enclosing";
-	code_map["Mn"] = "mark_nonspacing";
-	code_map["Nd"] = "number_decimal";
-	code_map["Nl"] = "number_letter";
-	code_map["No"] = "number_other";
-	code_map["Pc"] = "punctuation_connector";
-	code_map["Pd"] = "punctuation_dash";
-	code_map["Pe"] = "punctuation_close";
-	code_map["Pf"] = "punctuation_final";
-	code_map["Pi"] = "punctuation_initial";
-	code_map["Po"] = "punctuation_other";
-	code_map["Ps"] = "punctuation_open";
-	code_map["Sc"] = "symbol_currency";
-	code_map["Sk"] = "symbol_modifier";
-	code_map["Sm"] = "symbol_math";
-	code_map["So"] = "symbol_other";
-	code_map["Zl"] = "separator_line";
-	code_map["Zp"] = "separator_paragraph";
-	code_map["Zs"] = "separator_space";
+	char c_ = 0;
 
 	for (; i_ != e_; ++i_)
 	{
-		os_ << "\n    static const char *" << code_map[i_->first] <<
+		if (c_ != i_->first[0])
+		{
+			if (c_ != 0)
+			{
+				os_ << "]\";\n    }\n";
+			}
+
+			c_ = i_->first[0];
+			os_ << "\n    static const char* " << c_ << "()\n" <<
+				"    {\n        return \"[";
+			ucs_ << "    { \"" << c_ << "\", " << c_ << " },\n";
+		}
+
+		os_ << "\\\\p{" << i_->first << '}';
+		ucs_ << "    { \"" << i_->first << "\", " << i_->first << " },\n";
+	}
+
+	os_ << "]\";\n    }\n";
+	i_ = map_.begin();
+	e_ = map_.end();
+
+	for (; i_ != e_; ++i_)
+	{
+		os_ << "\n    static const char *" << i_->first <<
 			"()\n" << "    {\n";
 		line_ = "        return \"[";
 
@@ -134,7 +129,8 @@ void lex_unicode_data(lexertl::memory_file& mf_, std::ostream& os_)
 	}
 }
 
-void case_mapping(lexertl::memory_file& mf_, std::ostream& os2_, std::ostream& os4_)
+void case_mapping(lexertl::memory_file& mf_, std::ostream& os2_,
+	std::ostream& os4_)
 {
 	lexertl::rules rules_;
 	lexertl::state_machine sm_;
@@ -250,18 +246,89 @@ void case_mapping(lexertl::memory_file& mf_, std::ostream& os2_, std::ostream& o
 		std::setw(4) << second_.second << "}},\n";
 }
 
+void lex_blocks_data(lexertl::memory_file& mf_, std::ostream& dcpps_,
+	std::ostream& ucs_)
+{
+	enum
+	{
+		eStartRange = 1, eEndRange, eName
+	};
+	lexertl::rules rules_;
+	lexertl::state_machine sm_;
+
+	rules_.push_state("DOT_DOT");
+	rules_.push_state("END_RANGE");
+	rules_.push_state("SEP");
+	rules_.push_state("NAME");
+	rules_.push("INITIAL", "[A-F0-9]+", eStartRange, "DOT_DOT");
+	rules_.push("DOT_DOT", "[.][.]", rules_.skip(), "END_RANGE");
+	rules_.push("END_RANGE", "[A-F0-9]+", eEndRange, "SEP");
+	rules_.push("SEP", "; ", rules_.skip(), "NAME");
+	rules_.push("NAME", ".+", eName, "INITIAL");
+	rules_.push("#.*|\\s+", rules_.skip());
+	lexertl::generator::build(rules_, sm_);
+
+	lexertl::citerator iter_(mf_.data(), mf_.data() + mf_.size(), sm_);
+	lexertl::citerator end_;
+	bool first_ = true;
+
+	for (; iter_ != end_; ++iter_)
+	{
+		std::string name_;
+		std::string fname_;
+		std::string range_;
+
+		range_ = "\"[\\\\x" + iter_->str() + "-\\\\x";
+		++iter_;
+		range_ += iter_->str() + "]\"";
+		++iter_;
+		name_ = iter_->str();
+		std::transform(name_.begin(), name_.end(), name_.begin(),
+			[](const char c)
+			{
+				return c == ' ' ? '_' : c;
+			});
+
+		fname_ = name_;
+		std::transform(fname_.begin(), fname_.end(), fname_.begin(),
+			[](const char c)
+			{
+				return c == '-' ? '_' : c;
+			});
+		dcpps_ << "\n    static const char *" << fname_ <<
+			"()\n" << "    {\n" << "        return " << range_ <<
+			";\n    }\n";
+
+		ucs_ << "    { \"" << "In" << name_ << "\", " << fname_ << " },\n";
+		first_ = false;
+	}
+
+	ucs_ << "    { 0, 0 }\n";
+}
+
 int main()
 {
 	// http://www.unicode.org/Public/14.0.0/ucd/
-	lexertl::memory_file mf_("UnicodeData-14.0.0d3.txt");
-	std::ofstream us_("../include/lexertl/parser/tokeniser/unicode.hpp", std::ofstream::out);
-	std::ofstream fs2_("../include/lexertl/parser/tokeniser/fold2.inc", std::ofstream::out);
-	std::ofstream fs4_("../include/lexertl/parser/tokeniser/fold4.inc", std::ofstream::out);
+	lexertl::memory_file umf_("UnicodeData-14.0.0d3.txt");
+	lexertl::memory_file bmf_("Blocks-14.0.0d3.txt");
+	std::ofstream us_("../include/lexertl/parser/tokeniser/unicode.hpp",
+		std::ofstream::out);
+	std::ofstream fs2_("../include/lexertl/parser/tokeniser/fold2.inc",
+		std::ofstream::out);
+	std::ofstream fs4_("../include/lexertl/parser/tokeniser/fold4.inc",
+		std::ofstream::out);
+	std::ofstream dcpps_("../include/lexertl/parser/tokeniser/blocks.hpp",
+		std::ofstream::out);
+	std::ofstream ucs_("../include/lexertl/parser/tokeniser/table.inc",
+		std::ofstream::out);
 
-	lex_unicode_data(mf_, us_);
-	case_mapping(mf_, fs2_, fs4_);
+	lex_unicode_data(umf_, us_, ucs_);
+	case_mapping(umf_, fs2_, fs4_);
 	us_.close();
 	fs2_.close();
 	fs4_.close();
+	lex_blocks_data(bmf_, dcpps_, ucs_);
+	dcpps_.close();
+	ucs_.close();
 	return 0;
 }

@@ -18,6 +18,12 @@ namespace lexertl
 {
     namespace detail
     {
+        struct block
+        {
+            const char* _name;
+            const char* (*_func)();
+        };
+
         template<typename rules_char_type, typename input_char_type,
             typename id_type,
             typename char_traits = basic_char_traits<input_char_type> >
@@ -235,7 +241,7 @@ namespace lexertl
                 static const fold_pair mapping_[] =
                 {
 #include "fold2.inc"
-                {{0, 0}, {0, 0}}
+                    {{0, 0}, {0, 0}}
                 };
                 const fold_pair* ptr_ = mapping_;
 
@@ -1133,364 +1139,51 @@ namespace lexertl
                     throw runtime_error(ss_.str());
                 }
 
-                switch (*state_._curr)
+                const typename state_type::char_type* start_ = state_._curr;
+                const std::size_t idx = state_.index();
+
+                do
                 {
-                case 'C':
                     state_.increment();
+                } while (!state_.eos() && *state_._curr != '}');
 
-                    if (state_.eos())
-                    {
-                        std::ostringstream ss_;
-
-                        // Pointless returning index if at end of string
-                        state_.unexpected_end(ss_);
-                        ss_ << " following \\p{C";
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-
-                    switch (*state_._curr)
-                    {
-                    case '}':
-                        str_ = R"([\p{Cc}\p{Cf}\p{Co}\p{Cs}])";
-                        break;
-                    case 'c':
-                        str_ = other_control();
-                        state_.increment();
-                        break;
-                    case 'f':
-                        str_ = other_format();
-                        state_.increment();
-                        break;
-                        //case 'n':
-                        //break;
-                    case 'o':
-                        str_ = other_private();
-                        state_.increment();
-                        break;
-                    case 's':
-                        str_ = other_surrogate();
-                        state_.increment();
-                        break;
-                    default:
-                    {
-                        std::ostringstream ss_;
-
-                        ss_ << "Syntax error following \\p{C at index " <<
-                            state_.index();
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-                    }
-
-                    break;
-                case 'L':
-                    state_.increment();
-
-                    if (state_.eos())
-                    {
-                        std::ostringstream ss_;
-
-                        // Pointless returning index if at end of string
-                        state_.unexpected_end(ss_);
-                        ss_ << " following \\p{L";
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-
-                    switch (*state_._curr)
-                    {
-                    case '}':
-                        str_ = R"([\p{Ll}\p{Lm}\p{Lo}\p{Lt}\p{Lu}])";
-                        break;
-                    case 'C':
-                        str_ = R"([\p{Ll}\p{Lt}\p{Lu}])";
-                        state_.increment();
-                        break;
-                    case 'l':
-                        str_ = letter_lowercase();
-                        state_.increment();
-                        break;
-                    case 'm':
-                        str_ = letter_modifier();
-                        state_.increment();
-                        break;
-                    case 'o':
-                        str_ = letter_other();
-                        state_.increment();
-                        break;
-                    case 't':
-                        str_ = letter_titlecase();
-                        state_.increment();
-                        break;
-                    case 'u':
-                        str_ = letter_uppercase();
-                        state_.increment();
-                        break;
-                    default:
-                    {
-                        std::ostringstream ss_;
-
-                        ss_ << "Syntax error following \\p{L at index " <<
-                            state_.index();
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-                    }
-
-                    break;
-                case 'M':
-                    state_.increment();
-
-                    if (state_.eos())
-                    {
-                        std::ostringstream ss_;
-
-                        // Pointless returning index if at end of string
-                        state_.unexpected_end(ss_);
-                        ss_ << " following \\p{M";
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-
-                    switch (*state_._curr)
-                    {
-                    case '}':
-                        str_ = R"([\p{Mc}\p{Me}\p{Mn}])";
-                        break;
-                    case 'c':
-                        str_ = mark_combining();
-                        state_.increment();
-                        break;
-                    case 'e':
-                        str_ = mark_enclosing();
-                        state_.increment();
-                        break;
-                    case 'n':
-                        str_ = mark_nonspacing();
-                        state_.increment();
-                        break;
-                    default:
-                    {
-                        std::ostringstream ss_;
-
-                        ss_ << "Syntax error following \\p{M at index " <<
-                            state_.index();
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-                    }
-
-                    break;
-                case 'N':
-                    state_.increment();
-
-                    if (state_.eos())
-                    {
-                        std::ostringstream ss_;
-
-                        // Pointless returning index if at end of string
-                        state_.unexpected_end(ss_);
-                        ss_ << " following \\p{N";
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-
-                    switch (*state_._curr)
-                    {
-                    case '}':
-                        str_ = R"([\p{Nd}\p{Nl}\p{No}])";
-                        break;
-                    case 'd':
-                        str_ = number_decimal();
-                        state_.increment();
-                        break;
-                    case 'l':
-                        str_ = number_letter();
-                        state_.increment();
-                        break;
-                    case 'o':
-                        str_ = number_other();
-                        state_.increment();
-                        break;
-                    default:
-                    {
-                        std::ostringstream ss_;
-
-                        ss_ << "Syntax error following \\p{N at index " <<
-                            state_.index();
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-                    }
-
-                    break;
-                case 'P':
-                    state_.increment();
-
-                    if (state_.eos())
-                    {
-                        std::ostringstream ss_;
-
-                        // Pointless returning index if at end of string
-                        state_.unexpected_end(ss_);
-                        ss_ << " following \\p{P";
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-
-                    switch (*state_._curr)
-                    {
-                    case '}':
-                        str_ = "[\\p{Pc}\\p{Pd}\\p{Pe}\\p{Pf}\\p{Pi}\\p{Po}"
-                            "\\p{Ps}]";
-                        break;
-                    case 'c':
-                        str_ = punctuation_connector();
-                        state_.increment();
-                        break;
-                    case 'd':
-                        str_ = punctuation_dash();
-                        state_.increment();
-                        break;
-                    case 'e':
-                        str_ = punctuation_close();
-                        state_.increment();
-                        break;
-                    case 'f':
-                        str_ = punctuation_final();
-                        state_.increment();
-                        break;
-                    case 'i':
-                        str_ = punctuation_initial();
-                        state_.increment();
-                        break;
-                    case 'o':
-                        str_ = punctuation_other();
-                        state_.increment();
-                        break;
-                    case 's':
-                        str_ = punctuation_open();
-                        state_.increment();
-                        break;
-                    default:
-                    {
-                        std::ostringstream ss_;
-
-                        ss_ << "Syntax error following \\p{P at index " <<
-                            state_.index();
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-                    }
-
-                    break;
-                case 'S':
-                    state_.increment();
-
-                    if (state_.eos())
-                    {
-                        std::ostringstream ss_;
-
-                        // Pointless returning index if at end of string
-                        state_.unexpected_end(ss_);
-                        ss_ << " following \\p{S";
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-
-                    switch (*state_._curr)
-                    {
-                    case '}':
-                        str_ = R"([\p{Sc}\p{Sk}\p{Sm}\p{So}])";
-                        break;
-                    case 'c':
-                        str_ = symbol_currency();
-                        state_.increment();
-                        break;
-                    case 'k':
-                        str_ = symbol_modifier();
-                        state_.increment();
-                        break;
-                    case 'm':
-                        str_ = symbol_math();
-                        state_.increment();
-                        break;
-                    case 'o':
-                        str_ = symbol_other();
-                        state_.increment();
-                        break;
-                    default:
-                    {
-                        std::ostringstream ss_;
-
-                        ss_ << "Syntax error following \\p{S at index " <<
-                            state_.index();
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-                    }
-
-                    break;
-                case 'Z':
-                    state_.increment();
-
-                    if (state_.eos())
-                    {
-                        std::ostringstream ss_;
-
-                        // Pointless returning index if at end of string
-                        state_.unexpected_end(ss_);
-                        ss_ << " following \\p{Z";
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-
-                    switch (*state_._curr)
-                    {
-                    case '}':
-                        str_ = R"([\p{Zl}\p{Zp}\p{Zs}])";
-                        break;
-                    case 'l':
-                        str_ = separator_line();
-                        state_.increment();
-                        break;
-                    case 'p':
-                        str_ = separator_paragraph();
-                        state_.increment();
-                        break;
-                    case 's':
-                        str_ = separator_space();
-                        state_.increment();
-                        break;
-                    default:
-                    {
-                        std::ostringstream ss_;
-
-                        ss_ << "Syntax error following \\p{Z at index " <<
-                            state_.index();
-                        state_.error(ss_);
-                        throw runtime_error(ss_.str());
-                    }
-                    }
-
-                    break;
-                default:
+                if (state_.eos())
                 {
                     std::ostringstream ss_;
 
-                    ss_ << "Syntax error following \\p{ at index " <<
-                        state_.index();
+                    // Pointless returning index if at end of string
+                    state_.unexpected_end(ss_);
+                    ss_ << " following \\p{";
                     state_.error(ss_);
                     throw runtime_error(ss_.str());
                 }
+
+                static const block lookup_[] =
+                {
+#include "table.inc"
+                };
+
+                for (const block* entry_ = lookup_; entry_->_name; ++entry_)
+                {
+                    const typename state_type::char_type* source_ = start_;
+                    const char* name_ = entry_->_name;
+
+                    for (; source_ != state_._curr && *name_; ++source_, ++name_)
+                    {
+                        if (*source_ !=
+                            static_cast<typename state_type::char_type>(*name_))
+                            break;
+                    }
+
+                    if (source_ == state_._curr && !*name_)
+                        return str_ = entry_->_func();
                 }
 
-                if (*state_._curr != '}')
+                if (str_ == nullptr)
                 {
                     std::ostringstream ss_;
 
-                    ss_ << "Missing '}' at index " << state_.index();
+                    ss_ << "Syntax error following \\p{ at index " << idx;
                     state_.error(ss_);
                     throw runtime_error(ss_.str());
                 }
@@ -1498,6 +1191,7 @@ namespace lexertl
                 return str_;
             }
 
+#include "blocks.hpp"
 #include "unicode.hpp"
 
             template<typename state_type>
