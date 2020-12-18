@@ -65,10 +65,19 @@ void lex_unicode_data(lexertl::memory_file& mf_, std::ostream& os_,
 				os_ << "]\";\n    }\n";
 			}
 
+			if (c_ == 'L')
+			{
+				os_ << "\n    static const char* LC()\n" <<
+					"    {\n        return \"[\\\\p{Ll}\\\\p{Lt}\\\\p{Lu}]\";\n    }\n";
+			}
+
 			c_ = i_->first[0];
 			os_ << "\n    static const char* " << c_ << "()\n" <<
 				"    {\n        return \"[";
 			ucs_ << "    { \"" << c_ << "\", " << c_ << " },\n";
+
+			if (c_ == 'L')
+				ucs_ << "    { \"LC\", LC },\n";
 		}
 
 		os_ << "\\\\p{" << i_->first << '}';
