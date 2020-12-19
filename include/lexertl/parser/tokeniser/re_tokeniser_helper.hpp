@@ -1192,6 +1192,7 @@ namespace lexertl
             }
 
 #include "blocks.hpp"
+#include "scripts.hpp"
 #include "unicode.hpp"
 
             template<typename state_type>

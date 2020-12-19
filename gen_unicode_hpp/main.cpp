@@ -304,15 +304,132 @@ void lex_blocks_data(lexertl::memory_file& mf_, std::ostream& dcpps_,
 			{
 				return c == '-' ? '_' : c;
 			});
-		dcpps_ << "\n    static const char *" << fname_ <<
+		dcpps_ << "\n    static const char *In" << fname_ <<
 			"()\n" << "    {\n" << "        return " << range_ <<
 			";\n    }\n";
 
-		ucs_ << "    { \"" << "In" << name_ << "\", " << fname_ << " },\n";
+		ucs_ << "    { \"In" << name_ << "\", In" << fname_ << " },\n";
 		first_ = false;
 	}
+}
 
-	ucs_ << "    { 0, 0 }\n";
+void lex_scripts_data(lexertl::memory_file& mf_, std::ostream& scpps_,
+	std::ostream& ucs_)
+{
+	enum
+	{
+		eStartRange = 1, eEndRange, eName
+	};
+	lexertl::rules rules_;
+	lexertl::state_machine sm_;
+
+	rules_.push_state("DOT_DOT");
+	rules_.push_state("END_RANGE");
+	rules_.push_state("SEP");
+	rules_.push_state("NAME");
+	rules_.push_state("FINISH");
+	rules_.push("INITIAL", "[A-F0-9]+", eStartRange, "DOT_DOT");
+	rules_.push("DOT_DOT", "[.][.]", rules_.skip(), "END_RANGE");
+	rules_.push("DOT_DOT", "\\s+; ", rules_.skip(), "NAME");
+	rules_.push("END_RANGE", "[A-F0-9]+", eEndRange, "SEP");
+	rules_.push("SEP", "\\s+; ", rules_.skip(), "NAME");
+	rules_.push("NAME", "[^ ]+", eName, "FINISH");
+	rules_.push("FINISH", ".+", rules_.skip(), "INITIAL");
+	rules_.push("#.*|\\s+", rules_.skip());
+	lexertl::generator::build(rules_, sm_);
+
+	lexertl::citerator iter_(mf_.data(), mf_.data() + mf_.size(), sm_);
+	lexertl::citerator end_;
+	using string_token = lexertl::basic_string_token<std::size_t>;
+	using map = std::map<std::string, string_token>;
+	map map_;
+	std::size_t num1_ = 0;
+	std::size_t num2_ = 0;
+
+	for (; iter_ != end_; ++iter_)
+	{
+		if (iter_->id == eStartRange)
+		{
+			std::stringstream ss_;
+
+			ss_ << iter_->str();
+			ss_ >> std::hex >> num1_;
+		}
+		else if (iter_->id == eEndRange)
+		{
+			std::stringstream ss_;
+
+			ss_ << iter_->str();
+			ss_ >> std::hex >> num2_;
+		}
+		else if (iter_->id == eName)
+		{
+			const std::string name_ = iter_->str();
+
+			if (num2_)
+				map_[name_].insert(lexertl::basic_string_token<std::size_t>::range
+					(num1_, num2_));
+			else
+				map_[name_].insert(lexertl::basic_string_token<std::size_t>::range
+				(num1_, num1_));
+
+			num1_ = num2_ = 0;
+		}
+	}
+
+	map::const_iterator i_ = map_.begin();
+	map::const_iterator e_ = map_.end();
+	std::string line_;
+
+	for (; i_ != e_; ++i_)
+	{
+		scpps_ << "\n    static const char *Is" << i_->first <<
+			"()\n" << "    {\n";
+		line_ = "        return \"[";
+
+		auto ri = i_->second._ranges.cbegin();
+		auto re = i_->second._ranges.cend();
+
+		for (; ri != re; ++ri)
+		{
+			std::size_t max_chars = 79;
+			std::ostringstream ss_;
+			std::string range_;
+
+			ss_ << "\\\\x" << std::hex << ri->first;
+
+			if (ri->first != ri->second)
+			{
+				if (ri->second - ri->first > 1)
+				{
+					--max_chars;
+					ss_ << '-';
+				}
+
+				ss_ << "\\\\x" << ri->second;
+			}
+
+			range_ = ss_.str();
+
+			if (ri + 1 == re)
+			{
+				max_chars -= 3;
+			}
+
+			if (line_.size() + range_.size() > max_chars)
+			{
+				line_ += "\"\n";
+				scpps_ << line_;
+				line_ = "            \"";
+			}
+
+			line_ += range_;
+		}
+
+		line_ += "]\";\n    }\n";
+		scpps_ << line_;
+		ucs_ << "    { \"Is" << i_->first << "\", Is" << i_->first << " },\n";
+	}
 }
 
 int main()
@@ -320,6 +437,7 @@ int main()
 	// http://www.unicode.org/Public/14.0.0/ucd/
 	lexertl::memory_file umf_("UnicodeData-14.0.0d3.txt");
 	lexertl::memory_file bmf_("Blocks-14.0.0d3.txt");
+	lexertl::memory_file smf_("Scripts-14.0.0d1.txt");
 	std::ofstream us_("../include/lexertl/parser/tokeniser/unicode.hpp",
 		std::ofstream::out);
 	std::ofstream fs2_("../include/lexertl/parser/tokeniser/fold2.inc",
@@ -327,6 +445,8 @@ int main()
 	std::ofstream fs4_("../include/lexertl/parser/tokeniser/fold4.inc",
 		std::ofstream::out);
 	std::ofstream dcpps_("../include/lexertl/parser/tokeniser/blocks.hpp",
+		std::ofstream::out);
+	std::ofstream scpps_("../include/lexertl/parser/tokeniser/scripts.hpp",
 		std::ofstream::out);
 	std::ofstream ucs_("../include/lexertl/parser/tokeniser/table.inc",
 		std::ofstream::out);
@@ -337,6 +457,8 @@ int main()
 	fs2_.close();
 	fs4_.close();
 	lex_blocks_data(bmf_, dcpps_, ucs_);
+	lex_scripts_data(smf_, scpps_, ucs_);
+	ucs_ << "    { 0, 0 }\n";
 	dcpps_.close();
 	ucs_.close();
 	return 0;
