@@ -439,9 +439,9 @@ int main()
 	try
 	{
 		// http://www.unicode.org/Public/14.0.0/ucd/
-		lexertl::memory_file bmf_("Blocks-14.0.0d4.txt");
-		lexertl::memory_file smf_("Scripts-14.0.0d10a.txt");
-		lexertl::memory_file umf_("UnicodeData-14.0.0d9.txt");
+		lexertl::memory_file bmf_("Blocks-15.0.0d3.txt");
+		lexertl::memory_file smf_("Scripts-15.0.0d4.txt");
+		lexertl::memory_file umf_("UnicodeData-15.0.0d4.txt");
 		std::ofstream dcpps_("output/blocks.hpp", std::ofstream::out);
 		std::ofstream fs2_("output/fold2.inc", std::ofstream::out);
 		std::ofstream fs4_("output/fold4.inc", std::ofstream::out);
