@@ -46,7 +46,7 @@ namespace lexertl
             ostream& stream_)
         {
             header(stream_);
-            for (std::size_t dfa_ = 0, dfas_ = csm_.size();
+            for (id_type dfa_ = 0, dfas_ = csm_.size();
                 dfa_ < dfas_; ++dfa_)
             {
                 dump_ex(dfa_, csm_._sm_vector[dfa_], rules_, stream_);
@@ -165,7 +165,7 @@ namespace lexertl
 
             stream_ << std::endl;
 
-            for (std::size_t i_ = 0; i_ < states_; ++i_)
+            for (id_type i_ = 0; i_ < states_; ++i_)
             {
                 const dfa_state& state_ = dfa_._states[i_];
                 const string name = node_name(dfa_id_, i_);
@@ -192,7 +192,7 @@ namespace lexertl
 
             stream_ << std::endl;
 
-            for (std::size_t i_ = 0; i_ < states_; ++i_)
+            for (id_type i_ = 0; i_ < states_; ++i_)
             {
                 const dfa_state& state_ = dfa_._states[i_];
 

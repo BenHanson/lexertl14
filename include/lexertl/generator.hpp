@@ -35,7 +35,8 @@ namespace lexertl
 
         static void build(const rules& rules_, sm& sm_)
         {
-            const id_type size_ = static_cast<id_type>(rules_.statemap().size());
+            const id_type size_ =
+                static_cast<id_type>(rules_.statemap().size());
             // Strong exception guarantee
             // http://www.boost.org/community/exception_safety.html
             internals internals_;
