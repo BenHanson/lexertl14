@@ -438,10 +438,17 @@ int main()
 {
 	try
 	{
-		// http://www.unicode.org/Public/14.0.0/ucd/
-		lexertl::memory_file bmf_("Blocks-15.0.0d3.txt");
-		lexertl::memory_file smf_("Scripts-15.0.0d4.txt");
-		lexertl::memory_file umf_("UnicodeData-15.0.0d4.txt");
+		namespace fs = std::filesystem;
+
+		if (!fs::exists("output"))
+		{
+			fs::create_directory("output");
+		}
+
+		// http://www.unicode.org/Public/15.0.0/ucd/
+		lexertl::memory_file bmf_("Blocks.txt");
+		lexertl::memory_file smf_("Scripts.txt");
+		lexertl::memory_file umf_("UnicodeData.txt");
 		std::ofstream dcpps_("output/blocks.hpp", std::ofstream::out);
 		std::ofstream fs2_("output/fold2.inc", std::ofstream::out);
 		std::ofstream fs4_("output/fold4.inc", std::ofstream::out);
@@ -458,13 +465,8 @@ int main()
 		lex_scripts_data(smf_, scpps_, ucs_);
 		ucs_ << "    { 0, 0 }\n";
 		dcpps_.close();
-		fs2_.close();
-		fs4_.close();
 		scpps_.close();
 		ucs_.close();
-		us_.close();
-
-		namespace fs = std::filesystem;
 
 		fs::rename("output/blocks.hpp", "../include/lexertl/parser/tokeniser/blocks.hpp");
 		fs::rename("output/fold2.inc", "../include/lexertl/parser/tokeniser/fold2.inc");
