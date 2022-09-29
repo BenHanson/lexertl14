@@ -7,7 +7,7 @@
 # file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 cmake_minimum_required (VERSION 3.5)
-project(lexertl VERSION 0.1.0)
+project(lexertl VERSION 0.2.0)
 
 # Define project
 add_library(lexertl INTERFACE)
@@ -44,7 +44,16 @@ write_basic_package_version_file("lexertlConfigVersion.cmake"
 	VERSION ${lexertl_VERSION}
 	COMPATIBILITY SameMajorVersion
 )
+configure_package_config_file(
+   "${CMAKE_CURRENT_SOURCE_DIR}/lexertlConfig.cmake"
+   "${CMAKE_CURRENT_BINARY_DIR}/lexertlConfig.cmake"
+   INSTALL_DESTINATION lib/cmake/lexertl
+   )
+
 install(FILES "lexertlConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/lexertlConfigVersion.cmake"
 	DESTINATION lib/cmake/lexertl
 )
-
+export(EXPORT lexertlTargets
+    NAMESPACE lexertl::
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/lexertlTargets.cmake"
+  )
