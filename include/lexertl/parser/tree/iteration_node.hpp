@@ -1,5 +1,5 @@
 // iteration_node.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -43,16 +43,14 @@ namespace lexertl
                 }
             }
 
-            virtual ~basic_iteration_node() override
-            {
-            }
+            ~basic_iteration_node() override = default;
 
-            virtual node_type what_type() const override
+            node_type what_type() const override
             {
                 return node::node_type::ITERATION;
             }
 
-            virtual bool traverse(const_node_stack& node_stack_,
+            bool traverse(const_node_stack& node_stack_,
                 bool_stack& perform_op_stack_) const override
             {
                 perform_op_stack_.push(true);
@@ -64,7 +62,7 @@ namespace lexertl
             observer_ptr<node> _next;
             bool _greedy;
 
-            virtual void copy_node(node_ptr_vector& node_ptr_vector_,
+            void copy_node(node_ptr_vector& node_ptr_vector_,
                 node_stack& new_node_stack_, bool_stack& perform_op_stack_,
                 bool& down_) const override
             {

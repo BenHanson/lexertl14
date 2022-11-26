@@ -1,5 +1,5 @@
 // parser.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -81,9 +81,7 @@ namespace lexertl
                 _locale(locale_),
                 _node_ptr_vector(node_ptr_vector_),
                 _charset_map(charset_map_),
-                _eoi(eoi_),
-                _token_stack(),
-                _tree_node_stack()
+                _eoi(eoi_)
             {
             }
 
@@ -484,13 +482,13 @@ namespace lexertl
             void slice_range(const input_range& range_,
                 string_token_vector data_[2], const std::false_type&)
             {
-                const unsigned char first_msb_ = static_cast<unsigned char>
+                const auto first_msb_ = static_cast<unsigned char>
                     ((range_.first >> 8) & 0xff);
-                const unsigned char first_lsb_ = static_cast<unsigned char>
+                const auto first_lsb_ = static_cast<unsigned char>
                     (range_.first & 0xff);
-                const unsigned char second_msb_ = static_cast<unsigned char>
+                const auto second_msb_ = static_cast<unsigned char>
                     ((range_.second >> 8) & 0xff);
-                const unsigned char second_lsb_ = static_cast<unsigned char>
+                const auto second_lsb_ = static_cast<unsigned char>
                     (range_.second & 0xff);
 
                 if (first_msb_ == second_msb_)
@@ -518,17 +516,17 @@ namespace lexertl
             void slice_range(const input_range& range_,
                 string_token_vector data_[3], const std::true_type&)
             {
-                const unsigned char first_msb_ = static_cast<unsigned char>
+                const auto first_msb_ = static_cast<unsigned char>
                     ((range_.first >> 16) & 0xff);
-                const unsigned char first_mid_ = static_cast<unsigned char>
+                const auto first_mid_ = static_cast<unsigned char>
                     ((range_.first >> 8) & 0xff);
-                const unsigned char first_lsb_ = static_cast<unsigned char>
+                const auto first_lsb_ = static_cast<unsigned char>
                     (range_.first & 0xff);
-                const unsigned char second_msb_ = static_cast<unsigned char>
+                const auto second_msb_ = static_cast<unsigned char>
                     ((range_.second >> 16) & 0xff);
-                const unsigned char second_mid_ = static_cast<unsigned char>
+                const auto second_mid_ = static_cast<unsigned char>
                     ((range_.second >> 8) & 0xff);
-                const unsigned char second_lsb_ = static_cast<unsigned char>
+                const auto second_lsb_ = static_cast<unsigned char>
                     (range_.second & 0xff);
 
                 if (first_msb_ == second_msb_)

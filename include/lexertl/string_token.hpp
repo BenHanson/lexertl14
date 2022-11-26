@@ -1,5 +1,5 @@
 // string_token.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -28,10 +28,7 @@ namespace lexertl
 
         range_vector _ranges;
 
-        basic_string_token() :
-            _ranges()
-        {
-        }
+        basic_string_token() = default;
 
         basic_string_token(char_type ch_) :
             _ranges()
@@ -45,7 +42,7 @@ namespace lexertl
             insert(range(first_, second_));
         }
 
-        void clear()
+        void clear() noexcept
         {
             _ranges.clear();
         }
@@ -79,19 +76,17 @@ namespace lexertl
         bool negatable() const
         {
             std::size_t size_ = 0;
-            auto iter_ = _ranges.cbegin();
-            auto end_ = _ranges.cend();
 
-            for (; iter_ != end_; ++iter_)
+            for (const auto& pair_ : _ranges)
             {
-                size_ += static_cast<std::size_t>(iter_->second) + 1 -
-                    static_cast<std::size_t>(iter_->first);
+                size_ += static_cast<std::size_t>(pair_.second) + 1 -
+                    static_cast<std::size_t>(pair_.first);
             }
 
             return size_ > static_cast<std::size_t>(char_traits::max_val()) / 2;
         }
 
-        void swap(basic_string_token& rhs_)
+        void swap(basic_string_token& rhs_) noexcept
         {
             _ranges.swap(rhs_._ranges);
         }

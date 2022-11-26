@@ -1,5 +1,5 @@
 // rules.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -192,13 +192,13 @@ namespace lexertl
             if (_statemap.insert(string_id_type_pair(name_,
                 static_cast<id_type>(_statemap.size()))).second)
             {
-                _regexes.push_back(token_vector_vector());
+                _regexes.emplace_back();
                 _features.push_back(0);
-                _ids.push_back(id_vector());
-                _user_ids.push_back(id_vector());
-                _next_dfas.push_back(id_vector());
-                _pushes.push_back(id_vector());
-                _pops.push_back(bool_vector());
+                _ids.emplace_back();
+                _user_ids.emplace_back();
+                _next_dfas.emplace_back();
+                _pushes.emplace_back();
+                _pops.emplace_back();
 
                 if (string(name_) != initial())
                 {
@@ -276,7 +276,7 @@ namespace lexertl
             const id_type user_id_ = npos())
         {
             check_for_invalid_id(id_);
-            _regexes.front().push_back(token_vector());
+            _regexes.front().emplace_back();
             tokenise(regex_, _regexes.front().back(), id_, nullptr);
 
             if (_regexes.front().back()[1]._type == detail::token_type::BOL)
@@ -466,7 +466,7 @@ namespace lexertl
             string macro_;
             rules_char_type diff_ = 0;
 
-            tokens_.push_back(token());
+            tokens_.emplace_back();
 
             do
             {
@@ -965,7 +965,7 @@ namespace lexertl
             {
                 const id_type curr_ = next_dfas_[i_];
 
-                _regexes[curr_].push_back(token_vector());
+                _regexes[curr_].emplace_back();
                 tokenise(regex_, _regexes[curr_].back(), id_, 0);
 
                 if (_regexes[curr_].back()[1]._type == detail::token_type::BOL)

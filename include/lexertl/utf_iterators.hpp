@@ -1,5 +1,5 @@
 // utf_iterators.hpp
-// Copyright (c) 2015-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2015-2023 Ben Hanson (http://www.benhanson.net/)
 // Inspired by http://utfcpp.sourceforge.net/
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -26,16 +26,14 @@ namespace lexertl
 
         basic_utf8_in_iterator() :
             _it(char_iterator()),
-            _end(char_iterator()),
-            _char(0)
+            _end(char_iterator())
         {
         }
 
         explicit basic_utf8_in_iterator(const char_iterator& it_,
             const char_iterator& end_) :
             _it(it_),
-            _end(it_),
-            _char(0)
+            _end(it_)
         {
             if (it_ != end_)
             {
@@ -110,7 +108,7 @@ namespace lexertl
     private:
         char_iterator _it;
         char_iterator _end;
-        char_type _char;
+        char_type _char = 0;
 
         void next()
         {
@@ -165,6 +163,8 @@ namespace lexertl
                 ch_ |= *_end & 0x3f;
                 ++_end;
                 break;
+            default:
+                break;
             }
 
             _char = ch_;
@@ -195,17 +195,11 @@ namespace lexertl
         using reference =
             typename std::iterator_traits<char_iterator>::reference;
 
-        basic_utf8_out_iterator() :
-            _count(0),
-            _index(0)
-        {
-        }
+        basic_utf8_out_iterator() = default;
 
         explicit basic_utf8_out_iterator(const char_iterator& it_,
             const char_iterator& end_) :
-            _it(it_),
-            _count(0),
-            _index(0)
+            _it(it_)
         {
             if (it_ != end_)
             {
@@ -259,8 +253,8 @@ namespace lexertl
     private:
         char_iterator _it;
         char _bytes[4]{};
-        unsigned char _count;
-        unsigned char _index;
+        unsigned char _count = 0;
+        unsigned char _index = 0;
 
         void next()
         {
@@ -289,6 +283,8 @@ namespace lexertl
                 _bytes[2] = ((ch_ >> 6) & 0x3f) | 0x80;
                 _bytes[3] = (ch_ & 0x3f) | 0x80;
                 break;
+            default:
+                break;
             }
         }
 
@@ -316,16 +312,14 @@ namespace lexertl
 
         basic_utf16_in_iterator() :
             _it(char_iterator()),
-            _end(char_iterator()),
-            _char(0)
+            _end(char_iterator())
         {
         }
 
         explicit basic_utf16_in_iterator(const char_iterator& it_,
             const char_iterator& end_) :
             _it(it_),
-            _end(it_),
-            _char(0)
+            _end(it_)
         {
             if (it_ != end_)
             {
@@ -395,7 +389,7 @@ namespace lexertl
     private:
         char_iterator _it;
         char_iterator _end;
-        char_type _char;
+        char_type _char = 0;
 
         void next()
         {
@@ -429,17 +423,11 @@ namespace lexertl
         using reference =
             typename std::iterator_traits<char_iterator>::reference;
 
-        basic_utf16_out_iterator() :
-            _count(0),
-            _index(0)
-        {
-        }
+        basic_utf16_out_iterator() = default;
 
         explicit basic_utf16_out_iterator(const char_iterator& it_,
             const char_iterator& end_) :
-            _it(it_),
-            _count(0),
-            _index(0)
+            _it(it_)
         {
             if (it_ != end_)
             {
@@ -493,8 +481,8 @@ namespace lexertl
     private:
         char_iterator _it;
         out_char _chars[2]{};
-        unsigned char _count;
-        unsigned char _index;
+        unsigned char _count = 0;
+        unsigned char _index = 0;
 
         void next()
         {
@@ -512,6 +500,8 @@ namespace lexertl
                 _chars[0] = static_cast<out_char>((ch_ >> 10) + 0xdc00u -
                     (0x10000 >> 10));
                 _chars[1] = static_cast<out_char>((ch_ & 0x3ff) + 0xdc00u);
+                break;
+            default:
                 break;
             }
         }

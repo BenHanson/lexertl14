@@ -1,5 +1,5 @@
 // state_machine.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -32,11 +32,6 @@ namespace lexertl
         static_assert(std::is_unsigned<id_type>::value,
             "Your id type is signed");
 
-        basic_state_machine() :
-            _internals()
-        {
-        }
-
         void clear()
         {
             _internals.clear();
@@ -64,7 +59,7 @@ namespace lexertl
 
         void minimise()
         {
-            const id_type dfas_ = static_cast<id_type>(_internals._dfa.size());
+            const auto dfas_ = static_cast<id_type>(_internals._dfa.size());
 
             for (id_type i_ = 0; i_ < dfas_; ++i_)
             {
@@ -94,7 +89,7 @@ namespace lexertl
             return static_cast<id_type>(~1);
         }
 
-        void swap(basic_state_machine& rhs_)
+        void swap(basic_state_machine& rhs_) noexcept
         {
             _internals.swap(rhs_._internals);
         }
@@ -105,7 +100,7 @@ namespace lexertl
         internals _internals;
 
         void minimise_dfa(const id_type dfa_alphabet_,
-            id_type_vector& dfa_, std::size_t size_)
+            id_type_vector& dfa_, std::size_t size_) const
         {
             observer_ptr<const id_type> first_ = &dfa_.front();
             observer_ptr<const id_type> end_ = first_ + size_;
@@ -217,26 +212,14 @@ namespace lexertl
             using id_type_string_token_pair = std::pair<id_type, string_token>;
             enum class push_pop_dfa { neither, push_dfa, pop_dfa };
 
-            bool _end_state;
-            push_pop_dfa _push_pop_dfa;
-            id_type _id;
-            id_type _user_id;
-            id_type _push_dfa;
-            id_type _next_dfa;
-            id_type _eol_index;
+            bool _end_state = false;
+            push_pop_dfa _push_pop_dfa = push_pop_dfa::neither;
+            id_type _id = 0;
+            id_type _user_id = traits::npos();
+            id_type _push_dfa = traits::npos();
+            id_type _next_dfa = 0;
+            id_type _eol_index = traits::npos();
             id_type_string_token_map _transitions;
-
-            state() :
-                _end_state(false),
-                _push_pop_dfa(push_pop_dfa::neither),
-                _id(0),
-                _user_id(traits::npos()),
-                _push_dfa(traits::npos()),
-                _next_dfa(0),
-                _eol_index(traits::npos()),
-                _transitions()
-            {
-            }
 
             bool operator ==(const state rhs_) const
             {
@@ -259,11 +242,10 @@ namespace lexertl
 
         struct dfa
         {
-            id_type _bol_index;
+            id_type _bol_index = traits::npos();
             state_vector _states;
 
-            dfa(const std::size_t size_) :
-                _bol_index(traits::npos()),
+            explicit dfa(const std::size_t size_) :
                 _states(state_vector(size_))
             {
             }
@@ -273,7 +255,7 @@ namespace lexertl
                 return _states.size();
             }
 
-            void swap(dfa& rhs_)
+            void swap(dfa& rhs_) noexcept
             {
                 std::swap(_bol_index, rhs_._bol_index);
                 _states.swap(rhs_._states);
@@ -288,11 +270,6 @@ namespace lexertl
             "Your id type is signed");
         dfa_vector _sm_vector;
 
-        basic_char_state_machine() :
-            _sm_vector()
-        {
-        }
-
         void append(const string_token_vector& token_vector_,
             const internals& internals_, const id_type dfa_index_)
         {
@@ -305,7 +282,7 @@ namespace lexertl
                 dfa_alphabet_;
             typename state::id_type_string_token_map::iterator trans_iter_;
 
-            _sm_vector.push_back(dfa(size_));
+            _sm_vector.emplace_back(size_);
 
             dfa& dest_dfa_ = _sm_vector.back();
 
@@ -368,7 +345,7 @@ namespace lexertl
             }
         }
 
-        void clear()
+        void clear() noexcept
         {
             _sm_vector.clear();
         }
@@ -414,7 +391,7 @@ namespace lexertl
             return ~static_cast<id_type>(1);
         }
 
-        void swap(basic_char_state_machine& csm_)
+        void swap(basic_char_state_machine& csm_) noexcept
         {
             _sm_vector.swap(csm_._sm_vector);
         }
@@ -422,7 +399,7 @@ namespace lexertl
     private:
         using index_set = std::set<id_type>;
 
-        void minimise_dfa(dfa& dfa_, std::size_t size_)
+        void minimise_dfa(dfa& dfa_, std::size_t size_) const
         {
             observer_ptr<const state> first_ = &dfa_._states.front();
             observer_ptr<const state> end_ = first_ + size_;
@@ -489,24 +466,21 @@ namespace lexertl
                         new_ptr_->_eol_index = lookup_ptr_[ptr_->_eol_index];
                     }
 
-                    auto iter_ = ptr_->_transitions.cbegin();
-                    auto end_ = ptr_->_transitions.cend();
-                    typename state::id_type_string_token_map::iterator find_;
-
-                    for (; iter_ != end_; ++iter_)
+                    for (const auto& tran_ : ptr_->_transitions)
                     {
-                        find_ = new_ptr_->_transitions.find
-                        (lookup_ptr_[iter_->first]);
+                        auto find_ = new_ptr_->_transitions.
+                            find(lookup_ptr_[tran_.first]);
 
+                        // Long hand for performance
                         if (find_ == new_ptr_->_transitions.end())
                         {
                             new_ptr_->_transitions.insert
                             (id_type_string_token_pair
-                            (lookup_ptr_[iter_->first], iter_->second));
+                            (lookup_ptr_[tran_.first], tran_.second));
                         }
                         else
                         {
-                            find_->second.insert(iter_->second);
+                            find_->second.insert(tran_.second);
                         }
                     }
 

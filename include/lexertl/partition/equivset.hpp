@@ -1,5 +1,5 @@
 // equivset.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -101,10 +101,10 @@ namespace lexertl
                 }
             }
 
-            void remove(const index_vector& source_, index_vector& dest_)
+            void remove(const index_vector& source_, index_vector& dest_) const
             {
-                auto inter_ = source_.begin();
-                auto inter_end_ = source_.end();
+                auto inter_ = source_.cbegin();
+                auto inter_end_ = source_.cend();
                 auto reader_ = std::find(dest_.begin(), dest_.end(), *inter_);
                 auto writer_ = reader_;
                 auto dest_end_ = dest_.end();

@@ -1,5 +1,5 @@
 // internals.hpp
-// Copyright (c) 2009-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2009-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -20,20 +20,11 @@ namespace lexertl
             using id_type_vector = std::vector<id_type>;
             using id_type_vector_vector = std::vector<id_type_vector>;
 
-            id_type _eoi;
+            id_type _eoi = 0;
             id_type_vector_vector _lookup;
             id_type_vector _dfa_alphabet;
-            id_type _features;
+            id_type _features = 0;
             id_type_vector_vector _dfa;
-
-            basic_internals() :
-                _eoi(0),
-                _lookup(),
-                _dfa_alphabet(),
-                _features(0),
-                _dfa()
-            {
-            }
 
             void clear()
             {
@@ -56,11 +47,11 @@ namespace lexertl
                     // lookup *always* has a size 256 now.
                     _lookup.push_back(id_type_vector(256, dead_state_index));
                     _dfa_alphabet.push_back(0);
-                    _dfa.push_back(id_type_vector());
+                    _dfa.emplace_back();
                 }
             }
 
-            void swap(basic_internals& internals_)
+            void swap(basic_internals& internals_) noexcept
             {
                 std::swap(_eoi, internals_._eoi);
                 _lookup.swap(internals_._lookup);

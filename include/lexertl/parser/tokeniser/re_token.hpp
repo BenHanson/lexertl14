@@ -1,5 +1,5 @@
 // re_token.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -31,10 +31,9 @@ namespace lexertl
             string _extra;
             string_token _str;
 
-            basic_re_token(const token_type type_ = token_type::BEGIN) :
-                _type(type_),
-                _extra(),
-                _str()
+            explicit basic_re_token(const token_type type_ =
+                token_type::BEGIN) :
+                _type(type_)
             {
             }
 
@@ -45,7 +44,7 @@ namespace lexertl
                 _str.clear();
             }
 
-            void swap(basic_re_token& rhs_)
+            void swap(basic_re_token& rhs_) noexcept
             {
                 std::swap(_type, rhs_._type);
                 _extra.swap(rhs_._extra);

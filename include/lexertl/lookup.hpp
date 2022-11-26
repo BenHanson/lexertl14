@@ -1,5 +1,5 @@
 // lookup.hpp
-// Copyright (c) 2009-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2009-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -17,7 +17,7 @@ namespace lexertl
         template<bool>
         struct bol_state
         {
-            bol_state(const bool)
+            explicit bol_state(const bool)
             {
             }
         };
@@ -28,7 +28,7 @@ namespace lexertl
             bool _bol;
             bool _end_bol;
 
-            bol_state(const bool bol_) :
+            explicit bol_state(const bool bol_) :
                 _bol(bol_),
                 _end_bol(bol_)
             {
@@ -43,18 +43,13 @@ namespace lexertl
         template<typename id_type>
         struct eol_state<id_type, true>
         {
-            id_type _EOL_state;
-
-            eol_state() :
-                _EOL_state(0)
-            {
-            }
+            id_type _EOL_state = 0;
         };
 
         template<typename id_type, bool>
         struct multi_state_state
         {
-            multi_state_state(const id_type)
+            explicit multi_state_state(const id_type)
             {
             }
         };
@@ -64,7 +59,7 @@ namespace lexertl
         {
             id_type _start_state;
 
-            multi_state_state(const id_type state_) :
+            explicit multi_state_state(const id_type state_) :
                 _start_state(state_)
             {
             }
@@ -73,7 +68,7 @@ namespace lexertl
         template<typename id_type, bool>
         struct recursive_state
         {
-            recursive_state(const id_type*)
+            explicit recursive_state(const id_type*)
             {
             }
         };
@@ -84,7 +79,7 @@ namespace lexertl
             bool _pop;
             id_type _push_dfa;
 
-            recursive_state(const id_type* ptr_) :
+            explicit recursive_state(const id_type* ptr_) :
                 _pop((*ptr_& pop_dfa_bit) != 0),
                 _push_dfa(*(ptr_ + push_dfa_index))
             {
@@ -119,7 +114,6 @@ namespace lexertl
                 _id(*(_ptr + id_index)),
                 _uid(*(_ptr + user_id_index)),
                 _bol_state(bol_),
-                _eol_state(),
                 _multi_state_state(state_),
                 _recursive_state(_ptr)
             {

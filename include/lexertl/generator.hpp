@@ -1,5 +1,5 @@
 // generator.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -35,7 +35,7 @@ namespace lexertl
 
         static void build(const rules& rules_, sm& sm_)
         {
-            const id_type size_ =
+            const auto size_ =
                 static_cast<id_type>(rules_.statemap().size());
             // Strong exception guarantee
             // http://www.boost.org/community/exception_safety.html
@@ -610,12 +610,11 @@ namespace lexertl
             auto hash_end_ = hash_vector_.cend();
             auto set_iter_ = seen_sets_.cbegin();
 
-            for (; hash_iter_ != hash_end_; ++hash_iter_, ++set_iter_)
+            for (; !found_ && hash_iter_ != hash_end_;
+                ++hash_iter_, ++set_iter_)
             {
                 found_ = *hash_iter_ == hash_ && *(*set_iter_) == *set_ptr_;
                 ++index_;
-
-                if (found_) break;
             }
 
             if (!found_)

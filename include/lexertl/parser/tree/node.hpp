@@ -1,5 +1,5 @@
 // node.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -29,23 +29,14 @@ namespace lexertl
             using node_vector = std::vector<observer_ptr<basic_node>>;
             using node_ptr_vector = std::vector<std::unique_ptr<basic_node>>;
 
-            basic_node() :
-                _nullable(false),
-                _firstpos(),
-                _lastpos()
+            basic_node() = default;
+
+            explicit basic_node(const bool nullable_) :
+                _nullable(nullable_)
             {
             }
 
-            basic_node(const bool nullable_) :
-                _nullable(nullable_),
-                _firstpos(),
-                _lastpos()
-            {
-            }
-
-            virtual ~basic_node()
-            {
-            }
+            virtual ~basic_node() = default;
 
             static id_type null_token()
             {
@@ -223,7 +214,7 @@ namespace lexertl
             }
 
         protected:
-            const bool _nullable;
+            const bool _nullable = false;
             node_vector _firstpos;
             node_vector _lastpos;
 

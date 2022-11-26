@@ -1,5 +1,5 @@
 // match_results.hpp
-// Copyright (c) 2015-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2015-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -25,29 +25,23 @@ namespace lexertl
         using index_type = typename basic_char_traits<char_type>::index_type;
         using string = std::basic_string<char_type>;
 
-        id_type id;
-        id_type user_id;
+        id_type id = 0;
+        id_type user_id = npos();
         iter_type first;
         iter_type second;
         iter_type eoi;
-        bool bol;
-        id_type state;
+        bool bol = true;
+        id_type state = 0;
 
         match_results() :
-            id(0),
-            user_id(npos()),
             first(iter_type()),
             second(iter_type()),
-            eoi(iter_type()),
-            bol(true),
-            state(0)
+            eoi(iter_type())
         {
         }
 
         match_results(const iter_type& start_, const iter_type& end_,
             const bool bol_ = true, const id_type state_ = 0) :
-            id(0),
-            user_id(npos()),
             first(start_),
             second(start_),
             eoi(end_),
@@ -139,18 +133,16 @@ namespace lexertl
         {
         }
 
-        virtual ~recursive_match_results() override
-        {
-        }
+        ~recursive_match_results() override = default;
 
-        virtual void clear() override
+        void clear() override
         {
             match_results<iter, id_type, flags>::clear();
 
             while (!stack.empty()) stack.pop();
         }
 
-        virtual void reset(const iter& start_, const iter& end_) override
+        void reset(const iter& start_, const iter& end_) override
         {
             match_results<iter, id_type, flags>::reset(start_, end_);
 

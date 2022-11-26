@@ -1,5 +1,5 @@
 // end_node.hpp
-// Copyright (c) 2005-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2005-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -32,66 +32,63 @@ namespace lexertl
                 _user_id(user_id_),
                 _next_dfa(next_dfa_),
                 _push_dfa(push_dfa_),
-                _pop_dfa(pop_dfa_),
-                _followpos()
+                _pop_dfa(pop_dfa_)
             {
                 node::_firstpos.push_back(this);
                 node::_lastpos.push_back(this);
             }
 
-            virtual ~basic_end_node() override
-            {
-            }
+            ~basic_end_node() override = default;
 
-            virtual node_type what_type() const override
+            node_type what_type() const override
             {
                 return node::node_type::END;
             }
 
-            virtual bool traverse(const_node_stack&/*node_stack_*/,
+            bool traverse(const_node_stack&/*node_stack_*/,
                 bool_stack&/*perform_op_stack_*/) const override
             {
                 return false;
             }
 
-            virtual const node_vector& followpos() const override
+            const node_vector& followpos() const override
             {
                 // _followpos is always empty..!
                 return _followpos;
             }
 
-            virtual node_vector& followpos() override
+            node_vector& followpos() override
             {
                 // _followpos is always empty..!
                 return _followpos;
             }
 
-            virtual bool end_state() const override
+            bool end_state() const override
             {
                 return true;
             }
 
-            virtual id_type id() const override
+            id_type id() const override
             {
                 return _id;
             }
 
-            virtual id_type user_id() const override
+            id_type user_id() const override
             {
                 return _user_id;
             }
 
-            virtual id_type next_dfa() const override
+            id_type next_dfa() const override
             {
                 return _next_dfa;
             }
 
-            virtual id_type push_dfa() const override
+            id_type push_dfa() const override
             {
                 return _push_dfa;
             }
 
-            virtual bool pop_dfa() const override
+            bool pop_dfa() const override
             {
                 return _pop_dfa;
             }
@@ -104,7 +101,7 @@ namespace lexertl
             bool _pop_dfa;
             node_vector _followpos;
 
-            virtual void copy_node(node_ptr_vector&/*node_ptr_vector_*/,
+            void copy_node(node_ptr_vector&/*node_ptr_vector_*/,
                 node_stack&/*new_node_stack_*/,
                 bool_stack&/*perform_op_stack_*/,
                 bool&/*down_*/) const override

@@ -1,5 +1,5 @@
 // iterator.hpp
-// Copyright (c) 2015-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2015-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -25,8 +25,7 @@ namespace lexertl
         using iterator_category = std::forward_iterator_tag;
 
         iterator() :
-            _results(iter(), iter()),
-            _sm(nullptr)
+            _results(iter(), iter())
         {
         }
 
@@ -36,25 +35,6 @@ namespace lexertl
             _sm(&sm_)
         {
             lookup();
-        }
-
-        // Only need this because of warnings with gcc with -Weffc++
-        iterator(const iterator& rhs_)
-        {
-            _results = rhs_._results;
-            _sm = rhs_._sm;
-        }
-
-        // Only need this because of warnings with gcc with -Weffc++
-        iterator& operator =(const iterator& rhs_)
-        {
-            if (&rhs_ != this)
-            {
-                _results = rhs_._results;
-                _sm = rhs_._sm;
-            }
-
-            return *this;
         }
 
         iterator& operator ++()
@@ -99,7 +79,7 @@ namespace lexertl
 
     private:
         value_type _results;
-        const sm_type* _sm;
+        const sm_type* _sm = nullptr;
 
         void lookup()
         {
