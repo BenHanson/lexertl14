@@ -26,13 +26,14 @@ namespace lexertl
 
             basic_end_node(const id_type id_, const id_type user_id_,
                 const id_type next_dfa_, const id_type push_dfa_,
-                const bool pop_dfa_) :
+                const bool pop_dfa_, const bool greedy_) :
                 node(false),
                 _id(id_),
                 _user_id(user_id_),
                 _next_dfa(next_dfa_),
                 _push_dfa(push_dfa_),
-                _pop_dfa(pop_dfa_)
+                _pop_dfa(pop_dfa_),
+                _greedy(greedy_)
             {
                 node::_firstpos.push_back(this);
                 node::_lastpos.push_back(this);
@@ -49,6 +50,11 @@ namespace lexertl
                 bool_stack&/*perform_op_stack_*/) const override
             {
                 return false;
+            }
+
+            bool greedy() const override
+            {
+                return _greedy;
             }
 
             const node_vector& followpos() const override
@@ -99,6 +105,7 @@ namespace lexertl
             id_type _next_dfa;
             id_type _push_dfa;
             bool _pop_dfa;
+            bool _greedy;
             node_vector _followpos;
 
             void copy_node(node_ptr_vector&/*node_ptr_vector_*/,

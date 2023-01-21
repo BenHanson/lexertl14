@@ -88,7 +88,7 @@ namespace lexertl
 
         template<typename internals, typename id_type, typename index_type,
             std::size_t flags>
-            struct lookup_state
+        struct lookup_state
         {
             const id_type* _lookup;
             id_type _dfa_alphabet;

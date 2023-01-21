@@ -46,6 +46,11 @@ namespace lexertl
             return _char;
         }
 
+        bool operator >(const basic_utf8_in_iterator& rhs_) const
+        {
+            return _it > rhs_._it;
+        }
+
         bool operator ==(const basic_utf8_in_iterator& rhs_) const
         {
             return _it == rhs_._it;

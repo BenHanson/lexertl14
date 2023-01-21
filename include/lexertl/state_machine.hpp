@@ -197,7 +197,7 @@ namespace lexertl
 
     template<typename char_type, typename id_ty = uint16_t,
         bool is_dfa = true>
-        struct basic_char_state_machine
+    struct basic_char_state_machine
     {
         using id_type = id_ty;
         using traits =

@@ -63,6 +63,11 @@ namespace lexertl
                 return _token;
             }
 
+            bool set_greedy() const override
+            {
+                return _set_greedy;
+            }
+
             void greedy(const bool greedy_) override
             {
                 if (!_set_greedy)

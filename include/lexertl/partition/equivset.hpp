@@ -58,7 +58,28 @@ namespace lexertl
                     // Note that the LHS takes priority in order to
                     // respect rule ordering priority in the lex spec.
                     overlap_._id = _id;
-                    overlap_._greedy = _greedy;
+
+                    if (_greedy)
+                        overlap_._greedy = true;
+                    else
+                    {
+                        bool greedy_ = false;
+
+                        for (const node* node_ : rhs_._followpos)
+                        {
+                            // If a 'hard greedy' transition is present,
+                            // then respect that above all else.
+                            if (node_->what_type() == node::node_type::LEAF &&
+                                node_->greedy() && node_->set_greedy())
+                            {
+                                greedy_ = true;
+                                break;
+                            }
+                        }
+
+                        overlap_._greedy = greedy_;
+                    }
+
                     overlap_._followpos = _followpos;
 
                     auto overlap_begin_ = overlap_._followpos.cbegin();

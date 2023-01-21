@@ -247,7 +247,8 @@ namespace lexertl
                                 dfa_alphabet_);
 
                         // Prune abstemious transitions from end states.
-                        if (*ptr_ && !equivset_->_greedy) continue;
+                        if (*ptr_ && !(*ptr_ & greedy_bit) && !equivset_->_greedy)
+                            continue;
 
                         set_transitions(transition_, equivset_.get(), dfa_,
                             ptr_, index_, eol_set_);
@@ -591,6 +592,7 @@ namespace lexertl
             id_type push_dfa_ = sm_traits::npos();
             bool pop_dfa_ = false;
             std::size_t hash_ = 0;
+            bool greedy_ = true;
 
             if (followpos_.empty()) return sm_traits::npos();
 
@@ -602,7 +604,8 @@ namespace lexertl
             for (observer_ptr<node> node_ : followpos_)
             {
                 closure_ex(node_, end_state_, id_, user_id_, next_dfa_,
-                    push_dfa_, pop_dfa_, *set_ptr_, *vector_ptr_, hash_);
+                    push_dfa_, pop_dfa_, *set_ptr_, *vector_ptr_, hash_,
+                    greedy_);
             }
 
             bool found_ = false;
@@ -633,6 +636,9 @@ namespace lexertl
                 {
                     dfa_[old_size_] |= end_state_bit;
 
+                    if (greedy_)
+                        dfa_[old_size_] |= greedy_bit;
+
                     if (pop_dfa_)
                     {
                         dfa_[old_size_] |= pop_dfa_bit;
@@ -651,7 +657,7 @@ namespace lexertl
         static void closure_ex(observer_ptr<node> node_, bool& end_state_,
             id_type& id_, id_type& user_id_, id_type& next_dfa_,
             id_type& push_dfa_, bool& pop_dfa_, node_set& set_ptr_,
-            node_vector& vector_ptr_, std::size_t& hash_)
+            node_vector& vector_ptr_, std::size_t& hash_, bool& greedy_)
         {
             const bool temp_end_state_ = node_->end_state();
 
@@ -665,6 +671,7 @@ namespace lexertl
                     next_dfa_ = node_->next_dfa();
                     push_dfa_ = node_->push_dfa();
                     pop_dfa_ = node_->pop_dfa();
+                    greedy_ = node_->greedy();
                 }
             }
 

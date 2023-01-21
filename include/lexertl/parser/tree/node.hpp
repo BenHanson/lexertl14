@@ -181,6 +181,11 @@ namespace lexertl
 #endif
             }
 
+            virtual bool set_greedy() const
+            {
+                throw runtime_error("Internal error node::set_greedy().");
+            }
+
             virtual void greedy(const bool /*greedy_*/)
             {
                 throw runtime_error("Internal error node::greedy(bool).");

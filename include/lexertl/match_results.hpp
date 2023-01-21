@@ -17,7 +17,7 @@ namespace lexertl
     template<typename iter, typename id_t = uint16_t,
         std::size_t flags = bol_bit | eol_bit | skip_bit | again_bit |
         multi_state_bit | advance_bit>
-        struct match_results
+    struct match_results
     {
         using id_type = id_t;
         using iter_type = iter;
@@ -114,7 +114,7 @@ namespace lexertl
     template<typename iter, typename id_type = uint16_t,
         std::size_t flags = bol_bit | eol_bit | skip_bit | again_bit |
         multi_state_bit | recursive_bit | advance_bit>
-        struct recursive_match_results :
+    struct recursive_match_results :
         public match_results<iter, id_type, flags>
     {
         using id_type_pair = std::pair<id_type, id_type>;
