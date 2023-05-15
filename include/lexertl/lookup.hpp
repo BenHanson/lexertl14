@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include "match_results.hpp"
+#include "runtime_error.hpp"
 #include <type_traits>
 
 namespace lexertl

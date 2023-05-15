@@ -148,8 +148,8 @@ namespace lexertl
                 assert(_tree_node_stack.size() == 1);
 
                 observer_ptr<node> lhs_node_ = _tree_node_stack.top();
-                const bool non_greedy_ = std::find_if(regex_.cbegin(), regex_.cend(),
-                    [](const token& token_)
+                const bool non_greedy_ = std::find_if(regex_.cbegin(),
+                    regex_.cend(), [](const token& token_)
                     {
                         return token_._type == token_type::AOPT ||
                             token_._type == token_type::AZEROORMORE ||
@@ -159,7 +159,8 @@ namespace lexertl
 
                 _tree_node_stack.pop();
                 _node_ptr_vector.push_back(std::make_unique<end_node>
-                    (id_, user_id_, next_dfa_, push_dfa_, pop_dfa_, !non_greedy_));
+                    (id_, user_id_, next_dfa_, push_dfa_, pop_dfa_,
+                        !non_greedy_));
 
                 observer_ptr<node> rhs_node_ = _node_ptr_vector.back().get();
 

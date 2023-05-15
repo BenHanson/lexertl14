@@ -247,8 +247,11 @@ namespace lexertl
                                 dfa_alphabet_);
 
                         // Prune abstemious transitions from end states.
-                        if (*ptr_ && !(*ptr_ & greedy_bit) && !equivset_->_greedy)
+                        if (*ptr_ && !(*ptr_ & greedy_bit) &&
+                            !equivset_->_greedy)
+                        {
                             continue;
+                        }
 
                         set_transitions(transition_, equivset_.get(), dfa_,
                             ptr_, index_, eol_set_);
