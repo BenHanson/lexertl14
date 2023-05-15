@@ -268,13 +268,8 @@ namespace lexertl
             equivset* equivset_, typename internals::id_type_vector& dfa_,
             id_type* ptr_, const id_type index_, id_type_set& eol_set_)
         {
-            for (typename equivset::index_vector::const_iterator
-                equiv_iter_ = equivset_->_index_vector.begin(),
-                equiv_end_ = equivset_->_index_vector.end();
-                equiv_iter_ != equiv_end_; ++equiv_iter_)
+            for (id_type i_ : equivset_->_index_vector)
             {
-                const id_type i_ = *equiv_iter_;
-
                 if (i_ == parser::bol_token())
                 {
                     dfa_.front() = transition_;

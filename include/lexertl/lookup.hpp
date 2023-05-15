@@ -316,8 +316,7 @@ namespace lexertl
                 }
                 else if (_recursive_state._push_dfa != results::npos())
                 {
-                    results_.stack.push(typename results::id_type_pair
-                    (_recursive_state._push_dfa, _id));
+                    results_.stack.emplace(_recursive_state._push_dfa, _id);
                 }
             }
 
