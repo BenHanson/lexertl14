@@ -613,7 +613,7 @@ namespace lexertl
                         return token_ == *rhs_.get();
                     });
 
-                if (iter_ == data_[0].end())
+                if (iter_ == data_[0].cend())
                 {
                     data_[0].push_back(std::make_unique
                         <string_token>(token_));
