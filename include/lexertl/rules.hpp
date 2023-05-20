@@ -60,18 +60,7 @@ namespace lexertl
 #else
         basic_rules(const std::size_t flags_ = dot_not_newline) :
 #endif
-            _statemap(),
-            _macro_map(),
-            _regexes(),
-            _features(),
-            _ids(),
-            _user_ids(),
-            _next_dfas(),
-            _pushes(),
-            _pops(),
-            _flags(flags_),
-            _locale(),
-            _lexer_state_names()
+            _flags(flags_)
         {
             push_state(initial());
         }
@@ -914,7 +903,7 @@ namespace lexertl
 
             if (star_)
             {
-                const id_type size_ = static_cast<id_type>(_statemap.size());
+                const auto size_ = static_cast<id_type>(_statemap.size());
 
                 for (id_type i_ = 0; i_ < size_; ++i_)
                 {

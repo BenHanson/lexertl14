@@ -357,7 +357,7 @@ namespace lexertl
 
         void minimise()
         {
-            const id_type dfas_ = static_cast<id_type>(_sm_vector.size());
+            const auto dfas_ = static_cast<id_type>(_sm_vector.size());
 
             for (id_type i_ = 0; i_ < dfas_; ++i_)
             {

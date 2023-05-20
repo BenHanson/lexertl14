@@ -27,18 +27,13 @@ namespace lexertl
 
         id_type id = 0;
         id_type user_id = npos();
-        iter_type first;
-        iter_type second;
-        iter_type eoi;
+        iter_type first = iter_type();
+        iter_type second = iter_type();
+        iter_type eoi = iter_type();
         bool bol = true;
         id_type state = 0;
 
-        match_results() :
-            first(iter_type()),
-            second(iter_type()),
-            eoi(iter_type())
-        {
-        }
+        match_results() = default;
 
         match_results(const iter_type& start_, const iter_type& end_,
             const bool bol_ = true, const id_type state_ = 0) :
@@ -121,15 +116,13 @@ namespace lexertl
         std::stack<id_type_pair> stack;
 
         recursive_match_results() :
-            match_results<iter, id_type, flags>(),
-            stack()
+            match_results<iter, id_type, flags>()
         {
         }
 
         recursive_match_results(const iter& start_, const iter& end_,
             const bool bol_ = true, const id_type state_ = 0) :
-            match_results<iter, id_type, flags>(start_, end_, bol_, state_),
-            stack()
+            match_results<iter, id_type, flags>(start_, end_, bol_, state_)
         {
         }
 

@@ -127,8 +127,8 @@ namespace lexertl
                     *pop_dfa_iter_, rules_.flags(), cr_id_, nl_id_,
                     (rules_.features()[dfa_] & bol_bit) != 0);
 
-                node_ptr_vector_.emplace_back
-                (std::make_unique<selection_node>(root_, rhs_));
+                node_ptr_vector_.push_back(std::make_unique<selection_node>
+                    (root_, rhs_));
                 root_ = node_ptr_vector_.back().get();
 
                 ++regex_iter_;
@@ -468,7 +468,7 @@ namespace lexertl
                 typename charset_list::iterator end_;
                 charset_ptr overlap_ = std::make_unique<charset>();
 
-                lhs_.emplace_back(std::move(rhs_.front()));
+                lhs_.push_back(std::move(rhs_.front()));
                 rhs_.pop_front();
 
                 while (!rhs_.empty())
@@ -513,7 +513,7 @@ namespace lexertl
 
                     if (!r_->empty())
                     {
-                        lhs_.emplace_back(std::move(r_));
+                        lhs_.push_back(std::move(r_));
                     }
                 }
             }
@@ -523,7 +523,7 @@ namespace lexertl
         {
             for (const auto& pair_ : map_)
             {
-                list_.emplace_back(std::make_unique<charset>
+                list_.push_back(std::make_unique<charset>
                     (pair_.first, pair_.second));
             }
         }
@@ -620,8 +620,8 @@ namespace lexertl
 
             if (!found_)
             {
-                seen_sets_.emplace_back(std::move(set_ptr_));
-                seen_vectors_.emplace_back(std::move(vector_ptr_));
+                seen_sets_.push_back(std::move(set_ptr_));
+                seen_vectors_.push_back(std::move(vector_ptr_));
                 hash_vector_.push_back(hash_);
                 // State 0 is the jam state...
                 index_ = static_cast<id_type>(seen_sets_.size());
@@ -703,7 +703,7 @@ namespace lexertl
                 typename equivset_list::iterator end_;
                 equivset_ptr overlap_ = std::make_unique<equivset>();
 
-                lhs_.emplace_back(std::move(rhs_.front()));
+                lhs_.push_back(std::move(rhs_.front()));
                 rhs_.pop_front();
 
                 while (!rhs_.empty())
@@ -748,7 +748,7 @@ namespace lexertl
 
                     if (!r_->empty())
                     {
-                        lhs_.emplace_back(std::move(r_));
+                        lhs_.push_back(std::move(r_));
                     }
                 }
             }
@@ -771,13 +771,13 @@ namespace lexertl
                             std::set<id_type> index_set_;
 
                             index_set_.insert(token_);
-                            list_.emplace_back
-                            (std::make_unique<equivset>(index_set_,
-                                token_, node_->greedy(), node_->followpos()));
+                            list_.push_back(std::make_unique<equivset>
+                                (index_set_, token_, node_->greedy(),
+                                    node_->followpos()));
                         }
                         else
                         {
-                            list_.emplace_back(std::make_unique<equivset>
+                            list_.push_back(std::make_unique<equivset>
                                 (set_mapping_[token_], token_, node_->greedy(),
                                     node_->followpos()));
                         }

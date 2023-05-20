@@ -120,7 +120,7 @@ namespace lexertl
             {
             }
 
-            void reset_recursive(const std::false_type&)
+            void reset_recursive(const std::false_type&) const
             {
                 // Do nothing
             }
@@ -131,7 +131,7 @@ namespace lexertl
                 _recursive_state._push_dfa = *(_ptr + push_dfa_index);
             }
 
-            void bol_start_state(const std::false_type&)
+            void bol_start_state(const std::false_type&) const
             {
                 // Do nothing
             }
@@ -150,7 +150,7 @@ namespace lexertl
             }
 
             template<typename char_type>
-            bool is_eol(const char_type, const std::false_type&)
+            bool is_eol(const char_type, const std::false_type&) const
             {
                 return false;
             }
@@ -212,7 +212,7 @@ namespace lexertl
             }
 
             template<typename char_type>
-            void bol(const char_type, const std::false_type&)
+            void bol(const char_type, const std::false_type&) const
             {
                 // Do nothing
             }
@@ -223,7 +223,7 @@ namespace lexertl
                 _bol_state._bol = prev_char_ == '\n';
             }
 
-            void eol(const id_type, const std::false_type&)
+            void eol(const id_type, const std::false_type&) const
             {
                 // Do nothing
             }
@@ -233,7 +233,7 @@ namespace lexertl
                 _eol_state._EOL_state = err_val_;
             }
 
-            void reset_start_state(const std::false_type&)
+            void reset_start_state(const std::false_type&) const
             {
                 // Do nothing
             }
@@ -243,7 +243,7 @@ namespace lexertl
                 _multi_state_state._start_state = *(_ptr + next_dfa_index);
             }
 
-            void reset_end_bol(const std::false_type&)
+            void reset_end_bol(const std::false_type&) const
             {
                 // Do nothing
             }
@@ -273,7 +273,7 @@ namespace lexertl
 
             template<typename iter_type, typename char_type>
             void check_eol(iter_type&, iter_type&, const id_type,
-                const char_type, const std::false_type&)
+                const char_type, const std::false_type&) const
             {
                 // Do nothing
             }
@@ -296,7 +296,7 @@ namespace lexertl
             }
 
             template<typename results>
-            void pop(results&, const std::false_type&)
+            void pop(results&, const std::false_type&) const
             {
                 // Nothing to do
             }
@@ -322,7 +322,7 @@ namespace lexertl
 
             template<typename results>
             bool is_id_eoi(const id_type eoi_, const results&,
-                const std::false_type&)
+                const std::false_type&) const
             {
                 return _id == eoi_;
             }
@@ -336,7 +336,7 @@ namespace lexertl
                     results_.stack.top().second == eoi_);
             }
 
-            void start_state(id_type&, const std::false_type&)
+            void start_state(id_type&, const std::false_type&) const
             {
                 // Do nothing
             }
@@ -346,7 +346,7 @@ namespace lexertl
                 start_state_ = _multi_state_state._start_state;
             }
 
-            void bol(bool&, const std::false_type&)
+            void bol(const bool&, const std::false_type&) const
             {
                 // Do nothing
             }
