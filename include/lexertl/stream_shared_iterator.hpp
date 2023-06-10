@@ -332,6 +332,7 @@ namespace lexertl
 
     using stream_shared_iterator = basic_stream_shared_iterator<char>;
     using wstream_shared_iterator = basic_stream_shared_iterator<wchar_t>;
+    using u32stream_shared_iterator = basic_stream_shared_iterator<char32_t>;
 }
 
 #endif

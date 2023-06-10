@@ -144,6 +144,7 @@ namespace lexertl
 
     using memory_file = basic_memory_file<char>;
     using wmemory_file = basic_memory_file<wchar_t>;
+    using u32memory_file = basic_memory_file<char32_t>;
 }
 
 #endif

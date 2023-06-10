@@ -81,8 +81,8 @@ namespace lexertl
             id_type _push_dfa;
 
             explicit recursive_state(const id_type* ptr_) :
-                _pop((*ptr_& pop_dfa_bit) != 0),
-                _push_dfa(*(ptr_ + push_dfa_index))
+                _pop((*ptr_& *state_bit::pop_dfa) != 0),
+                _push_dfa(*(ptr_ + *state_index::push_dfa))
             {
             }
         };
@@ -98,11 +98,11 @@ namespace lexertl
             bool _end_state;
             id_type _id;
             id_type _uid;
-            bol_state<(flags& bol_bit) != 0> _bol_state;
-            eol_state<id_type, (flags& eol_bit) != 0> _eol_state;
-            multi_state_state<id_type, (flags& multi_state_bit) != 0>
+            bol_state<(flags & +feature_bit::bol) != 0> _bol_state;
+            eol_state<id_type, (flags & +feature_bit::eol) != 0> _eol_state;
+            multi_state_state<id_type, (flags & +feature_bit::multi_state) != 0>
                 _multi_state_state;
-            recursive_state<id_type, (flags& recursive_bit) != 0>
+            recursive_state<id_type, (flags & +feature_bit::recursive) != 0>
                 _recursive_state;
 
             lookup_state(const internals& internals_, const bool bol_,
@@ -112,8 +112,8 @@ namespace lexertl
                 _dfa(&internals_._dfa[state_][0]),
                 _ptr(_dfa + _dfa_alphabet),
                 _end_state(*_ptr != 0),
-                _id(*(_ptr + id_index)),
-                _uid(*(_ptr + user_id_index)),
+                _id(*(_ptr + *state_index::id)),
+                _uid(*(_ptr + *state_index::user_id)),
                 _bol_state(bol_),
                 _multi_state_state(state_),
                 _recursive_state(_ptr)
@@ -127,8 +127,8 @@ namespace lexertl
 
             void reset_recursive(const std::true_type&)
             {
-                _recursive_state._pop = (*_ptr & pop_dfa_bit) != 0;
-                _recursive_state._push_dfa = *(_ptr + push_dfa_index);
+                _recursive_state._pop = (*_ptr & *state_bit::pop_dfa) != 0;
+                _recursive_state._push_dfa = *(_ptr + *state_index::push_dfa);
             }
 
             void bol_start_state(const std::false_type&) const
@@ -160,7 +160,7 @@ namespace lexertl
             {
                 bool ret_ = false;
 
-                _eol_state._EOL_state = _ptr[eol_index];
+                _eol_state._EOL_state = _ptr[*state_index::eol];
                 ret_ = _eol_state._EOL_state &&
                     (curr_ == '\r' || curr_ == '\n');
 
@@ -240,7 +240,8 @@ namespace lexertl
 
             void reset_start_state(const std::true_type&)
             {
-                _multi_state_state._start_state = *(_ptr + next_dfa_index);
+                _multi_state_state._start_state =
+                    *(_ptr + *state_index::next_dfa);
             }
 
             void reset_end_bol(const std::false_type&) const
@@ -260,13 +261,14 @@ namespace lexertl
                 {
                     _end_state = true;
                     reset_end_bol
-                    (std::integral_constant<bool, (flags& bol_bit) != 0>());
-                    _id = *(_ptr + id_index);
-                    _uid = *(_ptr + user_id_index);
+                    (std::integral_constant<bool,
+                        (flags & +feature_bit::bol) != 0>());
+                    _id = *(_ptr + *state_index::id);
+                    _uid = *(_ptr + *state_index::user_id);
                     reset_recursive(std::integral_constant<bool,
-                        (flags& recursive_bit) != 0>());
+                        (flags & +feature_bit::recursive) != 0>());
                     reset_start_state(std::integral_constant<bool,
-                        (flags& multi_state_bit) != 0>());
+                        (flags & +feature_bit::multi_state) != 0>());
                     end_token_ = curr_;
                 }
             }
@@ -285,7 +287,7 @@ namespace lexertl
             {
                 if (_eol_state._EOL_state != npos_ && curr_ == eoi_)
                 {
-                    _eol_state._EOL_state = _ptr[eol_index];
+                    _eol_state._EOL_state = _ptr[*state_index::eol];
 
                     if (_eol_state._EOL_state)
                     {
@@ -396,25 +398,25 @@ namespace lexertl
                 typename results::index_type, flags> lu_state_
                 (internals_, results_.bol, results_.state);
             lu_state_.bol_start_state
-            (std::integral_constant<bool, (flags& bol_bit) != 0>());
+            (std::integral_constant<bool, (flags & +feature_bit::bol) != 0>());
 
             while (curr_ != results_.eoi)
             {
-                if (!lu_state_.is_eol(*curr_,
-                    std::integral_constant<bool, (flags & eol_bit) != 0>()))
+                if (!lu_state_.is_eol(*curr_, std::integral_constant<bool,
+                    (flags & +feature_bit::eol) != 0>()))
                 {
                     const auto prev_char_ = *curr_;
                     const id_type state_ = lu_state_.next_char(prev_char_,
                         compressed_);
 
-                    lu_state_.bol(prev_char_,
-                        std::integral_constant<bool, (flags& bol_bit) != 0>());
+                    lu_state_.bol(prev_char_, std::integral_constant<bool,
+                        (flags & +feature_bit::bol) != 0>());
 
                     if (state_ == 0)
                     {
                         lu_state_.is_eol(results::npos(),
                             std::integral_constant<bool,
-                            (flags& eol_bit) != 0>());
+                            (flags & +feature_bit::eol) != 0>());
                         break;
                     }
 
@@ -425,8 +427,8 @@ namespace lexertl
             }
 
             lu_state_.check_eol(end_token_, curr_,
-                results::npos(), results_.eoi,
-                std::integral_constant<bool, (flags& eol_bit) != 0>());
+                results::npos(), results_.eoi, std::integral_constant<bool,
+                (flags & +feature_bit::eol) != 0>());
 
             if (lu_state_._end_state)
             {
@@ -435,9 +437,9 @@ namespace lexertl
 
                 lu_state_.start_state(results_.state,
                     std::integral_constant<bool,
-                    (flags& multi_state_bit) != 0>());
-                lu_state_.bol(results_.bol,
-                    std::integral_constant<bool, (flags& bol_bit) != 0>());
+                    (flags & +feature_bit::multi_state) != 0>());
+                lu_state_.bol(results_.bol, std::integral_constant<bool,
+                    (flags & +feature_bit::bol) != 0>());
                 results_.second = end_token_;
 
                 if (lu_state_._id == sm_.skip()) goto skip;
@@ -455,7 +457,8 @@ namespace lexertl
                 results_.first = results_.second;
                 // No match causes char to be skipped
                 inc_end(results_,
-                    std::integral_constant<bool, (flags& advance_bit) != 0>());
+                    std::integral_constant<bool,
+                    (flags & +feature_bit::advance) != 0>());
                 lu_state_._id = results::npos();
                 lu_state_._uid = results::npos();
             }
@@ -490,7 +493,7 @@ namespace lexertl
 
         // If this asserts, you have not defined all the correct flags
         assert((sm_.data()._features & flags) == sm_.data()._features);
-        detail::next<sm_type, flags | recursive_bit>(sm_, results_,
+        detail::next<sm_type, flags | +feature_bit::recursive>(sm_, results_,
             std::integral_constant<bool, (sizeof(value_type) > 1)>(),
             std::true_type(), cat());
     }

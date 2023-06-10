@@ -70,8 +70,8 @@ namespace lexertl
                 {
                     observer_ptr<node> ptr_ = new_node_stack_.top();
 
-                    node_ptr_vector_.push_back(std::make_unique<basic_iteration_node>
-                        (ptr_, _greedy));
+                    node_ptr_vector_.push_back(std::make_unique
+                        <basic_iteration_node>(ptr_, _greedy));
                     new_node_stack_.top() = node_ptr_vector_.back().get();
                 }
                 else

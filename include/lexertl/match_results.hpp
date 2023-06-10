@@ -7,6 +7,7 @@
 #define LEXERTL_MATCH_RESULTS_HPP
 
 #include "char_traits.hpp"
+#include "enum_operator.hpp"
 #include "enums.hpp"
 #include <iterator>
 #include <stack>
@@ -15,8 +16,9 @@
 namespace lexertl
 {
     template<typename iter, typename id_t = uint16_t,
-        std::size_t flags = bol_bit | eol_bit | skip_bit | again_bit |
-        multi_state_bit | advance_bit>
+        std::size_t flags = +feature_bit::bol | +feature_bit::eol |
+        +feature_bit::skip | +feature_bit::again | +feature_bit::multi_state |
+        +feature_bit::advance>
     struct match_results
     {
         using id_type = id_t;
@@ -107,8 +109,9 @@ namespace lexertl
     };
 
     template<typename iter, typename id_type = uint16_t,
-        std::size_t flags = bol_bit | eol_bit | skip_bit | again_bit |
-        multi_state_bit | recursive_bit | advance_bit>
+        std::size_t flags = +feature_bit::bol | +feature_bit::eol |
+        +feature_bit::skip | +feature_bit::again | +feature_bit::multi_state |
+        +feature_bit::recursive | +feature_bit::advance>
     struct recursive_match_results :
         public match_results<iter, id_type, flags>
     {

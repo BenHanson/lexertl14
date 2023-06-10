@@ -295,6 +295,7 @@ namespace lexertl
 
     using dot = basic_dot<basic_state_machine<char>, char>;
     using wdot = basic_dot<basic_state_machine<wchar_t>, wchar_t>;
+    using u32dot = basic_dot<basic_state_machine<char32_t>, char32_t>;
 }
 
 #endif

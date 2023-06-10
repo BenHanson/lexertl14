@@ -173,7 +173,7 @@ namespace lexertl
                     fixup_bol(root_);
                 }
 
-                if ((flags_ & match_zero_len) == 0)
+                if ((flags_ & *regex_flags::match_zero_len) == 0)
                 {
                     const auto& firstpos_ = root_->firstpos();
 
