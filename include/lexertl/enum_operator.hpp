@@ -6,6 +6,7 @@
 #ifndef LEXERTL_ENUM_OPERATOR_HPP
 #define LEXERTL_ENUM_OPERATOR_HPP
 
+#include <cstdint>
 #include <type_traits>
 
 namespace lexertl
