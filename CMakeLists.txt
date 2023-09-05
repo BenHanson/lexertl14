@@ -27,17 +27,19 @@ if (BUILD_TESTING)
 endif()
 
 # Generate install
+include(GNUInstallDirs)
+
 install(TARGETS lexertl EXPORT lexertlTargets
-	ARCHIVE DESTINATION lib
-	LIBRARY DESTINATION lib
-	RUNTIME DESTINATION bin
-	PUBLIC_HEADER DESTINATION include
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-install(DIRECTORY include/lexertl DESTINATION include)
+install(DIRECTORY include/lexertl DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT lexertlTargets
 	FILE lexertlTargets.cmake
 	NAMESPACE lexertl::
-	DESTINATION lib/cmake/lexertl
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lexertl
 )
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file("lexertlConfigVersion.cmake"
@@ -45,6 +47,6 @@ write_basic_package_version_file("lexertlConfigVersion.cmake"
 	COMPATIBILITY SameMajorVersion
 )
 install(FILES "lexertlConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/lexertlConfigVersion.cmake"
-	DESTINATION lib/cmake/lexertl
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lexertl
 )
 
