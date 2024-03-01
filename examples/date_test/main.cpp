@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <fstream>
 #include <lexertl/generator.hpp>
 #include <lexertl/lookup.hpp>
@@ -5,7 +6,9 @@
 
 int main(int /*argc*/, char** /*argv*/)
 {
-    lexertl::rules rules_(lexertl::icase | lexertl::dot_not_newline);
+    lexertl::rules rules_(
+        static_cast<std::size_t>(lexertl::regex_flags::icase) |
+        static_cast<std::size_t>(lexertl::regex_flags::dot_not_newline));
     lexertl::state_machine sm_;
     std::ifstream if_("datetest.txt");
     lexertl::stream_shared_iterator iter_(if_);

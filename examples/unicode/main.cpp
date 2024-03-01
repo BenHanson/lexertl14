@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <fstream>
 #include <lexertl/generator.hpp>
 #include <iomanip>
@@ -39,7 +40,8 @@ void test_unicode()
     i = *++u16iter_; // 0xd7ff
 
     // Not all compilers have char32_t, so use int for now
-    lexertl::basic_rules<char, int> rules_(lexertl::icase);
+    lexertl::basic_rules<char, int> rules_(
+        static_cast<std::size_t>(lexertl::regex_flags::icase));
     lexertl::basic_state_machine<int> sm_;
     const int in_[] = {0x393, ' ', 0x393, 0x398, ' ', 0x398,
         '1', ' ', 'i', 'd', 0x41f, 0};
