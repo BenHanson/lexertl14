@@ -83,7 +83,7 @@ namespace lexertl
             }
 
         private:
-            void process_greedy(basic_equivset& rhs_, basic_equivset& overlap_)
+            void process_greedy(basic_equivset& rhs_, basic_equivset& overlap_) const
             {
                 if (_greedy)
                     overlap_._greedy = true;

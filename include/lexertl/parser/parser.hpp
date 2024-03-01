@@ -605,7 +605,7 @@ namespace lexertl
             }
 
             void insert_range(const string_token& token_,
-                const string_token& token2_, string_token_vector data_[2])
+                const string_token& token2_, string_token_vector data_[2]) const
             {
                 auto iter_ = std::find_if(data_[0].cbegin(), data_[0].cend(),
                     [&token_](const std::unique_ptr<string_token>& rhs_)
@@ -648,7 +648,7 @@ namespace lexertl
 
             void insert_range(const string_token& token_,
                 const string_token& token2_, const string_token& token3_,
-                string_token_vector data_[3])
+                string_token_vector data_[3]) const
             {
                 auto iter_ = data_[0].cbegin();
                 auto end_ = data_[0].cend();

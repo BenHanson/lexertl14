@@ -711,6 +711,8 @@ namespace lexertl
                     case '+':
                         lhs_->_str.insert(rhs_._str);
                         break;
+                    default:
+                        break;
                     }
 
                     diff_ = 0;
@@ -738,7 +740,7 @@ namespace lexertl
             }
         }
 
-        void reverse(token_vector& vector_)
+        void reverse(token_vector& vector_) const
         {
             token_vector new_vector_(vector_.size(), token());
             auto iter_ = vector_.rbegin();

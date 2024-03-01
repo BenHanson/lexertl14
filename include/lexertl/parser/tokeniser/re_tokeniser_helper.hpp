@@ -505,8 +505,8 @@ namespace lexertl
             static void alnum_alpha(state_type& state_, string_token& token_,
                 const bool negate_)
             {
-                enum { unknown, alnum, alpha };
-                std::size_t type_ = unknown;
+                enum class type { unknown, alnum, alpha };
+                type type_ = type::unknown;
 
                 state_.increment();
 
@@ -527,7 +527,7 @@ namespace lexertl
                                 if (!state_.eos() && *state_._curr == 'm')
                                 {
                                     state_.increment();
-                                    type_ = alnum;
+                                    type_ = type::alnum;
                                 }
                             }
                         }
@@ -542,14 +542,14 @@ namespace lexertl
                                 if (!state_.eos() && *state_._curr == 'a')
                                 {
                                     state_.increment();
-                                    type_ = alpha;
+                                    type_ = type::alpha;
                                 }
                             }
                         }
                     }
                 }
 
-                if (type_ == unknown)
+                if (type_ == type::unknown)
                 {
                     unknown_posix(state_);
                 }
@@ -559,7 +559,7 @@ namespace lexertl
 
                     check_posix_termination(state_);
 
-                    if (type_ == alnum)
+                    if (type_ == type::alnum)
                     {
                         // alnum
                         str_ = sizeof(input_char_type) == 1 ?
@@ -578,7 +578,7 @@ namespace lexertl
                 }
             }
 
-            static std::string make_alnum(std::locale& locale_)
+            static std::string make_alnum(const std::locale& locale_)
             {
                 std::string str_(1, '[');
 
@@ -595,7 +595,7 @@ namespace lexertl
                 return str_;
             }
 
-            static std::string make_alpha(std::locale& locale_)
+            static std::string make_alpha(const std::locale& locale_)
             {
                 std::string str_(1, '[');
 
@@ -768,7 +768,7 @@ namespace lexertl
                 }
             }
 
-            static std::string create_lower(std::locale& locale_)
+            static std::string create_lower(const std::locale& locale_)
             {
                 std::string str_(1, '[');
 
@@ -789,8 +789,8 @@ namespace lexertl
             static void print_punct(state_type& state_, string_token& token_,
                 const bool negate_)
             {
-                enum { unknown, print, punct };
-                std::size_t type_ = unknown;
+                enum class type { unknown, print, punct };
+                type type_ = type::unknown;
 
                 state_.increment();
 
@@ -811,7 +811,7 @@ namespace lexertl
                                 if (!state_.eos() && *state_._curr == 't')
                                 {
                                     state_.increment();
-                                    type_ = print;
+                                    type_ = type::print;
                                 }
                             }
                         }
@@ -831,14 +831,14 @@ namespace lexertl
                                 if (!state_.eos() && *state_._curr == 't')
                                 {
                                     state_.increment();
-                                    type_ = punct;
+                                    type_ = type::punct;
                                 }
                             }
                         }
                     }
                 }
 
-                if (type_ == unknown)
+                if (type_ == type::unknown)
                 {
                     unknown_posix(state_);
                 }
@@ -848,7 +848,7 @@ namespace lexertl
 
                     check_posix_termination(state_);
 
-                    if (type_ == print)
+                    if (type_ == type::print)
                     {
                         // print
                         str_ = sizeof(input_char_type) == 1 ?
@@ -929,7 +929,7 @@ namespace lexertl
                 }
             }
 
-            static std::string create_upper(std::locale& locale_)
+            static std::string create_upper(const std::locale& locale_)
             {
                 std::string str_(1, '[');
 
@@ -1081,6 +1081,8 @@ namespace lexertl
                     break;
                 case 'W':
                     str_ = "[^_0-9A-Za-z]";
+                    break;
+                default:
                     break;
                 }
 
@@ -1344,9 +1346,9 @@ namespace lexertl
                         ch_ = *state_._curr;
 
                         // Don't consume invalid chars!
-                        if (((ch_ >= '0' && ch_ <= '9') ||
+                        if ((ch_ >= '0' && ch_ <= '9') ||
                             (ch_ >= 'a' && ch_ <= 'f') ||
-                            (ch_ >= 'A' && ch_ <= 'F')))
+                            (ch_ >= 'A' && ch_ <= 'F'))
                         {
                             state_.increment();
                         }
