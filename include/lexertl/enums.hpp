@@ -12,7 +12,7 @@ namespace lexertl
     enum class regex_flags
     {
         icase = 1, dot_not_newline = 2, dot_not_cr_lf = 4,
-        skip_ws = 8, match_zero_len = 16
+        skip_ws = 8, match_zero_len = 16, allow_suppressed_rules = 32
     };
     // 0 = end_state, 1 = id, 2 = user_id, 3 = push_dfa
     // 4 = next_dfa, 5 = dead_state, 6 = dfa start
