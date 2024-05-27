@@ -71,7 +71,7 @@ namespace lexertl
                         node_ptr_vector_, charset_map_, cr_id_, nl_id_);
 
                     build_dfa(charset_map_, root_, internals_, temp_sm_, index_,
-                        cr_id_, nl_id_, rules_.flags(), rules_.ids(), used_ids_);
+                        cr_id_, nl_id_, rules_.flags(), used_ids_);
 
                     if (internals_._dfa[index_].size() /
                         internals_._dfa_alphabet[index_] >= sm_traits::npos())
@@ -83,6 +83,7 @@ namespace lexertl
                 }
             }
 
+            check_suppressed(rules_.flags(), rules_.ids(), used_ids_);
             // If you get a compile error here the id_type from rules and
             // state machine do no match.
             create(internals_, temp_sm_, rules_.features(), lookup());
@@ -173,8 +174,7 @@ namespace lexertl
         static void build_dfa(const charset_map& charset_map_,
             const observer_ptr<node> root_, internals& internals_, sm& sm_,
             const id_type dfa_index_, id_type& cr_id_, id_type& nl_id_,
-            const std::size_t flags_, const id_vector_vector& ids_vector_,
-            std::set<id_type>& used_ids_)
+            const std::size_t flags_, std::set<id_type>& used_ids_)
         {
             // partitioned charset list
             charset_list charset_list_;
@@ -265,7 +265,6 @@ namespace lexertl
                 }
             }
 
-            check_suppressed(flags_, ids_vector_, used_ids_);
             fix_clashes(eol_set_, cr_id_, nl_id_, zero_id_, dfa_, dfa_alphabet_,
                 compressed());
             append_dfa(charset_list_, internals_, sm_, dfa_index_, lookup());
@@ -298,11 +297,12 @@ namespace lexertl
         {
             if (!(flags_ & *regex_flags::allow_suppressed_rules))
             {
-                for (const auto ids_ : ids_vector_)
+                for (const auto& ids_ : ids_vector_)
                 {
                     for (const id_type id_ : ids_)
                     {
-                        if (used_ids_.find(id_) == used_ids_.cend())
+                        if (id_ != rules::skip() &&
+                            used_ids_.find(id_) == used_ids_.cend())
                         {
                             std::ostringstream ss;
 
@@ -694,9 +694,7 @@ namespace lexertl
             node_vector& vector_ptr_, std::size_t& hash_, bool& greedy_,
             const std::size_t flags_, std::set<id_type>& used_ids_)
         {
-            const bool temp_end_state_ = node_->end_state();
-
-            if (temp_end_state_)
+            if (node_->end_state())
             {
                 if (!end_state_)
                 {
