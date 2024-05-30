@@ -24,12 +24,14 @@ namespace lexertl
             using node_type = typename node::node_type;
             using node_vector = typename node::node_vector;
 
-            basic_end_node(const id_type id_, const id_type user_id_,
+            basic_end_node(const id_type id_,
+                const id_type user_id_, const id_type unique_id_,
                 const id_type next_dfa_, const id_type push_dfa_,
                 const bool pop_dfa_, const bool greedy_) :
                 node(false),
                 _id(id_),
                 _user_id(user_id_),
+                _unique_id(unique_id_),
                 _next_dfa(next_dfa_),
                 _push_dfa(push_dfa_),
                 _pop_dfa(pop_dfa_),
@@ -84,6 +86,11 @@ namespace lexertl
                 return _user_id;
             }
 
+            id_type unique_id() const override
+            {
+                return _unique_id;
+            }
+
             id_type next_dfa() const override
             {
                 return _next_dfa;
@@ -102,6 +109,7 @@ namespace lexertl
         private:
             id_type _id;
             id_type _user_id;
+            id_type _unique_id;
             id_type _next_dfa;
             id_type _push_dfa;
             bool _pop_dfa;

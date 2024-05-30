@@ -44,6 +44,7 @@ namespace lexertl
             sm temp_sm_;
             node_ptr_vector node_ptr_vector_;
             std::set<id_type> used_ids_;
+            id_type unique_id_ = 0;
 
             internals_._eoi = rules_.eoi();
             internals_.add_states(size_);
@@ -68,7 +69,8 @@ namespace lexertl
                     id_type nl_id_ = sm_traits::npos();
                     // Regex syntax tree
                     observer_ptr<node> root_ = build_tree(rules_, index_,
-                        node_ptr_vector_, charset_map_, cr_id_, nl_id_);
+                        node_ptr_vector_, charset_map_, cr_id_, nl_id_,
+                        unique_id_);
 
                     build_dfa(charset_map_, root_, internals_, temp_sm_, index_,
                         cr_id_, nl_id_, rules_.flags(), used_ids_);
@@ -83,7 +85,7 @@ namespace lexertl
                 }
             }
 
-            check_suppressed(rules_.flags(), rules_.ids(), used_ids_);
+            check_suppressed(rules_, unique_id_, used_ids_);
             // If you get a compile error here the id_type from rules and
             // state machine do no match.
             create(internals_, temp_sm_, rules_.features(), lookup());
@@ -92,7 +94,8 @@ namespace lexertl
 
         static observer_ptr<node> build_tree(const rules& rules_,
             const std::size_t dfa_, node_ptr_vector& node_ptr_vector_,
-            charset_map& charset_map_, id_type& cr_id_, id_type& nl_id_)
+            charset_map& charset_map_, id_type& cr_id_, id_type& nl_id_,
+            id_type& unique_id_)
         {
             parser parser_(rules_.locale(), node_ptr_vector_, charset_map_,
                 rules_.eoi());
@@ -114,7 +117,7 @@ namespace lexertl
             observer_ptr<node> root_ = nullptr;
 
             root_ = parser_.parse(*regex_iter_, *id_iter_, *user_id_iter_,
-                *next_dfa_iter_, *push_dfa_iter_, *pop_dfa_iter_,
+                ++unique_id_, *next_dfa_iter_, *push_dfa_iter_, *pop_dfa_iter_,
                 rules_.flags(), cr_id_, nl_id_, seen_bol_);
             ++regex_iter_;
             ++id_iter_;
@@ -127,8 +130,9 @@ namespace lexertl
             while (regex_iter_ != regex_iter_end_)
             {
                 observer_ptr<node> rhs_ = parser_.parse(*regex_iter_, *id_iter_,
-                    *user_id_iter_, *next_dfa_iter_, *push_dfa_iter_,
-                    *pop_dfa_iter_, rules_.flags(), cr_id_, nl_id_,
+                    *user_id_iter_, ++unique_id_, *next_dfa_iter_,
+                    *push_dfa_iter_, *pop_dfa_iter_, rules_.flags(),
+                    cr_id_, nl_id_,
                     (rules_.features()[dfa_] & *feature_bit::bol) != 0);
 
                 node_ptr_vector_.push_back(std::make_unique<selection_node>
@@ -169,6 +173,7 @@ namespace lexertl
         using node_vector_vector = std::vector<std::unique_ptr<node_vector>>;
         using selection_node = typename parser::selection_node;
         using size_t_vector = typename std::vector<std::size_t>;
+        using std_string_vector_vector = typename rules::std_string_vector_vector;
         using string_token = typename parser::string_token;
 
         static void build_dfa(const charset_map& charset_map_,
@@ -292,26 +297,37 @@ namespace lexertl
             }
         }
 
-        static void check_suppressed(const std::size_t flags_,
-            const id_vector_vector& ids_vector_, std::set<id_type>& used_ids_)
+        static void check_suppressed(const rules& rules_,
+            const id_type unique_id_, std::set<id_type>& used_ids_)
         {
-            if (!(flags_ & *regex_flags::allow_suppressed_rules))
+            if (!(rules_.flags() & *regex_flags::allow_suppressed_rules))
             {
-                for (const auto& ids_ : ids_vector_)
+                for (id_type id_ = 0; id_ < unique_id_; ++id_)
                 {
-                    for (const id_type id_ : ids_)
+                    if (used_ids_.find(id_ + 1) == used_ids_.end())
                     {
-                        if (id_ != rules::skip() &&
-                            used_ids_.find(id_) == used_ids_.cend())
-                        {
-                            std::ostringstream ss;
+                        std::ostringstream ss_;
 
-                            ss << "Rule " << id_ << " cannot be matched.";
-                            throw runtime_error(ss.str());
-                        }
+                        ss_ << "The following regex cannot be matched: " <<
+                            regex_from_idx(id_ - 1, rules_.regex_strings());
+                        throw runtime_error(ss_.str());
                     }
                 }
             }
+        }
+
+        static std::string regex_from_idx(std::size_t idx_,
+            const std_string_vector_vector& regexes)
+        {
+            for (const auto& regex_vec : regexes)
+            {
+                if (idx_ >= regex_vec.size())
+                    idx_ -= regex_vec.size();
+                else
+                    return regex_vec[idx_];
+            }
+
+            return std::string();
         }
 
         // Uncompressed
@@ -707,7 +723,7 @@ namespace lexertl
                     greedy_ = node_->greedy();
 
                     if (!(flags_ & *regex_flags::allow_suppressed_rules))
-                        used_ids_.insert(id_);
+                        used_ids_.insert(node_->unique_id());
                 }
             }
 

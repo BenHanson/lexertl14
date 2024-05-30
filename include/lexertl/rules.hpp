@@ -35,6 +35,7 @@ namespace lexertl
         using id_vector_vector = std::vector<id_vector>;
         using re_state =
             detail::basic_re_tokeniser_state<rules_char_type, id_type>;
+        using std_string_vector_vector = std::vector<std::vector<std::string>>;
         using string = std::basic_string<rules_char_type>;
         using string_token = basic_string_token<char_type>;
         using string_vector = std::vector<string>;
@@ -78,6 +79,7 @@ namespace lexertl
             _statemap.clear();
             _macro_map.clear();
             _regexes.clear();
+            _regex_strings.clear();
             _features.clear();
             _ids.clear();
             _user_ids.clear();
@@ -99,6 +101,7 @@ namespace lexertl
             if (_regexes.size() > dfa_)
             {
                 _regexes[dfa_].clear();
+                _regex_strings[dfa_].clear();
                 _features[dfa_] = 0;
                 _ids[dfa_].clear();
                 _user_ids[dfa_].clear();
@@ -190,6 +193,7 @@ namespace lexertl
                 static_cast<id_type>(_statemap.size()))).second)
             {
                 _regexes.emplace_back();
+                _regex_strings.emplace_back();
                 _features.push_back(0);
                 _ids.emplace_back();
                 _user_ids.emplace_back();
@@ -278,8 +282,12 @@ namespace lexertl
         void push(const string& regex_, const id_type id_,
             const id_type user_id_ = npos())
         {
+            std::ostringstream ss_;
+
             check_for_invalid_id(id_);
             _regexes.front().emplace_back();
+            narrow(regex_.c_str(), ss_);
+            _regex_strings.front().push_back(ss_.str());
             tokenise(regex_, _regexes.front().back(), id_, nullptr);
 
             if (_regexes.front().back()[1]._type == detail::token_type::BOL)
@@ -392,6 +400,11 @@ namespace lexertl
             return _regexes;
         }
 
+        const std_string_vector_vector& regex_strings() const
+        {
+            return _regex_strings;
+        }
+
         const id_vector& features() const
         {
             return _features;
@@ -464,6 +477,7 @@ namespace lexertl
         string_id_type_map _statemap;
         macro_map _macro_map;
         token_vector_vector_vector _regexes;
+        std_string_vector_vector _regex_strings;
         id_vector _features;
         id_vector_vector _ids;
         id_vector_vector _user_ids;
@@ -990,6 +1004,7 @@ namespace lexertl
                 i_ < size_; ++i_)
             {
                 const id_type curr_ = next_dfas_[i_];
+                std::ostringstream ss_;
 
                 _regexes[curr_].emplace_back();
                 tokenise(regex_, _regexes[curr_].back(), id_, 0);
@@ -1004,6 +1019,9 @@ namespace lexertl
                 {
                     _features[curr_] |= *feature_bit::eol;
                 }
+
+                narrow(regex_.c_str(), ss_);
+                _regex_strings[curr_].push_back(ss_.str());
 
                 if (id_ == skip())
                 {

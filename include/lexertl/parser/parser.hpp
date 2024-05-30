@@ -85,8 +85,8 @@ namespace lexertl
             {
             }
 
-            observer_ptr<node> parse(const token_vector& regex_,
-                const id_type id_, const id_type user_id_,
+            observer_ptr<node> parse(const token_vector& regex_, const id_type id_,
+                const id_type user_id_, const id_type unique_id_,
                 const id_type next_dfa_, const id_type push_dfa_,
                 const bool pop_dfa_, const std::size_t flags_,
                 id_type& cr_id_, id_type& nl_id_, const bool seen_bol_)
@@ -159,7 +159,7 @@ namespace lexertl
 
                 _tree_node_stack.pop();
                 _node_ptr_vector.push_back(std::make_unique<end_node>
-                    (id_, user_id_, next_dfa_, push_dfa_, pop_dfa_,
+                    (id_, user_id_, unique_id_, next_dfa_, push_dfa_, pop_dfa_,
                         !non_greedy_));
 
                 observer_ptr<node> rhs_node_ = _node_ptr_vector.back().get();
