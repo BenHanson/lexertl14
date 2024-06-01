@@ -72,6 +72,7 @@ namespace lexertl
                         node_ptr_vector_, charset_map_, cr_id_, nl_id_,
                         unique_id_);
 
+                    check_zero_len(rules_, root_);
                     build_dfa(charset_map_, root_, internals_, temp_sm_, index_,
                         cr_id_, nl_id_, rules_.flags(), used_ids_);
 
@@ -118,7 +119,7 @@ namespace lexertl
 
             root_ = parser_.parse(*regex_iter_, *id_iter_, *user_id_iter_,
                 ++unique_id_, *next_dfa_iter_, *push_dfa_iter_, *pop_dfa_iter_,
-                rules_.flags(), cr_id_, nl_id_, seen_bol_);
+                cr_id_, nl_id_, seen_bol_);
             ++regex_iter_;
             ++id_iter_;
             ++user_id_iter_;
@@ -131,8 +132,7 @@ namespace lexertl
             {
                 observer_ptr<node> rhs_ = parser_.parse(*regex_iter_, *id_iter_,
                     *user_id_iter_, ++unique_id_, *next_dfa_iter_,
-                    *push_dfa_iter_, *pop_dfa_iter_, rules_.flags(),
-                    cr_id_, nl_id_,
+                    *push_dfa_iter_, *pop_dfa_iter_, cr_id_, nl_id_,
                     (rules_.features()[dfa_] & *feature_bit::bol) != 0);
 
                 node_ptr_vector_.push_back(std::make_unique<selection_node>
@@ -297,6 +297,30 @@ namespace lexertl
             }
         }
 
+        static void check_zero_len(const rules& rules_,
+            const observer_ptr<node> root_)
+        {
+            if ((rules_.flags() & *regex_flags::match_zero_len) == 0)
+            {
+                const auto& firstpos_ = root_->firstpos();
+
+                for (observer_ptr<const node> node_ : firstpos_)
+                {
+                    if (node_->end_state())
+                    {
+                        std::ostringstream ss_;
+
+                        ss_ << "The following regex can match zero chars: " <<
+                            regex_from_idx(node_->unique_id() - 1,
+                                rules_.regex_strings()) <<
+                            "\n(Use regex_flags::match_zero_len "
+                            "to suppress this error.)";
+                        throw runtime_error(ss_.str());
+                    }
+                }
+            }
+        }
+
         static void check_suppressed(const rules& rules_,
             const id_type unique_id_, std::set<id_type>& used_ids_)
         {
@@ -309,7 +333,9 @@ namespace lexertl
                         std::ostringstream ss_;
 
                         ss_ << "The following regex cannot be matched: " <<
-                            regex_from_idx(id_, rules_.regex_strings());
+                            regex_from_idx(id_, rules_.regex_strings()) <<
+                            "\n(Use regex_flags::allow_suppressed_rules "
+                            "to suppress this error.)";
                         throw runtime_error(ss_.str());
                     }
                 }

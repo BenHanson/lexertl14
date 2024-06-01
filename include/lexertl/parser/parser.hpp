@@ -88,8 +88,8 @@ namespace lexertl
             observer_ptr<node> parse(const token_vector& regex_, const id_type id_,
                 const id_type user_id_, const id_type unique_id_,
                 const id_type next_dfa_, const id_type push_dfa_,
-                const bool pop_dfa_, const std::size_t flags_,
-                id_type& cr_id_, id_type& nl_id_, const bool seen_bol_)
+                const bool pop_dfa_, id_type& cr_id_, id_type& nl_id_,
+                const bool seen_bol_)
             {
                 auto iter_ = regex_.cbegin();
                 auto end_ = regex_.cend();
@@ -171,26 +171,6 @@ namespace lexertl
                 if (seen_bol_)
                 {
                     fixup_bol(root_);
-                }
-
-                if ((flags_ & *regex_flags::match_zero_len) == 0)
-                {
-                    const auto& firstpos_ = root_->firstpos();
-
-                    for (observer_ptr<const node> node_ : firstpos_)
-                    {
-                        if (node_->end_state())
-                        {
-                            std::ostringstream ss_;
-
-                            ss_ << "Rules that match zero characters are not "
-                                "allowed as this can cause an infinite loop "
-                                "in user code. The match_zero_len flag "
-                                "overrides this check. Rule id " <<
-                                id_ << '.';
-                            throw runtime_error(ss_.str());
-                        }
-                    }
                 }
 
                 return root_;
