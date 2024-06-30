@@ -246,7 +246,7 @@ namespace lexertl
 
                 for (auto& equivset_ : equiv_list_)
                 {
-                    prune_eol_clashes(equivset_->_followpos, nl_id_,
+                    prune_eol_clashes(equivset_->_followpos, cr_id_, nl_id_,
                         set_mapping_);
 
                     const id_type transition_ =
@@ -286,7 +286,8 @@ namespace lexertl
         // (i.e. we could be supressing other paths that have nothing to do
         // with the end_states we are interested in).
         static void prune_eol_clashes(typename equivset::node_vector& followpos_,
-            const id_type nl_id_, const index_set_vector& set_mapping_)
+            const id_type cr_id_, const id_type nl_id_,
+            const index_set_vector& set_mapping_)
         {
             auto iter_ = followpos_.begin();
             auto end_ = followpos_.end();
@@ -299,11 +300,13 @@ namespace lexertl
                 {
                     if (node_->token() == parser::eol_token())
                     {
-                        prune_NL(iter_, end_, followpos_, nl_id_, set_mapping_);
+                        prune_NL(iter_, end_, followpos_, cr_id_, nl_id_,
+                            set_mapping_);
                     }
                     else
                     {
-                        prune_eol(iter_, end_, followpos_, nl_id_, set_mapping_);
+                        prune_eol(iter_, end_, followpos_, cr_id_, nl_id_,
+                            set_mapping_);
                     }
                 }
             }
@@ -311,7 +314,8 @@ namespace lexertl
 
         static void prune_NL(typename equivset::node_vector::iterator& iter_,
             typename equivset::node_vector::iterator& end_,
-            typename equivset::node_vector& followpos_, const id_type nl_id_,
+            typename equivset::node_vector& followpos_,
+            const id_type cr_id_, const id_type nl_id_,
             const index_set_vector& set_mapping_)
         {
             // Search for NL followed by end state
@@ -329,9 +333,55 @@ namespace lexertl
                     continue;
                 }
 
-                const auto& set_ = set_mapping_[node_->token()];
+                const auto& cr_set_ =
+                    set_mapping_[node_->token()];
 
-                if (set_.find(nl_id_) != set_.end())
+                if (cr_set_.find(cr_id_) != cr_set_.end())
+                {
+                    const auto& cr_followpos_ =
+                        node_->followpos();
+
+                    for (auto cr_node_ : cr_followpos_)
+                    {
+                        if (cr_node_->end_state())
+                            continue;
+
+                        const auto& nl_set_ =
+                            set_mapping_[cr_node_->token()];
+
+                        if (nl_set_.find(nl_id_) != nl_set_.end())
+                        {
+                            const auto& nl_followpos_ =
+                                cr_node_->followpos();
+                            bool found_ = false;
+
+                            for (auto nl_node_ : nl_followpos_)
+                            {
+                                found_ = nl_node_->end_state();
+
+                                if (found_)
+                                    break;
+                            }
+
+                            if (found_)
+                            {
+                                // This might be suppressing additional paths
+                                // but we should be erroring out anyway.
+                                nl_iter_ = followpos_.erase(nl_iter_);
+                                end_ = followpos_.end();
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                if (nl_iter_ == end_)
+                    break;
+
+                const auto& nl_set_ =
+                    set_mapping_[node_->token()];
+
+                if (nl_set_.find(nl_id_) != nl_set_.end())
                 {
                     const auto& nl_followpos_ =
                         node_->followpos();
@@ -361,11 +411,64 @@ namespace lexertl
 
         static void prune_eol(typename equivset::node_vector::iterator& iter_,
             typename equivset::node_vector::iterator& end_,
-            typename equivset::node_vector& followpos_, const id_type nl_id_,
+            typename equivset::node_vector& followpos_,
+            const id_type cr_id_, const id_type nl_id_,
             const index_set_vector& set_mapping_)
         {
             auto node_ = *iter_;
             const auto& set_ = set_mapping_[node_->token()];
+
+            if (set_.find(cr_id_) != set_.end())
+            {
+                const auto& cr_followpos_ = node_->followpos();
+                bool found_ = false;
+
+                for (auto cr_node_ : cr_followpos_)
+                {
+                    if (cr_node_->end_state())
+                        continue;
+
+                    const auto& cr_set_ = set_mapping_[cr_node_->token()];
+
+                    if (cr_set_.find(nl_id_) != cr_set_.end())
+                    {
+                        const auto& nl_followpos_ = cr_node_->followpos();
+
+                        found_ = false;
+
+                        for (auto nl_node_ : nl_followpos_)
+                        {
+                            found_ = nl_node_->end_state();
+
+                            if (found_)
+                                break;
+                        }
+
+                        if (found_)
+                        {
+                            // Search for any EOL tokens
+                            auto nl_iter_ = iter_;
+
+                            ++nl_iter_;
+
+                            while (nl_iter_ != end_)
+                            {
+                                node_ = *nl_iter_;
+
+                                if (!node_->end_state() &&
+                                    node_->token() == parser::eol_token())
+                                {
+                                    nl_iter_ = followpos_.erase(nl_iter_);
+                                    end_ = followpos_.end();
+                                    continue;
+                                }
+
+                                ++nl_iter_;
+                            }
+                        }
+                    }
+                }
+            }
 
             if (set_.find(nl_id_) != set_.end())
             {
