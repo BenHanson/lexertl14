@@ -571,6 +571,21 @@ namespace lexertl
     private:
         char_iterator _it = char_iterator();
     };
+
+    using cutf8_in_utf32_out_iterator =
+        basic_utf8_in_iterator<const char*, char32_t>;
+    using cutf16_in_utf32_out_iterator =
+        basic_utf16_in_iterator<const char16_t*, char32_t>;
+    using cwchar_t_in_utf32_out_iterator =
+        basic_utf16_in_iterator<const wchar_t*, char32_t>;
+    using cutf8_in_utf16_out_iterator =
+        basic_utf16_out_iterator<cutf8_in_utf32_out_iterator, char16_t>;
+    using cutf8_in_wchar_t_out_iterator =
+        basic_utf16_out_iterator<cutf8_in_utf32_out_iterator, wchar_t>;
+    using cutf16_in_utf8_out_iterator =
+        basic_utf8_out_iterator<cutf16_in_utf32_out_iterator>;
+    using cwchar_t_in_utf8_out_iterator =
+        basic_utf8_out_iterator<cwchar_t_in_utf32_out_iterator>;
 }
 
 #endif
