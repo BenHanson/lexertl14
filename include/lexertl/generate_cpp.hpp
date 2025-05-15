@@ -89,7 +89,7 @@ namespace lexertl
 
             if (internals_._dfa.size() > 1)
             {
-                os_ << "    const id_type *lookup_ = "
+                os_ << "    const id_type* lookup_ = "
                     "lookups_[results_.state];\n";
                 os_ << "    const id_type dfa_alphabet_ = dfa_alphabets_"
                     "[results_.state];\n";
@@ -97,28 +97,28 @@ namespace lexertl
 
                 if (pointers_)
                 {
-                    os_ << "void * const";
+                    os_ << "void* const";
                 }
                 else
                 {
                     os_ << "id_type";
                 }
 
-                os_ << " *dfa_ = dfas_[results_.state];\n";
+                os_ << "* dfa_ = dfas_[results_.state];\n";
             }
 
             os_ << "    const ";
 
             if (pointers_)
             {
-                os_ << "void * const";
+                os_ << "void* const";
             }
             else
             {
                 os_ << "id_type";
             }
 
-            os_ << " *ptr_ = dfa_ + dfa_alphabet_;\n";
+            os_ << "* ptr_ = dfa_ + dfa_alphabet_;\n";
             os_ << "    bool end_state_ = *ptr_ != 0;\n";
 
             if (internals_._features & *feature_bit::recursive)
@@ -217,14 +217,14 @@ namespace lexertl
 
                 if (pointers_)
                 {
-                    os_ << "const void * const *";
+                    os_ << "const void* const*";
                 }
                 else
                 {
-                    os_ << "id_type ";
+                    os_ << "id_type";
                 }
 
-                os_ << "EOL_state_ = 0;\n";
+                os_ << " EOL_state_ = 0;\n";
             }
 
             os_ << '\n';
@@ -237,21 +237,21 @@ namespace lexertl
 
                 if (pointers_)
                 {
-                    os_ << "void *";
+                    os_ << "void*";
                 }
                 else
                 {
-                    os_ << "id_type ";
+                    os_ << "id_type";
                 }
 
-                os_ << "state_ = *dfa_;\n\n";
+                os_ << " state_ = *dfa_;\n\n";
                 os_ << "        if (state_)\n";
                 os_ << "        {\n";
                 os_ << "            ptr_ = ";
 
                 if (pointers_)
                 {
-                    os_ << "reinterpret_cast<void * const *>(state_);\n";
+                    os_ << "reinterpret_cast<void* const*>(state_);\n";
                 }
                 else
                 {
@@ -271,7 +271,7 @@ namespace lexertl
 
                 if (pointers_)
                 {
-                    os_ << "reinterpret_cast<const void * const *>(";
+                    os_ << "reinterpret_cast<const void* const*>(";
                 }
 
                 os_ << "ptr_[" << *state_index::eol << ']';
@@ -438,7 +438,7 @@ namespace lexertl
 
                 if (pointers_)
                 {
-                    os_ << "reinterpret_cast<const void * const *>(";
+                    os_ << "reinterpret_cast<const void* const*>(";
                 }
 
                 os_ << "ptr_[" << *state_index::eol << ']';
@@ -783,14 +783,14 @@ namespace lexertl
 
                 if (pointers_)
                 {
-                    os_ << "void *";
+                    os_ << "void*";
                 }
                 else
                 {
-                    os_ << "id_type ";
+                    os_ << "id_type";
                 }
 
-                os_ << dfa_name_;
+                os_ << ' ' << dfa_name_;
 
                 if (dfas_ > 1)
                 {
@@ -826,14 +826,14 @@ namespace lexertl
 
                 if (pointers_)
                 {
-                    os_ << "void * const";
+                    os_ << "void* const";
                 }
                 else
                 {
                     os_ << "id_type";
                 }
 
-                os_ << " *dfas_[] = {dfa0_";
+                os_ << "* dfas_[] = {dfa0_";
 
                 for (std::size_t col_ = 1; col_ < dfas_; ++col_)
                 {
@@ -864,7 +864,7 @@ namespace lexertl
                 }
                 else if (!zero_)
                 {
-                    os_ << "reinterpret_cast<const void *>(0x"
+                    os_ << "reinterpret_cast<const void*>(0x"
                         // We want numbers regardless of id_type.
                         << std::hex << static_cast<std::size_t>(*ptr_++) << ')';
                 }
@@ -883,7 +883,7 @@ namespace lexertl
 
                     if (!zero_)
                     {
-                        os_ << "reinterpret_cast<const void *>(";
+                        os_ << "reinterpret_cast<const void*>(";
                     }
 
                     // We want numbers regardless of id_type.
@@ -949,18 +949,18 @@ namespace lexertl
 
             if (pointers_)
             {
-                os_ << "void * const *";
+                os_ << "void* const*";
             }
             else
             {
-                os_ << "id_type ";
+                os_ << "id_type";
             }
 
-            os_ << "state_ = ";
+            os_ << " state_ = ";
 
             if (pointers_)
             {
-                os_ << "reinterpret_cast<void * const *>\n            ";
+                os_ << "reinterpret_cast<void* const*>\n            ";
                 output_tabs(additional_tabs_, os_);
                 os_ << '(';
             }
@@ -1058,18 +1058,18 @@ namespace lexertl
 
             if (pointers_)
             {
-                os_ << "void * const *";
+                os_ << "void* const*";
             }
             else
             {
-                os_ << "id_type ";
+                os_ << "id_type";
             }
 
-            os_ << "state_ = ";
+            os_ << " state_ = ";
 
             if (pointers_)
             {
-                os_ << "reinterpret_cast<void * const *>\n                ";
+                os_ << "reinterpret_cast<void* const*>\n                ";
                 output_tabs(additional_tabs_, os_);
                 os_ << '(';
             }
