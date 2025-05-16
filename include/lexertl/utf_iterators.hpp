@@ -466,7 +466,7 @@ namespace lexertl
 
         void next()
         {
-            if (_it != _eoi)
+            if (_it == _eoi)
                 return;
 
             char_type ch_ = *_it & 0xffff;
