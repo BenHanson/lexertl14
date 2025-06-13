@@ -17,6 +17,7 @@ namespace lexertl
     class iterator
     {
     public:
+        using data_iterator = iter;
         using id_type = typename results::id_type;
         using value_type = results;
         using difference_type = ptrdiff_t;

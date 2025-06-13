@@ -50,9 +50,7 @@ namespace lexertl
             static const char* escape_sequence(state_type& state_,
                 char_type& ch_, std::size_t& str_len_)
             {
-                bool eos_ = state_.eos();
-
-                if (eos_)
+                if (state_.eos())
                 {
                     std::ostringstream ss_;
 

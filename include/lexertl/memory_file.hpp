@@ -54,17 +54,18 @@ namespace lexertl
 #ifdef _WIN32
             _fh = ::CreateFileA(pathname_, GENERIC_READ, FILE_SHARE_READ,
                 nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-            _fmh = nullptr;
 
-            if (_fh != INVALID_HANDLE_VALUE)
+            if (_fh == INVALID_HANDLE_VALUE)
+                _fh = nullptr;
+            else
             {
                 _fmh = ::CreateFileMapping(_fh, nullptr, PAGE_READONLY, 0, 0,
                     nullptr);
 
                 if (_fmh != nullptr)
                 {
-                    _data = static_cast<char_type*>(::MapViewOfFile
-                    (_fmh, FILE_MAP_READ, 0, 0, 0));
+                    _data = static_cast<char_type*>
+                        (::MapViewOfFile(_fmh, FILE_MAP_READ, 0, 0, 0));
 
                     if (_data)
                     {
@@ -115,20 +116,29 @@ namespace lexertl
             {
 #ifdef _WIN32
                 ::UnmapViewOfFile(_data);
-                ::CloseHandle(_fmh);
-                ::CloseHandle(_fh);
 #else
                 ::munmap(const_cast<char_type*>(_data), _size);
-                ::close(_fh);
-                _fh = 0;
 #endif
                 _data = nullptr;
                 _size = 0;
-#ifdef _WIN32
-                _fh = nullptr;
-                _fmh = nullptr;
-#endif
             }
+
+#ifdef _WIN32
+            if (_fmh)
+                ::CloseHandle(_fmh);
+
+            _fmh = nullptr;
+
+            if (_fh)
+                ::CloseHandle(_fh);
+
+            _fh = nullptr;
+#else
+            if (_fh)
+                ::close(_fh);
+
+            _fh = 0;
+#endif
         }
 
     private:
