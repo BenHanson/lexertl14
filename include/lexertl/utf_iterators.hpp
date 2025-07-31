@@ -604,7 +604,8 @@ namespace lexertl
                 _chars[0] = static_cast<out_char>(ch_);
                 break;
             case 2:
-                _chars[0] = static_cast<out_char>(((ch_ - 0x10000) >> 10) + 0xd800u);
+                _chars[0] = static_cast<out_char>
+                    (((ch_ - 0x10000) >> 10) + 0xd800u);
                 _chars[1] = static_cast<out_char>((ch_ & 0x3ff) + 0xdc00u);
                 break;
             default:

@@ -6,9 +6,10 @@
 #ifndef LEXERTL_EQUIVSET_HPP
 #define LEXERTL_EQUIVSET_HPP
 
+#include "../parser/tree/node.hpp"
+
 #include <algorithm>
 #include <iterator>
-#include "../parser/tree/node.hpp"
 #include <set>
 
 namespace lexertl
@@ -25,13 +26,13 @@ namespace lexertl
 
             index_vector _index_vector;
             id_type _id = 0;
-            bool _greedy = true;
+            greedy_repeat _greedy = greedy_repeat::yes;
             node_vector _followpos;
 
             basic_equivset() = default;
 
             basic_equivset(const index_set& index_set_, const id_type id_,
-                const bool greedy_, const node_vector& followpos_) :
+                const greedy_repeat greedy_, const node_vector& followpos_) :
                 _index_vector(index_set_.begin(), index_set_.end()),
                 _id(id_),
                 _greedy(greedy_),
@@ -83,28 +84,18 @@ namespace lexertl
             }
 
         private:
-            void process_greedy(basic_equivset& rhs_, basic_equivset& overlap_) const
+            void process_greedy(basic_equivset& rhs_,
+                basic_equivset& overlap_) const
             {
-                if (_greedy)
-                    overlap_._greedy = true;
-                else
+                if (_greedy == greedy_repeat::no)
                 {
-                    bool greedy_ = false;
-
-                    for (const node* node_ : rhs_._followpos)
-                    {
-                        // If a 'hard greedy' transition is present,
-                        // then respect that above all else.
-                        if (node_->what_type() == node::node_type::LEAF &&
-                            node_->greedy() && node_->set_greedy())
-                        {
-                            greedy_ = true;
-                            break;
-                        }
-                    }
-
-                    overlap_._greedy = greedy_;
+                    if (rhs_._greedy == greedy_repeat::hard)
+                        overlap_._greedy = rhs_._greedy;
+                    else
+                        overlap_._greedy = _greedy;
                 }
+                else
+                    overlap_._greedy = _greedy;
             }
 
             void intersect_indexes(index_vector& rhs_, index_vector& overlap_)

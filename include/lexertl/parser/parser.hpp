@@ -6,16 +6,17 @@
 #ifndef LEXERTL_PARSER_HPP
 #define LEXERTL_PARSER_HPP
 
-#include <cassert>
-#include <algorithm>
+#include "../runtime_error.hpp"
+#include "tokeniser/re_tokeniser.hpp"
 #include "tree/end_node.hpp"
 #include "tree/iteration_node.hpp"
 #include "tree/leaf_node.hpp"
-#include <map>
-#include "tokeniser/re_tokeniser.hpp"
-#include "../runtime_error.hpp"
 #include "tree/selection_node.hpp"
 #include "tree/sequence_node.hpp"
+
+#include <algorithm>
+#include <cassert>
+#include <map>
 #include <type_traits>
 #include <vector>
 
@@ -85,11 +86,11 @@ namespace lexertl
             {
             }
 
-            observer_ptr<node> parse(const token_vector& regex_, const id_type id_,
-                const id_type user_id_, const id_type unique_id_,
-                const id_type next_dfa_, const id_type push_dfa_,
-                const bool pop_dfa_, id_type& cr_id_, id_type& nl_id_,
-                const bool seen_bol_)
+            observer_ptr<node> parse(const token_vector& regex_,
+                const id_type id_, const id_type user_id_,
+                const id_type unique_id_, const id_type next_dfa_,
+                const id_type push_dfa_, const bool pop_dfa_, id_type& cr_id_,
+                id_type& nl_id_, const bool seen_bol_)
             {
                 auto iter_ = regex_.cbegin();
                 auto end_ = regex_.cend();
@@ -160,7 +161,7 @@ namespace lexertl
                 _tree_node_stack.pop();
                 _node_ptr_vector.push_back(std::make_unique<end_node>
                     (id_, user_id_, unique_id_, next_dfa_, push_dfa_, pop_dfa_,
-                        !non_greedy_));
+                        non_greedy_ ? greedy_repeat::no : greedy_repeat::yes));
 
                 observer_ptr<node> rhs_node_ = _node_ptr_vector.back().get();
 
@@ -263,25 +264,33 @@ namespace lexertl
                     break;
                 case token_type::OPT:
                 case token_type::AOPT:
-                    optional(rhs_->_type == token_type::OPT);
+                    optional(rhs_->_type == token_type::OPT ?
+                        greedy_repeat::hard :
+                        greedy_repeat::no);
                     _token_stack.push(std::make_unique<token>
                         (token_type::DUP));
                     break;
                 case token_type::ZEROORMORE:
                 case token_type::AZEROORMORE:
-                    zero_or_more(rhs_->_type == token_type::ZEROORMORE);
+                    zero_or_more(rhs_->_type == token_type::ZEROORMORE ?
+                        greedy_repeat::hard :
+                        greedy_repeat::no);
                     _token_stack.push(std::make_unique<token>
                         (token_type::DUP));
                     break;
                 case token_type::ONEORMORE:
                 case token_type::AONEORMORE:
-                    one_or_more(rhs_->_type == token_type::ONEORMORE);
+                    one_or_more(rhs_->_type == token_type::ONEORMORE ?
+                        greedy_repeat::hard :
+                        greedy_repeat::no);
                     _token_stack.push(std::make_unique<token>
                         (token_type::DUP));
                     break;
                 case token_type::REPEATN:
                 case token_type::AREPEATN:
-                    repeatn(rhs_->_type == token_type::REPEATN,
+                    repeatn(rhs_->_type == token_type::REPEATN ?
+                        greedy_repeat::hard :
+                        greedy_repeat::no,
                         handle_.top().get());
                     _token_stack.push(std::make_unique<token>
                         (token_type::DUP));
@@ -380,7 +389,7 @@ namespace lexertl
 
                 // store charset
                 _node_ptr_vector.push_back(std::make_unique<leaf_node>
-                    (bol_token(), true));
+                    (bol_token(), greedy_repeat::yes));
                 _tree_node_stack.push(_node_ptr_vector.back().get());
                 _token_stack.push(std::make_unique<token>
                     (token_type::REPEAT));
@@ -412,7 +421,7 @@ namespace lexertl
 
                 // store charset
                 _node_ptr_vector.push_back(std::make_unique<leaf_node>
-                    (eol_token(), true));
+                    (eol_token(), greedy_repeat::yes));
                 _tree_node_stack.push(_node_ptr_vector.back().get());
                 _token_stack.push(std::make_unique<token>
                     (token_type::REPEAT));
@@ -428,7 +437,7 @@ namespace lexertl
 
                 // store charset
                 _node_ptr_vector.push_back(std::make_unique<leaf_node>
-                    (id_, true));
+                    (id_, greedy_repeat::yes));
                 _tree_node_stack.push(_node_ptr_vector.back().get());
                 _token_stack.push(std::make_unique<token>
                     (token_type::REPEAT));
@@ -721,7 +730,7 @@ namespace lexertl
                 const id_type id_ = lookup(*token_);
 
                 _node_ptr_vector.push_back(std::make_unique
-                    <leaf_node>(id_, true));
+                    <leaf_node>(id_, greedy_repeat::yes));
                 _tree_node_stack.push(_node_ptr_vector.back().get());
             }
 
@@ -777,7 +786,7 @@ namespace lexertl
                 _tree_node_stack.top() = _node_ptr_vector.back().get();
             }
 
-            void optional(const bool greedy_)
+            void optional(const greedy_repeat greedy_)
             {
                 // perform ?
                 observer_ptr<node> lhs_ = _tree_node_stack.top();
@@ -800,7 +809,7 @@ namespace lexertl
                 _tree_node_stack.top() = _node_ptr_vector.back().get();
             }
 
-            void zero_or_more(const bool greedy_)
+            void zero_or_more(const greedy_repeat greedy_)
             {
                 // perform *
                 observer_ptr<node> ptr_ = _tree_node_stack.top();
@@ -810,7 +819,7 @@ namespace lexertl
                 _tree_node_stack.top() = _node_ptr_vector.back().get();
             }
 
-            void one_or_more(const bool greedy_)
+            void one_or_more(const greedy_repeat greedy_)
             {
                 // perform +
                 observer_ptr<node> lhs_ = _tree_node_stack.top();
@@ -832,7 +841,8 @@ namespace lexertl
             // {0,1} = ?
             // {1,}  = +
             // therefore we do not check for these cases.
-            void repeatn(const bool greedy_, observer_ptr<const token> token_)
+            void repeatn(const greedy_repeat greedy_,
+                observer_ptr<const token> token_)
             {
                 const rules_char_type* str_ = token_->_extra.c_str();
                 std::size_t min_ = 0;
@@ -935,12 +945,12 @@ namespace lexertl
                 if (!found_)
                 {
                     _node_ptr_vector.push_back(std::make_unique<leaf_node>
-                        (bol_token(), true));
+                        (bol_token(), greedy_repeat::yes));
 
                     observer_ptr<node> lhs_ = _node_ptr_vector.back().get();
 
                     _node_ptr_vector.push_back(std::make_unique<leaf_node>
-                        (node::null_token(), true));
+                        (node::null_token(), greedy_repeat::yes));
 
                     observer_ptr<node> rhs_ = _node_ptr_vector.back().get();
 

@@ -32,6 +32,10 @@ namespace lexertl
     {
         end_state = 1, greedy = 2, pop_dfa = 4
     };
+    enum class greedy_repeat
+    {
+        no, yes, hard
+    };
 }
 
 #endif

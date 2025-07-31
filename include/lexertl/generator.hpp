@@ -6,16 +6,17 @@
 #ifndef LEXERTL_GENERATOR_HPP
 #define LEXERTL_GENERATOR_HPP
 
-#include <algorithm>
-#include "partition/charset.hpp"
 #include "char_traits.hpp"
 #include "enum_operator.hpp"
-#include "partition/equivset.hpp"
-#include <list>
-#include <memory>
 #include "parser/parser.hpp"
+#include "partition/charset.hpp"
+#include "partition/equivset.hpp"
 #include "rules.hpp"
 #include "state_machine.hpp"
+
+#include <algorithm>
+#include <list>
+#include <memory>
 #include <type_traits>
 
 namespace lexertl
@@ -173,7 +174,8 @@ namespace lexertl
         using node_vector_vector = std::vector<std::unique_ptr<node_vector>>;
         using selection_node = typename parser::selection_node;
         using size_t_vector = typename std::vector<std::size_t>;
-        using std_string_vector_vector = typename rules::std_string_vector_vector;
+        using std_string_vector_vector =
+            typename rules::std_string_vector_vector;
         using string_token = typename parser::string_token;
 
         static void build_dfa(const charset_map& charset_map_,
@@ -263,7 +265,7 @@ namespace lexertl
 
                         // Prune abstemious transitions from end states.
                         if (*ptr_ && !(*ptr_ & *state_bit::greedy) &&
-                            !equivset_->_greedy)
+                            equivset_->_greedy == greedy_repeat::no)
                         {
                             continue;
                         }
@@ -285,7 +287,7 @@ namespace lexertl
         // followset that have other transitions as we should error out anyway
         // (i.e. we could be supressing other paths that have nothing to do
         // with the end_states we are interested in).
-        static void prune_eol_clashes(typename equivset::node_vector& followpos_,
+        static void prune_eol_clashes(node_vector& followpos_,
             const id_type cr_id_, const id_type nl_id_,
             const index_set_vector& set_mapping_)
         {
@@ -312,9 +314,9 @@ namespace lexertl
             }
         }
 
-        static void prune_NL(typename equivset::node_vector::iterator& iter_,
-            typename equivset::node_vector::iterator& end_,
-            typename equivset::node_vector& followpos_,
+        static void prune_NL(typename node_vector::iterator& iter_,
+            typename node_vector::iterator& end_,
+            node_vector& followpos_,
             const id_type cr_id_, const id_type nl_id_,
             const index_set_vector& set_mapping_)
         {
@@ -409,9 +411,9 @@ namespace lexertl
             }
         }
 
-        static void prune_eol(typename equivset::node_vector::iterator& iter_,
-            typename equivset::node_vector::iterator& end_,
-            typename equivset::node_vector& followpos_,
+        static void prune_eol(typename node_vector::iterator& iter_,
+            typename node_vector::iterator& end_,
+            node_vector& followpos_,
             const id_type cr_id_, const id_type nl_id_,
             const index_set_vector& set_mapping_)
         {
@@ -901,7 +903,7 @@ namespace lexertl
             id_type push_dfa_ = sm_traits::npos();
             bool pop_dfa_ = false;
             std::size_t hash_ = 0;
-            bool greedy_ = true;
+            greedy_repeat greedy_ = greedy_repeat::yes;
 
             if (followpos_.empty()) return sm_traits::npos();
 
@@ -945,7 +947,7 @@ namespace lexertl
                 {
                     dfa_[old_size_] |= *state_bit::end_state;
 
-                    if (greedy_)
+                    if (greedy_ != greedy_repeat::no)
                         dfa_[old_size_] |= *state_bit::greedy;
 
                     if (pop_dfa_)
@@ -966,8 +968,9 @@ namespace lexertl
         static void closure_ex(observer_ptr<node> node_, bool& end_state_,
             id_type& id_, id_type& user_id_, id_type& next_dfa_,
             id_type& push_dfa_, bool& pop_dfa_, node_set& set_ptr_,
-            node_vector& vector_ptr_, std::size_t& hash_, bool& greedy_,
-            const std::size_t flags_, std::set<id_type>& used_ids_)
+            node_vector& vector_ptr_, std::size_t& hash_,
+            greedy_repeat& greedy_, const std::size_t flags_,
+            std::set<id_type>& used_ids_)
         {
             if (node_->end_state())
             {

@@ -6,10 +6,12 @@
 #ifndef LEXERTL_NODE_HPP
 #define LEXERTL_NODE_HPP
 
-#include <assert.h>
-#include <memory>
+#include "../../enums.hpp"
 #include "../../observer_ptr.hpp"
 #include "../../runtime_error.hpp"
+
+#include <assert.h>
+#include <memory>
 #include <stack>
 #include <vector>
 
@@ -192,22 +194,17 @@ namespace lexertl
 #endif
             }
 
-            virtual bool set_greedy() const
-            {
-                throw runtime_error("Internal error node::set_greedy().");
-            }
-
-            virtual void greedy(const bool /*greedy_*/)
+            virtual void greedy(const greedy_repeat /*greedy_*/)
             {
                 throw runtime_error("Internal error node::greedy(bool).");
             }
 
-            virtual bool greedy() const
+            virtual greedy_repeat greedy() const
             {
                 throw runtime_error("Internal error node::greedy().");
 #ifdef __SUNPRO_CC
                 // Stop bogus Solaris compiler warning
-                return false;
+                return greedy_repeat::no;
 #endif
             }
 
