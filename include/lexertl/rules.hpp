@@ -6,14 +6,16 @@
 #ifndef LEXERTL_RULES_HPP
 #define LEXERTL_RULES_HPP
 
+#include "abstemious.hpp"
 #include "enum_operator.hpp"
 #include "enums.hpp"
-#include <locale>
-#include <map>
 #include "narrow.hpp"
 #include "observer_ptr.hpp"
 #include "parser/tokeniser/re_tokeniser.hpp"
 #include "runtime_error.hpp"
+
+#include <locale>
+#include <map>
 #include <set>
 #include <sstream>
 #include <string>
@@ -495,6 +497,7 @@ namespace lexertl
                 _flags, _locale, name_);
             string macro_;
             rules_char_type diff_ = 0;
+            std::vector<std::size_t> ab_indexes_;
 
             tokens_.emplace_back();
 
@@ -504,6 +507,18 @@ namespace lexertl
                 token rhs_;
 
                 tokeniser::next(*lhs_, state_, rhs_);
+
+                switch (rhs_._type)
+                {
+                case detail::token_type::AOPT:
+                case detail::token_type::AZEROORMORE:
+                case detail::token_type::AONEORMORE:
+                case detail::token_type::AREPEATN:
+                    ab_indexes_.push_back(tokens_.size());
+                    break;
+                default:
+                    break;
+                }
 
                 if (rhs_._type != detail::token_type::DIFF &&
                     lhs_->precedence(rhs_._type) == ' ')
@@ -751,6 +766,9 @@ namespace lexertl
                     diff_ = 0;
                 }
             } while (tokens_.back()._type != detail::token_type::END);
+
+            if (!name_)
+                abstemious<rules_char_type, char_type>::prune(tokens_, ab_indexes_);
 
             if (tokens_.size() == 2)
             {

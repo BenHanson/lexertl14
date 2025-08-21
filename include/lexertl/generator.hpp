@@ -259,13 +259,16 @@ namespace lexertl
 
                     if (transition_ != sm_traits::npos())
                     {
+                        // The end state is set as part of closure(),
+                        // so wait until here to check for it.
                         observer_ptr<id_type> ptr_ = &dfa_.front() +
                             ((static_cast<std::size_t>(index_) + 1) *
                                 dfa_alphabet_);
 
                         // Prune abstemious transitions from end states.
-                        if (*ptr_ && !(*ptr_ & *state_bit::greedy) &&
-                            equivset_->_greedy == greedy_repeat::no)
+                        if (*ptr_ && std::all_of(equiv_list_.begin(),
+                            equiv_list_.end(), [](const auto& e_)
+                            { return e_->_greedy == greedy_repeat::no; }))
                         {
                             continue;
                         }
@@ -946,9 +949,6 @@ namespace lexertl
                 if (end_state_)
                 {
                     dfa_[old_size_] |= *state_bit::end_state;
-
-                    if (greedy_ != greedy_repeat::no)
-                        dfa_[old_size_] |= *state_bit::greedy;
 
                     if (pop_dfa_)
                     {
