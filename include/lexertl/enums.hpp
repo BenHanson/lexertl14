@@ -30,7 +30,7 @@ namespace lexertl
     // End state flags:
     enum class state_bit
     {
-        end_state = 1, pop_dfa = 2
+        end_state = 1, greedy = 2, pop_dfa = 4
     };
     enum class greedy_repeat
     {

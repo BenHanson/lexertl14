@@ -266,7 +266,8 @@ namespace lexertl
                                 dfa_alphabet_);
 
                         // Prune abstemious transitions from end states.
-                        if (*ptr_ && std::all_of(equiv_list_.begin(),
+                        if (*ptr_ && !(*ptr_ & *state_bit::greedy) &&
+                            std::all_of(equiv_list_.begin(),
                             equiv_list_.end(), [](const auto& e_)
                             { return e_->_greedy == greedy_repeat::no; }))
                         {
@@ -949,6 +950,9 @@ namespace lexertl
                 if (end_state_)
                 {
                     dfa_[old_size_] |= *state_bit::end_state;
+
+                    if (greedy_ != greedy_repeat::no)
+                        dfa_[old_size_] |= *state_bit::greedy;
 
                     if (pop_dfa_)
                     {
