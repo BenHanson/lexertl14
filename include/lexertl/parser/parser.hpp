@@ -137,18 +137,6 @@ namespace lexertl
                     }
                 } while (!_token_stack.empty());
 
-                if (_tree_node_stack.empty())
-                {
-                    std::ostringstream ss_;
-
-                    ss_ << "Empty rules are not allowed in rule id " <<
-                        id_ << '.';
-                    throw runtime_error(ss_.str());
-                }
-
-                assert(_tree_node_stack.size() == 1);
-
-                observer_ptr<node> lhs_node_ = _tree_node_stack.top();
                 const bool non_greedy_ = std::find_if(regex_.cbegin(),
                     regex_.cend(), [](const token& token_)
                     {
@@ -158,15 +146,24 @@ namespace lexertl
                             token_._type == token_type::AREPEATN;
                     }) != regex_.cend();
 
-                _tree_node_stack.pop();
                 _node_ptr_vector.push_back(std::make_unique<end_node>
                     (id_, user_id_, unique_id_, next_dfa_, push_dfa_, pop_dfa_,
                         non_greedy_ ? greedy_repeat::no : greedy_repeat::yes));
 
-                observer_ptr<node> rhs_node_ = _node_ptr_vector.back().get();
+                if (!_tree_node_stack.empty())
+                {
+                    assert(_tree_node_stack.size() == 1);
 
-                _node_ptr_vector.push_back(std::make_unique<sequence_node>
-                    (lhs_node_, rhs_node_));
+                    observer_ptr<node> lhs_node_ = _tree_node_stack.top();
+
+                    _tree_node_stack.pop();
+
+                    observer_ptr<node> rhs_node_ = _node_ptr_vector.back().get();
+
+                    _node_ptr_vector.push_back(std::make_unique<sequence_node>
+                        (lhs_node_, rhs_node_));
+                }
+
                 root_ = _node_ptr_vector.back().get();
 
                 if (seen_bol_)
