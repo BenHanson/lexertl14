@@ -6,17 +6,24 @@
 #ifndef LEXERTL_PARSER_HPP
 #define LEXERTL_PARSER_HPP
 
-#include "../runtime_error.hpp"
-#include "tokeniser/re_tokeniser.hpp"
 #include "tree/end_node.hpp"
+#include "../enums.hpp"
 #include "tree/iteration_node.hpp"
 #include "tree/leaf_node.hpp"
+#include "../observer_ptr.hpp"
+#include "tokeniser/re_tokeniser.hpp"
+#include "../runtime_error.hpp"
+#include "tree/node.hpp"
 #include "tree/selection_node.hpp"
 #include "tree/sequence_node.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <locale>
 #include <map>
+#include <memory>
+#include <sstream>
+#include <stack>
 #include <type_traits>
 #include <vector>
 
@@ -50,7 +57,6 @@ namespace lexertl
         class basic_parser
         {
         public:
-            enum { char_24_bit = sm_traits::char_24_bit };
             using char_type = typename sm_traits::char_type;
             using id_type = typename sm_traits::id_type;
             using end_node = basic_end_node<id_type>;
@@ -455,15 +461,16 @@ namespace lexertl
             // Slice wchar_t into sequence of char.
             void create_sequence(std::unique_ptr<token>& token_)
             {
-                string_token_vector data_[char_24_bit ? 3 : 2];
+                string_token_vector data_[+sm_traits::char_24_bit ? 3 : 2];
 
                 for (const input_range& range_ : token_->_str._ranges)
                 {
                     slice_range(range_, data_,
-                        std::integral_constant<bool, char_24_bit>());
+                        std::integral_constant<bool, +sm_traits::char_24_bit>());
                 }
 
-                push_ranges(data_, std::integral_constant<bool, char_24_bit>());
+                push_ranges(data_, std::integral_constant<bool,
+                    +sm_traits::char_24_bit>());
 
                 _token_stack.push(std::make_unique<token>
                     (token_type::OPENPAREN));

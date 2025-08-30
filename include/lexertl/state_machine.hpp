@@ -6,14 +6,20 @@
 #ifndef LEXERTL_STATE_MACHINE_HPP
 #define LEXERTL_STATE_MACHINE_HPP
 
-// memcmp()
-#include <cstring>
+#include "enums.hpp"
 #include "internals.hpp"
-#include <map>
 #include "observer_ptr.hpp"
-#include <set>
 #include "sm_traits.hpp"
 #include "string_token.hpp"
+
+// memcmp()
+#include <cstdint>
+#include <cstring>
+#include <map>
+#include <set>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace lexertl
 {
@@ -226,16 +232,16 @@ namespace lexertl
             id_type _eol_index = traits::npos();
             id_type_string_token_map _transitions;
 
-            bool operator ==(const state rhs_) const
+            friend bool operator ==(const state lhs_, const state rhs_)
             {
-                return _end_state == rhs_._end_state &&
-                    _push_pop_dfa == rhs_._push_pop_dfa &&
-                    _id == rhs_._id &&
-                    _user_id == rhs_._user_id &&
-                    _push_dfa == rhs_._push_dfa &&
-                    _next_dfa == rhs_._next_dfa &&
-                    _eol_index == rhs_._eol_index &&
-                    _transitions == rhs_._transitions;
+                return lhs_._end_state == rhs_._end_state &&
+                    lhs_._push_pop_dfa == rhs_._push_pop_dfa &&
+                    lhs_._id == rhs_._id &&
+                    lhs_._user_id == rhs_._user_id &&
+                    lhs_._push_dfa == rhs_._push_dfa &&
+                    lhs_._next_dfa == rhs_._next_dfa &&
+                    lhs_._eol_index == rhs_._eol_index &&
+                    lhs_._transitions == rhs_._transitions;
             }
         };
 

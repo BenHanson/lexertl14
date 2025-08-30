@@ -10,7 +10,10 @@
 #include "enums.hpp"
 #include "state_machine.hpp"
 
+#include <ios>
 #include <sstream>
+#include <string>
+#include <type_traits>
 
 namespace lexertl
 {

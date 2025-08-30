@@ -7,12 +7,10 @@
 #ifndef LEXERTL_STREAM_SHARED_ITERATOR_HPP
 #define LEXERTL_STREAM_SHARED_ITERATOR_HPP
 
-#include <algorithm>
-// memcpy
-#include <cstring>
-#include <iostream>
-#include <math.h>
 #include "runtime_error.hpp"
+
+#include <istream>
+#include <iterator>
 #include <vector>
 
 namespace lexertl
@@ -113,18 +111,20 @@ namespace lexertl
             return *this;
         }
 
-        bool operator ==(const basic_stream_shared_iterator& rhs_) const
+        friend bool operator ==(const basic_stream_shared_iterator& lhs_,
+            const basic_stream_shared_iterator& rhs_)
         {
-            return _index == rhs_._index &&
-                (_shared == rhs_._shared ||
-                    (_index == shared::npos() ||
+            return lhs_._index == rhs_._index &&
+                (lhs_._shared == rhs_._shared ||
+                    (lhs_._index == shared::npos() ||
                         rhs_._index == shared::npos()) &&
-                    (!_shared || !rhs_._shared));
+                    (!lhs_._shared || !rhs_._shared));
         }
 
-        bool operator !=(const basic_stream_shared_iterator& rhs_) const
+        friend bool operator !=(const basic_stream_shared_iterator& lhs_,
+            const basic_stream_shared_iterator& rhs_)
         {
-            return !(*this == rhs_);
+            return !(lhs_ == rhs_);
         }
 
         const char_type& operator *()

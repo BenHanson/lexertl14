@@ -9,6 +9,7 @@
 #include "enum_operator.hpp"
 #include "enums.hpp"
 #include "observer_ptr.hpp"
+
 #include <cstddef>
 
 namespace lexertl

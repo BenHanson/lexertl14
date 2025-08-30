@@ -8,8 +8,10 @@
 
 #include "../../char_traits.hpp"
 #include "../../enums.hpp"
-#include <locale>
 #include "../../narrow.hpp"
+
+#include <locale>
+#include <sstream>
 #include <stack>
 
 namespace lexertl

@@ -10,7 +10,7 @@
 #include "../../observer_ptr.hpp"
 #include "../../runtime_error.hpp"
 
-#include <assert.h>
+#include <cassert>
 #include <memory>
 #include <stack>
 #include <vector>

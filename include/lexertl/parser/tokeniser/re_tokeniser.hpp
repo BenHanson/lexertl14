@@ -6,13 +6,15 @@
 #ifndef LEXERTL_RE_TOKENISER_HPP
 #define LEXERTL_RE_TOKENISER_HPP
 
-#include <cstring>
 #include "../../enum_operator.hpp"
+#include "../../enums.hpp"
 #include "re_token.hpp"
-#include "../../runtime_error.hpp"
-#include <sstream>
-#include "../../string_token.hpp"
 #include "re_tokeniser_helper.hpp"
+#include "../../runtime_error.hpp"
+#include "../../string_token.hpp"
+
+#include <cstring>
+#include <sstream>
 
 namespace lexertl
 {

@@ -6,6 +6,7 @@
 #ifndef LEXERTL_END_NODE_HPP
 #define LEXERTL_END_NODE_HPP
 
+#include "../../enums.hpp"
 #include "node.hpp"
 
 namespace lexertl

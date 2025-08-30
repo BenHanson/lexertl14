@@ -7,6 +7,7 @@
 #define LEXERTL_SELECTION_NODE_HPP
 
 #include "node.hpp"
+#include "../../observer_ptr.hpp"
 
 namespace lexertl
 {

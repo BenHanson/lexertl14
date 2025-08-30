@@ -8,12 +8,17 @@
 
 #include "../../char_traits.hpp"
 #include "../../enum_operator.hpp"
-// strlen()
-#include <cstring>
+#include "../../enums.hpp"
 #include "re_tokeniser_state.hpp"
 #include "../../runtime_error.hpp"
-#include <sstream>
 #include "../../string_token.hpp"
+
+// strlen()
+#include <cstring>
+#include <ios>
+#include <locale>
+#include <sstream>
+#include <string>
 
 namespace lexertl
 {

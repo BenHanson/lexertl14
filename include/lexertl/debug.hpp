@@ -14,11 +14,12 @@
 #include "string_token.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <ostream>
 #include <sstream>
-#include <vector>
+#include <string>
 
 namespace lexertl
 {

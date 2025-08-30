@@ -6,7 +6,9 @@
 #ifndef LEXERTL_ITERATION_NODE_HPP
 #define LEXERTL_ITERATION_NODE_HPP
 
+#include "../../enums.hpp"
 #include "node.hpp"
+#include "../../observer_ptr.hpp"
 
 namespace lexertl
 {

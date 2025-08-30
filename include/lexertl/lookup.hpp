@@ -6,9 +6,13 @@
 #ifndef LEXERTL_LOOKUP_HPP
 #define LEXERTL_LOOKUP_HPP
 
-#include <cassert>
+#include "enums.hpp"
 #include "match_results.hpp"
 #include "runtime_error.hpp"
+
+#include <array>
+#include <cassert>
+#include <iterator>
 #include <type_traits>
 
 namespace lexertl
@@ -192,7 +196,7 @@ namespace lexertl
             {
                 const std::size_t bytes_ = sizeof(char_type) < 3 ?
                     sizeof(char_type) : 3;
-                const std::size_t shift_[] = { 0, 8, 16 };
+                const std::array<std::size_t, 3> shift_ = { 0, 8, 16 };
                 id_type state_ = 0;
 
                 for (std::size_t i_ = 0; i_ < bytes_; ++i_)

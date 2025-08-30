@@ -11,14 +11,22 @@
 #include "enums.hpp"
 #include "narrow.hpp"
 #include "observer_ptr.hpp"
+#include "parser/tokeniser/re_token.hpp"
 #include "parser/tokeniser/re_tokeniser.hpp"
+#include "parser/tokeniser/re_tokeniser_state.hpp"
 #include "runtime_error.hpp"
+#include "string_token.hpp"
 
+#include <array>
+#include <cstdint>
 #include <locale>
 #include <map>
 #include <set>
 #include <sstream>
+#include <stack>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace lexertl
@@ -72,9 +80,7 @@ namespace lexertl
         }
 
         // Added to support python bindings
-        virtual ~basic_rules()
-        {
-        }
+        virtual ~basic_rules() = default;
 
         void clear()
         {
@@ -455,24 +461,24 @@ namespace lexertl
 
         static const rules_char_type* initial()
         {
-            static const rules_char_type initial_[] =
+            static const std::array<rules_char_type, 8> initial_ =
             { 'I', 'N', 'I', 'T', 'I', 'A', 'L', 0 };
 
-            return initial_;
+            return &initial_.front();
         }
 
         static const rules_char_type* dot()
         {
-            static const rules_char_type dot_[] = { '.', 0 };
+            static const std::array<rules_char_type, 2> dot_ = { '.', 0 };
 
-            return dot_;
+            return &dot_.front();
         }
 
         static const rules_char_type* all_states()
         {
-            static const rules_char_type star_[] = { '*', 0 };
+            static const std::array<rules_char_type, 2> star_ = { '*', 0 };
 
-            return star_;
+            return &star_.front();
         }
 
     private:
@@ -868,8 +874,8 @@ namespace lexertl
                     dest_->_type = detail::token_type::BEGIN;
                     break;
                 default:
-                    // detail::token_type::OR
-                    // detail::token_type::CHARSET
+                    // OR
+                    // CHARSET
                     iter_->swap(*dest_);
                     break;
                 }

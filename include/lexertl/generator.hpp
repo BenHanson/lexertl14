@@ -8,16 +8,24 @@
 
 #include "char_traits.hpp"
 #include "enum_operator.hpp"
+#include "enums.hpp"
+#include "internals.hpp"
 #include "parser/parser.hpp"
 #include "partition/charset.hpp"
 #include "partition/equivset.hpp"
+#include "observer_ptr.hpp"
 #include "rules.hpp"
+#include "runtime_error.hpp"
 #include "state_machine.hpp"
 
 #include <algorithm>
 #include <list>
 #include <memory>
+#include <set>
+#include <sstream>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 namespace lexertl
 {
