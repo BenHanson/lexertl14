@@ -8,6 +8,7 @@
 
 #include "enum_operator.hpp"
 #include "enums.hpp"
+
 #include <vector>
 
 namespace lexertl

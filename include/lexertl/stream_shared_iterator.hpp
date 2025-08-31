@@ -118,7 +118,7 @@ namespace lexertl
                 (lhs_._shared == rhs_._shared ||
                     (lhs_._index == shared::npos() ||
                         rhs_._index == shared::npos()) &&
-                    (!lhs_._shared || !rhs_._shared));
+                        (!lhs_._shared || !rhs_._shared));
         }
 
         friend bool operator !=(const basic_stream_shared_iterator& lhs_,

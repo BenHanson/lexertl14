@@ -33,7 +33,7 @@ namespace lexertl
 {
     template<typename r_ch_type, typename ch_type,
         typename id_ty = uint16_t>
-        class basic_rules
+    class basic_rules
     {
     public:
         using bool_vector = std::vector<bool>;
@@ -253,8 +253,10 @@ namespace lexertl
             {
                 auto pair_ =
                     _macro_map.insert(macro_pair(name_, token_vector()));
+                auto tokens_vec_ = tokenise(regex_, npos(), name_);
 
-                tokenise(regex_, pair_.first->second, npos(), name_);
+                // There can only be one token_vector for a macro
+                pair_.first->second = std::move(tokens_vec_.back());
             }
             else
             {
@@ -293,18 +295,17 @@ namespace lexertl
             std::ostringstream ss_;
 
             check_for_invalid_id(id_);
-            _regexes.front().emplace_back();
             narrow(regex_.c_str(), ss_);
-            _regex_strings.front().push_back(ss_.str());
-            tokenise(regex_, _regexes.front().back(), id_, nullptr);
 
-            if (_regexes.front().back()[1]._type == detail::token_type::BOL)
+            auto tokens_vec_ = tokenise(regex_, id_, nullptr);
+
+            if (tokens_vec_.front()[1]._type == detail::token_type::BOL)
             {
                 _features.front() |= *feature_bit::bol;
             }
 
-            if (_regexes.front().back()[_regexes.front().back().size() - 2].
-                _type == detail::token_type::EOL)
+            if (tokens_vec_.back()[tokens_vec_.back().size() - 2]._type ==
+                detail::token_type::EOL)
             {
                 _features.front() |= *feature_bit::eol;
             }
@@ -318,11 +319,16 @@ namespace lexertl
                 _features.front() |= *feature_bit::again;
             }
 
-            _ids.front().push_back(id_);
-            _user_ids.front().push_back(user_id_);
-            _next_dfas.front().push_back(0);
-            _pushes.front().push_back(npos());
-            _pops.front().push_back(false);
+            for (auto& tokens_ : tokens_vec_)
+            {
+                _regex_strings.front().push_back(ss_.str());
+                _regexes.front().push_back(std::move(tokens_));
+                _ids.front().push_back(id_);
+                _user_ids.front().push_back(user_id_);
+                _next_dfas.front().push_back(0);
+                _pushes.front().push_back(npos());
+                _pops.front().push_back(false);
+            }
         }
 
         // Add rule with no id
@@ -496,9 +502,11 @@ namespace lexertl
         std::locale _locale;
         string_vector _lexer_state_names;
 
-        void tokenise(const string& regex_, token_vector& tokens_,
+        [[nodiscard]] token_vector_vector tokenise(const string& regex_,
             const id_type id_, const rules_char_type* name_)
         {
+            token_vector_vector ret_;
+            token_vector tokens_;
             re_state state_(regex_.c_str(), regex_.c_str() + regex_.size(), id_,
                 _flags, _locale, name_);
             string macro_;
@@ -513,195 +521,16 @@ namespace lexertl
                 token rhs_;
 
                 tokeniser::next(*lhs_, state_, rhs_);
-
-                switch (rhs_._type)
-                {
-                case detail::token_type::AOPT:
-                case detail::token_type::AZEROORMORE:
-                case detail::token_type::AONEORMORE:
-                case detail::token_type::AREPEATN:
-                    ab_indexes_.push_back(tokens_.size());
-                    break;
-                default:
-                    break;
-                }
-
-                if (rhs_._type != detail::token_type::DIFF &&
-                    lhs_->precedence(rhs_._type) == ' ')
-                {
-                    std::ostringstream ss_;
-
-                    ss_ << "A syntax error occurred: '" <<
-                        lhs_->precedence_string() <<
-                        "' against '" << rhs_.precedence_string() <<
-                        "' preceding index " << state_.index() <<
-                        " in ";
-
-                    if (name_ != nullptr)
-                    {
-                        ss_ << "macro ";
-                        narrow(name_, ss_);
-                    }
-                    else
-                    {
-                        ss_ << "rule id " << state_._id;
-                    }
-
-                    ss_ << '.';
-                    throw runtime_error(ss_.str());
-                }
+                check_diff_error(name_, lhs_, rhs_, state_);
 
                 if (rhs_._type == detail::token_type::MACRO)
                 {
-                    typename macro_map::const_iterator iter_ =
-                        _macro_map.find(rhs_._extra);
-
-                    macro_ = rhs_._extra;
-
-                    if (iter_ == _macro_map.end())
-                    {
-                        const rules_char_type* rhs_name_ = rhs_._extra.c_str();
-                        std::ostringstream ss_;
-
-                        ss_ << "Unknown MACRO name '";
-                        narrow(rhs_name_, ss_);
-                        ss_ << "'.";
-                        throw runtime_error(ss_.str());
-                    }
-                    else
-                    {
-                        const bool multiple_ = iter_->second.size() > 3;
-                        const token& first_ = iter_->second[1];
-                        const token& second_ =
-                            iter_->second[iter_->second.size() - 2];
-                        const bool bol_ = tokens_.size() == 1 &&
-                            first_._type == detail::token_type::BOL;
-                        const bool caret_ =
-                            !bol_ && first_._type == detail::token_type::BOL;
-                        const bool eol_ =
-                            state_._curr == regex_.c_str() + regex_.size() &&
-                            second_._type == detail::token_type::EOL;
-                        const bool dollar_ =
-                            !eol_ && second_._type == detail::token_type::EOL;
-
-                        if (diff_)
-                        {
-                            if (multiple_)
-                            {
-                                std::ostringstream ss_;
-
-                                ss_ << "Single CHARSET must "
-                                    "follow {-} or {+} at index " <<
-                                    state_.index() - 1 << " in ";
-
-                                if (name_ != nullptr)
-                                {
-                                    ss_ << "macro ";
-                                    narrow(name_, ss_);
-                                }
-                                else
-                                {
-                                    ss_ << "rule id " << state_._id;
-                                }
-
-                                ss_ << '.';
-                                throw runtime_error(ss_.str());
-                            }
-                            else
-                            {
-                                rhs_ = iter_->second[1];
-                            }
-                        }
-
-                        // Any macro with more than one charset (or quantifiers)
-                        // requires bracketing.
-                        if (multiple_ && !(bol_ || eol_))
-                        {
-                            token open_;
-
-                            open_._type = detail::token_type::OPENPAREN;
-                            open_._str.insert('(');
-                            tokens_.push_back(open_);
-                        }
-
-                        // Don't need to store token if it is diff.
-                        if (!diff_)
-                        {
-                            std::size_t start_offset_ = 1;
-                            std::size_t end_offset_ = 1;
-
-                            if (caret_)
-                            {
-                                token token_;
-
-                                token_._type = detail::token_type::CHARSET;
-                                token_._str.insert('^');
-                                tokens_.push_back(token_);
-                                ++start_offset_;
-                            }
-
-                            if (dollar_)
-                            {
-                                ++end_offset_;
-                            }
-
-                            // Don't insert BEGIN or END tokens
-                            tokens_.insert(tokens_.end(),
-                                iter_->second.begin() + start_offset_,
-                                iter_->second.end() - end_offset_);
-
-                            if (dollar_)
-                            {
-                                token token_;
-
-                                token_._type = detail::token_type::CHARSET;
-                                token_._str.insert('$');
-                                tokens_.push_back(token_);
-                            }
-
-                            lhs_ = &tokens_.back();
-                        }
-
-                        if (multiple_ && !(bol_ || eol_))
-                        {
-                            token close_;
-
-                            close_._type = detail::token_type::CLOSEPAREN;
-                            close_._str.insert(')');
-                            tokens_.push_back(close_);
-                        }
-                    }
+                    process_macro(name_, lhs_, rhs_, macro_, tokens_, state_,
+                        regex_, diff_);
                 }
                 else if (rhs_._type == detail::token_type::DIFF)
                 {
-                    if (!macro_.empty())
-                    {
-                        auto iter_ = _macro_map.find(macro_);
-
-                        if (iter_->second.size() > 3)
-                        {
-                            std::ostringstream ss_;
-
-                            ss_ << "Single CHARSET must precede {-} or {+} at "
-                                "index " << state_.index() - 1 << " in ";
-
-                            if (name_ != nullptr)
-                            {
-                                ss_ << "macro ";
-                                narrow(name_, ss_);
-                            }
-                            else
-                            {
-                                ss_ << "rule id " << state_._id;
-                            }
-
-                            ss_ << '.';
-                            throw runtime_error(ss_.str());
-                        }
-                    }
-
-                    diff_ = rhs_._extra[0];
-                    macro_.clear();
+                    process_diff(name_, rhs_, state_, macro_, diff_);
                     continue;
                 }
                 else if (!diff_)
@@ -714,11 +543,128 @@ namespace lexertl
                 // diff_ may have been set by previous conditional.
                 if (diff_)
                 {
-                    if (rhs_._type != detail::token_type::CHARSET)
+                    check_diff(name_, lhs_, rhs_, state_, diff_);
+                    diff_ = 0;
+                }
+            } while (tokens_.back()._type != detail::token_type::END);
+
+            record_abstemious(tokens_, ab_indexes_);
+
+            if (!name_)
+            {
+                abstemious<rules_char_type, char_type>::
+                    prune(tokens_, ab_indexes_);
+                // Need to fill ab_indexes_ again following prune
+                record_abstemious(tokens_, ab_indexes_);
+            }
+
+            check_empty(name_, tokens_, state_);
+
+            if (ab_indexes_.empty())
+                ret_.push_back(std::move(tokens_));
+            else
+                ret_ = split(tokens_);
+
+            return ret_;
+        }
+
+        void record_abstemious(const token_vector& tokens_,
+            std::vector<std::size_t>& ab_indexes_) const
+        {
+            std::size_t idx_ = 0;
+
+            for (const auto& token_ : tokens_)
+            {
+                switch (token_._type)
+                {
+                case detail::token_type::AOPT:
+                case detail::token_type::AZEROORMORE:
+                case detail::token_type::AONEORMORE:
+                case detail::token_type::AREPEATN:
+                    ab_indexes_.push_back(idx_);
+                    break;
+                default:
+                    break;
+                }
+
+                ++idx_;
+            }
+        }
+
+        void check_diff_error(const rules_char_type* name_,
+            const observer_ptr<token> lhs_, const token& rhs_,
+            const re_state& state_) const
+        {
+            if (rhs_._type != detail::token_type::DIFF &&
+                lhs_->precedence(rhs_._type) == ' ')
+            {
+                std::ostringstream ss_;
+
+                ss_ << "A syntax error occurred: '" <<
+                    lhs_->precedence_string() <<
+                    "' against '" << rhs_.precedence_string() <<
+                    "' preceding index " << state_.index() <<
+                    " in ";
+
+                if (name_ != nullptr)
+                {
+                    ss_ << "macro ";
+                    narrow(name_, ss_);
+                }
+                else
+                {
+                    ss_ << "rule id " << state_._id;
+                }
+
+                ss_ << '.';
+                throw runtime_error(ss_.str());
+            }
+        }
+
+        void process_macro(const rules_char_type* name_,
+            observer_ptr<token> lhs_, token& rhs_, string& macro_,
+            token_vector& tokens_, const re_state& state_,
+            const string& regex_, const rules_char_type diff_)
+        {
+            typename macro_map::const_iterator iter_ =
+                _macro_map.find(rhs_._extra);
+
+            macro_ = rhs_._extra;
+
+            if (iter_ == _macro_map.end())
+            {
+                const rules_char_type* rhs_name_ = rhs_._extra.c_str();
+                std::ostringstream ss_;
+
+                ss_ << "Unknown MACRO name '";
+                narrow(rhs_name_, ss_);
+                ss_ << "'.";
+                throw runtime_error(ss_.str());
+            }
+            else
+            {
+                const bool multiple_ = iter_->second.size() > 3;
+                const token& first_ = iter_->second[1];
+                const token& second_ =
+                    iter_->second[iter_->second.size() - 2];
+                const bool bol_ = tokens_.size() == 1 &&
+                    first_._type == detail::token_type::BOL;
+                const bool caret_ =
+                    !bol_ && first_._type == detail::token_type::BOL;
+                const bool eol_ =
+                    state_._curr == regex_.c_str() + regex_.size() &&
+                    second_._type == detail::token_type::EOL;
+                const bool dollar_ =
+                    !eol_ && second_._type == detail::token_type::EOL;
+
+                if (diff_)
+                {
+                    if (multiple_)
                     {
                         std::ostringstream ss_;
 
-                        ss_ << "CHARSET must follow {-} or {+} at index " <<
+                        ss_ << "Single CHARSET must "
+                            "follow {-} or {+} at index " <<
                             state_.index() - 1 << " in ";
 
                         if (name_ != nullptr)
@@ -734,51 +680,169 @@ namespace lexertl
                         ss_ << '.';
                         throw runtime_error(ss_.str());
                     }
-
-                    switch (diff_)
+                    else
                     {
-                    case '-':
-                        lhs_->_str.remove(rhs_._str);
+                        rhs_ = iter_->second[1];
+                    }
+                }
 
-                        if (lhs_->_str.empty())
-                        {
-                            std::ostringstream ss_;
+                // Any macro with more than one charset (or quantifiers)
+                // requires bracketing.
+                if (multiple_ && !(bol_ || eol_))
+                {
+                    token open_;
 
-                            ss_ << "Empty charset created by {-} at index " <<
-                                state_.index() - 1 << " in ";
+                    open_._type = detail::token_type::OPENPAREN;
+                    open_._str.insert('(');
+                    tokens_.push_back(open_);
+                }
 
-                            if (name_ != nullptr)
-                            {
-                                ss_ << "macro ";
-                                narrow(name_, ss_);
-                            }
-                            else
-                            {
-                                ss_ << "rule id " << state_._id;
-                            }
+                // Don't need to store token if it is diff.
+                if (!diff_)
+                {
+                    std::size_t start_offset_ = 1;
+                    std::size_t end_offset_ = 1;
 
-                            ss_ << '.';
-                            throw runtime_error(ss_.str());
-                        }
+                    if (caret_)
+                    {
+                        token token_;
 
-                        break;
-                    case '+':
-                        lhs_->_str.insert(rhs_._str);
-                        break;
-                    default:
-                        break;
+                        token_._type = detail::token_type::CHARSET;
+                        token_._str.insert('^');
+                        tokens_.push_back(token_);
+                        ++start_offset_;
                     }
 
-                    diff_ = 0;
-                }
-            } while (tokens_.back()._type != detail::token_type::END);
+                    if (dollar_)
+                    {
+                        ++end_offset_;
+                    }
 
-            if (!name_)
+                    // Don't insert BEGIN or END tokens
+                    tokens_.insert(tokens_.end(),
+                        iter_->second.begin() + start_offset_,
+                        iter_->second.end() - end_offset_);
+
+                    if (dollar_)
+                    {
+                        token token_;
+
+                        token_._type = detail::token_type::CHARSET;
+                        token_._str.insert('$');
+                        tokens_.push_back(token_);
+                    }
+
+                    lhs_ = &tokens_.back();
+                }
+
+                if (multiple_ && !(bol_ || eol_))
+                {
+                    token close_;
+
+                    close_._type = detail::token_type::CLOSEPAREN;
+                    close_._str.insert(')');
+                    tokens_.push_back(close_);
+                }
+            }
+        }
+
+        void process_diff(const rules_char_type* name_,
+            const token& rhs_, const re_state& state_, string& macro_,
+            rules_char_type& diff_)
+        {
+            if (!macro_.empty())
             {
-                abstemious<rules_char_type, char_type>::
-                    prune(tokens_, ab_indexes_);
+                auto iter_ = _macro_map.find(macro_);
+
+                if (iter_->second.size() > 3)
+                {
+                    std::ostringstream ss_;
+
+                    ss_ << "Single CHARSET must precede {-} or {+} at "
+                        "index " << state_.index() - 1 << " in ";
+
+                    if (name_ != nullptr)
+                    {
+                        ss_ << "macro ";
+                        narrow(name_, ss_);
+                    }
+                    else
+                    {
+                        ss_ << "rule id " << state_._id;
+                    }
+
+                    ss_ << '.';
+                    throw runtime_error(ss_.str());
+                }
             }
 
+            diff_ = rhs_._extra[0];
+            macro_.clear();
+        }
+
+        void check_diff(const rules_char_type* name_,
+            observer_ptr<token> lhs_, const token& rhs_,
+            const re_state& state_, const rules_char_type diff_) const
+        {
+            if (rhs_._type != detail::token_type::CHARSET)
+            {
+                std::ostringstream ss_;
+
+                ss_ << "CHARSET must follow {-} or {+} at index " <<
+                    state_.index() - 1 << " in ";
+
+                if (name_ != nullptr)
+                {
+                    ss_ << "macro ";
+                    narrow(name_, ss_);
+                }
+                else
+                {
+                    ss_ << "rule id " << state_._id;
+                }
+
+                ss_ << '.';
+                throw runtime_error(ss_.str());
+            }
+
+            switch (diff_)
+            {
+            case '-':
+                lhs_->_str.remove(rhs_._str);
+
+                if (lhs_->_str.empty())
+                {
+                    std::ostringstream ss_;
+
+                    ss_ << "Empty charset created by {-} at index " <<
+                        state_.index() - 1 << " in ";
+
+                    if (name_ != nullptr)
+                    {
+                        ss_ << "macro ";
+                        narrow(name_, ss_);
+                    }
+                    else
+                    {
+                        ss_ << "rule id " << state_._id;
+                    }
+
+                    ss_ << '.';
+                    throw runtime_error(ss_.str());
+                }
+
+                break;
+            case '+':
+                lhs_->_str.insert(rhs_._str);
+                break;
+            default:
+                break;
+            }
+        }
+
+        void check_empty(const rules_char_type* name_, token_vector& tokens_,
+            const re_state& state_) const
+        {
             if (tokens_.size() == 2 && !(_flags & *regex_flags::match_zero_len))
             {
                 std::ostringstream ss_;
@@ -798,6 +862,62 @@ namespace lexertl
                 ss_ << " is not allowed.";
                 throw runtime_error(ss_.str());
             }
+        }
+
+        token_vector_vector split(const token_vector& tokens_)
+        {
+            token_vector_vector ret_;
+            std::size_t parens_ = 0;
+            std::size_t start_ = 1;
+            std::size_t end_ = 0;
+
+            for (const auto& token_ : tokens_)
+            {
+                switch (token_._type)
+                {
+                case detail::token_type::OPENPAREN:
+                    ++parens_;
+                    break;
+                case detail::token_type::CLOSEPAREN:
+                    --parens_;
+                    break;
+                case detail::token_type::OR:
+                    if (!parens_)
+                    {
+                        ret_.emplace_back();
+
+                        auto& new_tokens_ = ret_.back();
+
+                        new_tokens_.emplace_back();
+                        new_tokens_.insert(new_tokens_.end(),
+                            tokens_.begin() + start_,
+                            tokens_.begin() + end_);
+                        new_tokens_.emplace_back(detail::token_type::END);
+                        start_ = end_ + 1;
+                    }
+
+                    break;
+                case detail::token_type::END:
+                {
+                    ret_.emplace_back();
+
+                    auto& new_tokens_ = ret_.back();
+
+                    new_tokens_.emplace_back();
+                    new_tokens_.insert(new_tokens_.end(),
+                        tokens_.begin() + start_,
+                        tokens_.begin() + end_);
+                    new_tokens_.emplace_back(detail::token_type::END);
+                    break;
+                }
+                default:
+                    break;
+                }
+
+                ++end_;
+            }
+
+            return ret_;
         }
 
         void reverse(token_vector& vector_) const
@@ -1032,24 +1152,21 @@ namespace lexertl
                 i_ < size_; ++i_)
             {
                 const id_type curr_ = next_dfas_[i_];
+                auto tokens_vec_ = tokenise(regex_, id_, 0);
                 std::ostringstream ss_;
 
-                _regexes[curr_].emplace_back();
-                tokenise(regex_, _regexes[curr_].back(), id_, 0);
+                narrow(regex_.c_str(), ss_);
 
-                if (_regexes[curr_].back()[1]._type == detail::token_type::BOL)
+                if (tokens_vec_.back()[1]._type == detail::token_type::BOL)
                 {
                     _features[curr_] |= *feature_bit::bol;
                 }
 
-                if (_regexes[curr_].back()[_regexes[curr_].back().size() - 2].
+                if (tokens_vec_.back()[tokens_vec_.back().size() - 2].
                     _type == detail::token_type::EOL)
                 {
                     _features[curr_] |= *feature_bit::eol;
                 }
-
-                narrow(regex_.c_str(), ss_);
-                _regex_strings[curr_].push_back(ss_.str());
 
                 if (id_ == skip())
                 {
@@ -1065,12 +1182,27 @@ namespace lexertl
                     _features[curr_] |= *feature_bit::recursive;
                 }
 
-                _ids[curr_].push_back(id_);
-                _user_ids[curr_].push_back(user_id_);
-                _next_dfas[curr_].push_back(dot_ ? curr_ : new_dfa_id_);
-                _pushes[curr_].push_back(push_ ? (push_dfa_ ?
-                    push_dfa_id_ : curr_) : npos());
-                _pops[curr_].push_back(pop_);
+                for (auto& tokens_ : tokens_vec_)
+                {
+                    _regex_strings[curr_].push_back(ss_.str());
+                    _regexes[curr_].push_back(std::move(tokens_));
+                    _ids[curr_].push_back(id_);
+                    _user_ids[curr_].push_back(user_id_);
+                    _next_dfas[curr_].push_back(dot_ ? curr_ : new_dfa_id_);
+
+                    id_ty push_id_ = npos();
+
+                    if (push_)
+                    {
+                        if (push_dfa_)
+                            push_id_ = push_dfa_id_;
+                        else
+                            push_id_ = curr_;
+                    }
+
+                    _pushes[curr_].push_back(push_id_);
+                    _pops[curr_].push_back(pop_);
+                }
             }
         }
 

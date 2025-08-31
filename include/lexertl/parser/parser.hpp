@@ -6,13 +6,13 @@
 #ifndef LEXERTL_PARSER_HPP
 #define LEXERTL_PARSER_HPP
 
-#include "tree/end_node.hpp"
 #include "../enums.hpp"
+#include "../observer_ptr.hpp"
+#include "../runtime_error.hpp"
+#include "tokeniser/re_tokeniser.hpp"
+#include "tree/end_node.hpp"
 #include "tree/iteration_node.hpp"
 #include "tree/leaf_node.hpp"
-#include "../observer_ptr.hpp"
-#include "tokeniser/re_tokeniser.hpp"
-#include "../runtime_error.hpp"
 #include "tree/node.hpp"
 #include "tree/selection_node.hpp"
 #include "tree/sequence_node.hpp"

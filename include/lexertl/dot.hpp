@@ -10,6 +10,7 @@
 #include "rules.hpp"
 #include "sm_to_csm.hpp"
 #include "state_machine.hpp"
+#include "stream_num.hpp"
 
 #include <cstdint>
 #include <ios>
