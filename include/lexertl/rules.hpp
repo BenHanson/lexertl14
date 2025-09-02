@@ -548,6 +548,7 @@ namespace lexertl
                 }
             } while (tokens_.back()._type != detail::token_type::END);
 
+            strip_parens(tokens_);
             record_abstemious(tokens_, ab_indexes_);
 
             if (!name_)
@@ -566,6 +567,27 @@ namespace lexertl
                 ret_ = split(tokens_);
 
             return ret_;
+        }
+
+        void strip_parens(token_vector& tokens_) const
+        {
+            std::size_t lhs_ = 1;
+            std::size_t rhs_ = tokens_.size() - 2;
+
+            for (; lhs_ < rhs_ &&
+                tokens_[lhs_]._type == detail::token_type::OPENPAREN &&
+                tokens_[rhs_]._type == detail::token_type::CLOSEPAREN;
+                ++lhs_, --rhs_);
+
+            if (rhs_ != tokens_.size() - 2)
+            {
+                tokens_.erase(tokens_.begin() + rhs_ + 1, tokens_.end() - 1);
+            }
+
+            if (lhs_ != 1)
+            {
+                tokens_.erase(tokens_.begin() + 1, tokens_.begin() + lhs_);
+            }
         }
 
         void record_abstemious(const token_vector& tokens_,
