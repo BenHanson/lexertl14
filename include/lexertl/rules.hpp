@@ -548,7 +548,7 @@ namespace lexertl
                 }
             } while (tokens_.back()._type != detail::token_type::END);
 
-            //strip_parens(tokens_);
+            strip_parens(tokens_);
             record_abstemious(tokens_, ab_indexes_);
 
             if (!name_)
@@ -571,23 +571,51 @@ namespace lexertl
 
         void strip_parens(token_vector& tokens_) const
         {
-            std::size_t lhs_ = 1;
-            std::size_t rhs_ = tokens_.size() - 2;
-
-            for (; lhs_ < rhs_ &&
-                tokens_[lhs_]._type == detail::token_type::OPENPAREN &&
-                tokens_[rhs_]._type == detail::token_type::CLOSEPAREN;
-                ++lhs_, --rhs_);
-
-            if (rhs_ != tokens_.size() - 2)
+            for (;;)
             {
-                tokens_.erase(tokens_.begin() + rhs_ + 1, tokens_.end() - 1);
+                const std::size_t lhs_ = 1;
+                const std::size_t rhs_ = tokens_.size() - 2;
+
+                if (lhs_ < rhs_ &&
+                    tokens_[lhs_]._type == detail::token_type::OPENPAREN &&
+                    tokens_[rhs_]._type == detail::token_type::CLOSEPAREN &&
+                    balanced_parens(tokens_.begin() + lhs_ + 1,
+                        tokens_.begin() + rhs_))
+                {
+                    tokens_.erase(tokens_.begin() + rhs_,
+                        tokens_.end() - 1);
+                    tokens_.erase(tokens_.begin() + lhs_,
+                        tokens_.begin() + lhs_ + 1);
+                }
+                else
+                    break;
+            }
+        }
+
+        bool balanced_parens(typename token_vector::const_iterator iter_,
+            typename token_vector::const_iterator end_) const
+        {
+            std::size_t parens_ = 0;
+
+            for (; iter_ != end_; ++iter_)
+            {
+                switch (iter_->_type)
+                {
+                case detail::token_type::OPENPAREN:
+                    ++parens_;
+                    break;
+                case detail::token_type::CLOSEPAREN:
+                    if (parens_ == 0)
+                        return false;
+
+                    --parens_;
+                    break;
+                default:
+                    break;
+                }
             }
 
-            if (lhs_ != 1)
-            {
-                tokens_.erase(tokens_.begin() + 1, tokens_.begin() + lhs_);
-            }
+            return parens_ == 0;
         }
 
         void record_abstemious(const token_vector& tokens_,
