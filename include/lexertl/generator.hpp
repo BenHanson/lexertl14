@@ -18,7 +18,6 @@
 #include "runtime_error.hpp"
 #include "state_machine.hpp"
 
-#include <algorithm>
 #include <list>
 #include <memory>
 #include <set>
@@ -274,16 +273,12 @@ namespace lexertl
                                 dfa_alphabet_);
 
                         // Prune abstemious transitions from end states.
-                        if (*ptr_ && !(*ptr_ & *state_bit::greedy) &&
-                            std::all_of(equiv_list_.begin(),
-                            equiv_list_.end(), [](const auto& e_)
-                            { return e_->_greedy == greedy_repeat::no; }))
+                        if (!(*ptr_ && !(*ptr_ & *state_bit::greedy) &&
+                            equivset_->_greedy == greedy_repeat::no))
                         {
-                            continue;
+                            set_transitions(transition_, equivset_.get(), dfa_,
+                                ptr_, index_, eol_set_);
                         }
-
-                        set_transitions(transition_, equivset_.get(), dfa_,
-                            ptr_, index_, eol_set_);
                     }
                 }
             }
