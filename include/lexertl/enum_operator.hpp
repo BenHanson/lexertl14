@@ -11,25 +11,25 @@
 
 namespace lexertl
 {
-	// Operator to convert enum class to underlying type (usually int)
-	// Example:
-	// enum class number { one = 1, two, three };
-	// int num = *number::two;
-	template <typename T>
-	auto operator*(T e) noexcept ->
-		std::enable_if_t<std::is_enum<T>::value, uint16_t>
-	{
-		return static_cast<uint16_t>(e);
-	}
+    // Operator to convert enum class to underlying type (usually int)
+    // Example:
+    // enum class number { one = 1, two, three };
+    // int num = *number::two;
+    template <typename T>
+    auto operator*(T e) noexcept ->
+        std::enable_if_t<std::is_enum<T>::value, uint16_t>
+    {
+        return static_cast<uint16_t>(e);
+    }
 
-	// This is the compile time version of the above operator
-	// (e.g. Setting a C style array size using an enum)
-	template <typename T>
-	constexpr auto operator+(T e) noexcept ->
-		std::enable_if_t<std::is_enum<T>::value, uint16_t>
-	{
-		return static_cast<uint16_t>(e);
-	}
+    // This is the compile time version of the above operator
+    // (e.g. Setting a C style array size using an enum)
+    template <typename T>
+    constexpr auto operator+(T e) noexcept ->
+        std::enable_if_t<std::is_enum<T>::value, uint16_t>
+    {
+        return static_cast<uint16_t>(e);
+    }
 }
 
 #endif
