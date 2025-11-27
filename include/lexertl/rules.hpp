@@ -502,7 +502,7 @@ namespace lexertl
         std::locale _locale;
         string_vector _lexer_state_names;
 
-        [[nodiscard]] token_vector_vector tokenise(const string& regex_,
+        token_vector_vector tokenise(const string& regex_,
             const id_type id_, const rules_char_type* name_)
         {
             token_vector_vector ret_;
