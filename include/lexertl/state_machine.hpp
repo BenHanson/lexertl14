@@ -109,9 +109,10 @@ namespace lexertl
             id_type_vector& dfa_, std::size_t size_) const
         {
             id_type_vector lookup_(size_ / dfa_alphabet_, npos());
-            if(lookup_.empty()){
+
+            if (lookup_.empty())
                 return;
-            }
+
             observer_ptr<const id_type> first_ = &dfa_.front();
             observer_ptr<const id_type> end_ = first_ + size_;
             id_type index_ = 1;
