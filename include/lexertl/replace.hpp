@@ -182,7 +182,7 @@ namespace lexertl
     out_iter replace(out_iter out_, fwd_iter first_, fwd_iter second_,
         const basic_state_machine<char_type, id_type>& sm_,
         const std::map<id_type,
-        const char_type*(*)(const char_type*, const char_type*)> fmt_)
+        const char_type*(*)(fwd_iter, fwd_iter)> fmt_)
     {
         fwd_iter last_ = first_;
         lexertl::match_results<fwd_iter, id_type> results_(first_, second_);
@@ -199,7 +199,8 @@ namespace lexertl
                 std::copy(results_.first, results_.second, out_);
             else
             {
-                const char_type* str_ = iter_->second(results_.first, results_.second);
+                const char_type* str_ =
+                    iter_->second(results_.first, results_.second);
                 const char_type* end_str_ = [str_]() mutable
                     {
                         for (; *str_; ++str_)
@@ -295,9 +296,10 @@ namespace lexertl
                         const_iterator&)>& fmt_)
     {
         std::basic_string<char_type, straits, salloc> ret_;
-        const char_type* last_ = s_.c_str();
-        lexertl::match_results<const char_type*, id_type>
-            results_(s_.c_str(), s_.c_str() + s_.size());
+        typename std::basic_string<char_type, straits, salloc>::
+            const_iterator last_ = s_.begin();
+        lexertl::match_results<typename std::basic_string<char_type, straits,
+            salloc>::const_iterator, id_type>results_(s_.cbegin(), s_.cend());
 
         // Lookahead
         lexertl::lookup(sm_, results_);
