@@ -437,7 +437,14 @@ namespace lexertl
                     if (cr_node_->end_state())
                         continue;
 
-                    const auto& cr_set_ = set_mapping_[cr_node_->token()];
+                    const auto idx_ = cr_node_->token();
+
+                    // ^ and $ have out of bounds ids
+                    // so skip if either of these show up
+                    if (idx_ >= set_mapping_.size())
+                        continue;
+
+                    const auto& cr_set_ = set_mapping_[idx_];
 
                     if (cr_set_.find(nl_id_) != cr_set_.end())
                     {
