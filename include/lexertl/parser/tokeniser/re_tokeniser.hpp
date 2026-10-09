@@ -204,15 +204,18 @@ namespace lexertl
                         {
                             token_._type = token_type::CHARSET;
 
-                            if (state_._flags & *regex_flags::dot_not_newline)
-                            {
-                                token_._str.insert(range('\n', '\n'));
-                            }
-                            else if (state_._flags &
+                            // Prioritise dot_not_cr_lf in case
+                            // dot_not_newline also set,
+                            // as dot_not_cr_lf is a superset.
+                            if (state_._flags &
                                 *regex_flags::dot_not_cr_lf)
                             {
                                 token_._str.insert(range('\n', '\n'));
                                 token_._str.insert(range('\r', '\r'));
+                            }
+                            else if (state_._flags & *regex_flags::dot_not_newline)
+                            {
+                                token_._str.insert(range('\n', '\n'));
                             }
 
                             token_._str.negate();
@@ -372,51 +375,40 @@ namespace lexertl
                             break;
                         case 'i':
                             if (negate_)
-                            {
-                                state_._flags = state_._flags &
-                                    ~*regex_flags::icase;
-                            }
+                                state_._flags &= ~*regex_flags::icase;
                             else
-                            {
-                                state_._flags = state_._flags |
-                                    *regex_flags::icase;
-                            }
+                                state_._flags |= *regex_flags::icase;
 
                             negate_ = false;
                             break;
                         case 's':
                             if (negate_)
                             {
-                                state_._flags = state_._flags |
+                                if (state_._any_flags)
+                                    state_._flags |= state_._any_flags;
+                                else
+                                {
+                                    state_._flags |=
 #ifdef _WIN32
-                                    *regex_flags::dot_not_cr_lf;
+                                        *regex_flags::dot_not_cr_lf;
 #else
-                                    *regex_flags::dot_not_newline;
+                                        *regex_flags::dot_not_newline;
 #endif
+                                }
                             }
                             else
                             {
-                                state_._flags = state_._flags &
-#ifdef _WIN32
-                                    ~*regex_flags::dot_not_cr_lf;
-#else
-                                    ~*regex_flags::dot_not_newline;
-#endif
+                                state_._flags &= ~(*regex_flags::dot_not_cr_lf |
+                                    *regex_flags::dot_not_newline);
                             }
 
                             negate_ = false;
                             break;
                         case 'x':
                             if (negate_)
-                            {
-                                state_._flags = state_._flags &
-                                    ~*regex_flags::skip_ws;
-                            }
+                                state_._flags &= ~*regex_flags::skip_ws;
                             else
-                            {
-                                state_._flags = state_._flags |
-                                    *regex_flags::skip_ws;
-                            }
+                                state_._flags |= *regex_flags::skip_ws;
 
                             negate_ = false;
                             break;
