@@ -9,6 +9,8 @@
 #include "parser/tokeniser/re_token.hpp"
 #include "parser/tokeniser/re_tokeniser.hpp"
 
+#include <algorithm>
+#include <functional>
 #include <vector>
 
 namespace lexertl
@@ -45,8 +47,12 @@ namespace lexertl
                         op_._type = detail::token_type::REPEATN;
                         op_._extra = op_._extra.substr(0, op_._extra.find(','));
 
-                        if (op_._extra.size() == 1 && op_._extra.front() == '0')
+                        if (std::adjacent_find(op_._extra.begin(),
+                            op_._extra.end(), std::not_equal_to<>()) ==
+                            op_._extra.end() && op_._extra.front() == '0')
+                        {
                             remove_sequence(tokens_, start_, idx_);
+                        }
 
                         break;
                     default:
@@ -80,7 +86,7 @@ namespace lexertl
                 switch (token_._type)
                 {
                 case detail::token_type::OR:
-                    idx_ = end_block(tokens_, idx_ + 1);
+                    idx_ = end_block(tokens_, idx_);
                     break;
                 case detail::token_type::CLOSEPAREN:
                     ++idx_;
@@ -179,7 +185,20 @@ namespace lexertl
             iter_ = tokens_.erase(iter_, tokens_.begin() + idx_ + 1);
 
             if (iter_->_type == detail::token_type::OR)
-                tokens_.erase(iter_);
+            {
+                auto prev_ = iter_ - 1;
+                auto next_ = iter_ + 1;
+
+                if (prev_->_type == detail::token_type::BEGIN ||
+                    prev_->_type == detail::token_type::OPENPAREN ||
+                    prev_->_type == detail::token_type::OR ||
+                    next_->_type == detail::token_type::CLOSEPAREN ||
+                    next_->_type == detail::token_type::END ||
+                    next_->_type == detail::token_type::OR)
+                {
+                    tokens_.erase(iter_);
+                }
+            }
             else if (iter_->_type != detail::token_type::BEGIN &&
                 (iter_ - 1)->_type == detail::token_type::OR)
             {
