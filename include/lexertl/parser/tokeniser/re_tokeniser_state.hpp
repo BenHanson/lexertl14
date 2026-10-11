@@ -7,6 +7,7 @@
 #define LEXERTL_RE_TOKENISER_STATE_HPP
 
 #include "../../char_traits.hpp"
+#include "../../enum_operator.hpp"
 #include "../../enums.hpp"
 #include "../../narrow.hpp"
 
