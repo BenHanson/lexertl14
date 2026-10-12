@@ -1207,7 +1207,7 @@ namespace lexertl
 
                 narrow(regex_.c_str(), ss_);
 
-                if (tokens_vec_.back()[1]._type == detail::token_type::BOL)
+                if (tokens_vec_.front()[1]._type == detail::token_type::BOL)
                 {
                     _features[curr_] |= *feature_bit::bol;
                 }
