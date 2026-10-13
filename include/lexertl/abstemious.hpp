@@ -90,6 +90,15 @@ namespace lexertl
                     break;
                 case detail::token_type::CLOSEPAREN:
                     ++idx_;
+
+                    // An optional group still ends the match, e.g. the
+                    // "(...)?" left behind by drop_empty_alternative().
+                    if (idx_ < size_ &&
+                        tokens_[idx_]._type == detail::token_type::OPT)
+                    {
+                        ++idx_;
+                    }
+
                     break;
                 case detail::token_type::END:
                     return true;
@@ -180,30 +189,79 @@ namespace lexertl
                 --start_;
                 --iter_;
                 ++idx_;
+
+                // Remove the group's optional marker too (if any)
+                if (tokens_[idx_ + 1]._type == detail::token_type::OPT)
+                    ++idx_;
             }
 
             iter_ = tokens_.erase(iter_, tokens_.begin() + idx_ + 1);
+            drop_empty_alternative(tokens_, iter_ - tokens_.begin());
+        }
 
-            if (iter_->_type == detail::token_type::OR)
+        // pos_ is the index of the first token after the sequence that was
+        // just erased.
+        // If the erased sequence was a whole alternative, remove the
+        // alternative (and its '|'). Inside a group the lazy path matched
+        // nothing, which is still a valid match, so the group becomes
+        // optional: "x(a*?|b)" -> "x(b)?".
+        static void drop_empty_alternative(token_vector& tokens_,
+            std::size_t pos_)
+        {
+            const auto prev_ = tokens_[pos_ - 1]._type;
+            const auto next_ = tokens_[pos_]._type;
+            const bool starts_ = prev_ == detail::token_type::BEGIN ||
+                prev_ == detail::token_type::OPENPAREN ||
+                prev_ == detail::token_type::OR;
+            const bool ends_ = next_ == detail::token_type::OR ||
+                next_ == detail::token_type::CLOSEPAREN ||
+                next_ == detail::token_type::END;
+
+            // The alternative still has content, e.g. "xa*?|b" -> "x|b"
+            if (!starts_ || !ends_)
+                return;
+
+            if (next_ == detail::token_type::OR)
+                tokens_.erase(tokens_.begin() + pos_);
+            else if (prev_ == detail::token_type::OR)
+                tokens_.erase(tokens_.begin() + --pos_);
+            else
+                return; // Nothing but BEGIN/END left
+
+            // pos_ is now the first token after the dropped alternative.
+            // Find the close paren of the enclosing group (if any).
+            std::size_t parens_ = 0;
+
+            for (auto size_ = tokens_.size(); pos_ < size_; ++pos_)
             {
-                auto prev_ = iter_ - 1;
-                auto next_ = iter_ + 1;
-
-                if (prev_->_type == detail::token_type::BEGIN ||
-                    prev_->_type == detail::token_type::OPENPAREN ||
-                    prev_->_type == detail::token_type::OR ||
-                    next_->_type == detail::token_type::CLOSEPAREN ||
-                    next_->_type == detail::token_type::END ||
-                    next_->_type == detail::token_type::OR)
+                switch (tokens_[pos_]._type)
                 {
-                    tokens_.erase(iter_);
+                case detail::token_type::OPENPAREN:
+                    ++parens_;
+                    break;
+                case detail::token_type::CLOSEPAREN:
+                    if (parens_ == 0)
+                    {
+                        // A trailing group has no quantifier, so any '?'
+                        // here was added by an earlier call.
+                        if (tokens_[pos_ + 1]._type !=
+                            detail::token_type::OPT)
+                        {
+                            tokens_.insert(tokens_.begin() + pos_ + 1,
+                                token(detail::token_type::OPT));
+                        }
+
+                        return;
+                    }
+
+                    --parens_;
+                    break;
+                default:
+                    break;
                 }
             }
-            else if (iter_->_type != detail::token_type::BEGIN &&
-                (iter_ - 1)->_type == detail::token_type::OR)
-            {
-                tokens_.erase(--iter_);
-            }
+
+            // Top level: an empty alternative is simply dropped.
         }
     };
 }
