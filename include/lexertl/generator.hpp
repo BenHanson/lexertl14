@@ -220,9 +220,17 @@ namespace lexertl
                     nl_id_ = *set_mapping_[nl_id_].begin();
                 }
 
-                zero_id_ = sm_traits::compressed ?
-                    *set_mapping_[charset_map_.find(string_token(0, 0))->
-                    second].begin() : sm_traits::npos();
+                if (sm_traits::compressed)
+                {
+                    auto iter_ = charset_map_.find(string_token(0, 0));
+
+                    if (iter_ == charset_map_.end())
+                        zero_id_ = 0;
+                    else
+                        zero_id_ = *set_mapping_[iter_->second].begin();
+                }
+                else
+                    zero_id_ = sm_traits::npos();
             }
 
             dfa_alphabet_ = charset_list_.size() + *state_index::transitions +
@@ -342,8 +350,15 @@ namespace lexertl
                     continue;
                 }
 
-                const auto& cr_set_ =
-                    set_mapping_[node_->token()];
+                const auto token_ = node_->token();
+
+                if (token_ >= set_mapping_.size())
+                {
+                    ++nl_iter_;
+                    continue;
+                }
+
+                const auto& cr_set_ = set_mapping_[token_];
 
                 if (cr_set_.find(cr_id_) != cr_set_.end())
                 {
@@ -387,8 +402,7 @@ namespace lexertl
                 if (nl_iter_ == end_)
                     break;
 
-                const auto& nl_set_ =
-                    set_mapping_[node_->token()];
+                const auto& nl_set_ = set_mapping_[token_];
 
                 if (nl_set_.find(nl_id_) != nl_set_.end())
                 {
@@ -425,7 +439,12 @@ namespace lexertl
             const index_set_vector& set_mapping_)
         {
             auto node_ = *iter_;
-            const auto& set_ = set_mapping_[node_->token()];
+            auto token_ = node_->token();
+
+            if (token_ >= set_mapping_.size())
+                return;
+
+            const auto& set_ = set_mapping_[token_];
 
             if (set_.find(cr_id_) != set_.end())
             {
