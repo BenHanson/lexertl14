@@ -81,7 +81,7 @@ namespace lexertl
                         node_ptr_vector_, charset_map_, cr_id_, nl_id_,
                         unique_id_);
 
-                    check_zero_len(rules_, root_);
+                    check_zero_len(rules_, charset_map_, root_);
                     build_dfa(charset_map_, root_, internals_, temp_sm_, index_,
                         cr_id_, nl_id_, rules_.flags(), used_ids_);
 
@@ -567,10 +567,21 @@ namespace lexertl
         }
 
         static void check_zero_len(const rules& rules_,
+            const charset_map& charset_map_,
             const observer_ptr<node> root_)
         {
             if ((rules_.flags() & *regex_flags::match_zero_len) == 0)
             {
+                if (charset_map_.empty())
+                {
+                        std::ostringstream ss_;
+
+                        ss_ << "No chars are consumed by the regex(es). " <<
+                            "\n(Use regex_flags::match_zero_len "
+                            "to suppress this error.)";
+                        throw runtime_error(ss_.str());
+                }
+
                 const auto& firstpos_ = root_->firstpos();
 
                 for (observer_ptr<const node> node_ : firstpos_)
