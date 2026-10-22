@@ -566,6 +566,12 @@ namespace lexertl
             }
         }
 
+        static const char* match_zero_len()
+        {
+            return "\n(Use regex_flags::match_zero_len "
+                "to suppress this error.)";
+        }
+
         static void check_zero_len(const rules& rules_,
             const charset_map& charset_map_,
             const observer_ptr<node> root_)
@@ -574,12 +580,11 @@ namespace lexertl
             {
                 if (charset_map_.empty())
                 {
-                        std::ostringstream ss_;
+                    std::ostringstream ss_;
 
-                        ss_ << "No chars are consumed by the regex(es). " <<
-                            "\n(Use regex_flags::match_zero_len "
-                            "to suppress this error.)";
-                        throw runtime_error(ss_.str());
+                    ss_ << "No chars are consumed by the regex(es)." <<
+                        match_zero_len();
+                    throw runtime_error(ss_.str());
                 }
 
                 const auto& firstpos_ = root_->firstpos();
@@ -593,8 +598,7 @@ namespace lexertl
                         ss_ << "The following regex can match zero chars: " <<
                             regex_from_idx(node_->unique_id() - 1,
                                 rules_.regex_strings()) <<
-                            "\n(Use regex_flags::match_zero_len "
-                            "to suppress this error.)";
+                            match_zero_len();
                         throw runtime_error(ss_.str());
                     }
                     else
@@ -609,24 +613,30 @@ namespace lexertl
                             {
                                 if (node_->end_state())
                                 {
-                                    throw runtime_error("regex '^' matches "
-                                        "zero chars.\n(Use regex_flags::"
-                                        "match_zero_len to suppress this "
-                                        "error.)");
+                                    std::ostringstream ss_;
+
+                                    ss_ << "regex '^' matches zero chars." <<
+                                        match_zero_len();
+                                    throw runtime_error(ss_.str());
                                 }
                                 else if (node_->token() == parser::eol_token())
                                 {
-                                    throw runtime_error("regex '^$' matches "
-                                        "zero chars.\n(Use regex_flags::"
-                                        "match_zero_len to suppress this "
-                                        "error.)");
+                                    std::ostringstream ss_;
+
+                                    ss_ << "regex '^$' matches zero chars." <<
+                                        match_zero_len();
+                                    throw runtime_error(ss_.str());
                                 }
                             }
                         }
                         else if (token == parser::eol_token())
-                            throw runtime_error("regex '$' matches zero chars."
-                                "\n(Use regex_flags::match_zero_len "
-                                "to suppress this error.)");
+                        {
+                            std::ostringstream ss_;
+
+                            ss_ << "regex '$' matches zero chars." <<
+                                match_zero_len();
+                            throw runtime_error(ss_.str());
+                        }
                     }
                 }
             }
