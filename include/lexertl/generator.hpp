@@ -597,6 +597,37 @@ namespace lexertl
                             "to suppress this error.)";
                         throw runtime_error(ss_.str());
                     }
+                    else
+                    {
+                        const id_type token = node_->token();
+
+                        if (token == parser::bol_token())
+                        {
+                            const auto& followpos_ = node_->followpos();
+
+                            for (observer_ptr<const node> node_ : followpos_)
+                            {
+                                if (node_->end_state())
+                                {
+                                    throw runtime_error("regex '^' matches "
+                                        "zero chars.\n(Use regex_flags::"
+                                        "match_zero_len to suppress this "
+                                        "error.)");
+                                }
+                                else if (node_->token() == parser::eol_token())
+                                {
+                                    throw runtime_error("regex '^$' matches "
+                                        "zero chars.\n(Use regex_flags::"
+                                        "match_zero_len to suppress this "
+                                        "error.)");
+                                }
+                            }
+                        }
+                        else if (token == parser::eol_token())
+                            throw runtime_error("regex '$' matches zero chars."
+                                "\n(Use regex_flags::match_zero_len "
+                                "to suppress this error.)");
+                    }
                 }
             }
         }
