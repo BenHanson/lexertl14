@@ -362,9 +362,9 @@ namespace lexertl
                         {
                             const auto& followpos_ = node_->followpos();
 
-                            for (observer_ptr<const node> node_ : followpos_)
+                            for (observer_ptr<const node> follow_ : followpos_)
                             {
-                                if (node_->end_state())
+                                if (follow_->end_state())
                                 {
                                     std::ostringstream ss_;
 
@@ -372,7 +372,7 @@ namespace lexertl
                                         match_zero_len();
                                     throw runtime_error(ss_.str());
                                 }
-                                else if (node_->token() == parser::eol_token())
+                                else if (follow_->token() == parser::eol_token())
                                 {
                                     std::ostringstream ss_;
 
